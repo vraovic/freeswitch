@@ -5815,8 +5815,8 @@ static int jb_valid(switch_rtp_t *rtp_session)
 static switch_size_t do_flush(switch_rtp_t *rtp_session, int force, switch_size_t bytes_in)
 {
 	int was_blocking = 0;
-	switch_size_t bytes;
-	uint32_t flushed = 0;
+	// switch_size_t bytes;
+	// uint32_t flushed = 0;
 	switch_size_t bytes_out = 0;
 
 	if (!switch_rtp_ready(rtp_session)) {
@@ -5876,7 +5876,7 @@ static switch_size_t do_flush(switch_rtp_t *rtp_session, int force, switch_size_
 #endif
 		    handle_rfc2833(rtp_session, bytes_in, &do_cng);
 		}
-
+/*
 		do {
 			if (switch_rtp_ready(rtp_session)) {
 				bytes = sizeof(rtp_msg_t);
@@ -5889,7 +5889,7 @@ static switch_size_t do_flush(switch_rtp_t *rtp_session, int force, switch_size_
 						rtp_session->last_media = switch_micro_time_now();
 					}
 
-					/* Make sure to handle RFC2833 packets, even if we're flushing the packets */
+					//Make sure to handle RFC2833 packets, even if we're flushing the packets 
 					if (bytes > rtp_header_len && rtp_session->recv_msg.header.version == 2 && rtp_session->recv_msg.header.pt == rtp_session->recv_te) {
 						rtp_session->last_rtp_hdr = rtp_session->recv_msg.header;
 						handle_rfc2833(rtp_session, bytes, &do_cng);
@@ -5908,7 +5908,7 @@ static switch_size_t do_flush(switch_rtp_t *rtp_session, int force, switch_size_
 				break;
 			}
 		} while (bytes > 0);
-
+*/
 #ifdef DEBUG_2833
         if (flushed) {
             switch_log_printf(SWITCH_CHANNEL_LOG, SWITCH_LOG_ERROR, "*** do_flush: total flushed packets: %ld ***\n",(long)flushed);
@@ -9478,3 +9478,4 @@ SWITCH_DECLARE(switch_core_session_t*) switch_rtp_get_core_session(switch_rtp_t 
  * For VIM:
  * vim:set softtabstop=4 shiftwidth=4 tabstop=4 noet:
  */
+
