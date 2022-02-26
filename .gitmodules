@@ -1,0 +1,12 @@
+[submodule "libs/spandsp"]
+	path = libs/spandsp
+	url = /Users/openstack/src/ThirdParty/FSWITCH/vraovic/freeswitch/libs/spandsp
+[submodule "libs/libfvad"]
+	path = libs/libfvad
+	url = /Users/openstack/src/ThirdParty/FSWITCH/vraovic/freeswitch/libs/libfvad
+[submodule "libs/sofia-sip"]
+	path = libs/sofia-sip
+	url = /Users/openstack/src/ThirdParty/FSWITCH/vraovic/freeswitch/libs/sofia-sip
+[submodule "libs/libwebsockets"]
+	path = libs/libwebsockets
+	url = /Users/openstack/src/ThirdParty/FSWITCH/vraovic/freeswitch/libs/libwebsockets
