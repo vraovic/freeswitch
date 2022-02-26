@@ -1325,7 +1325,7 @@ PKG_CHECK_MODULES([GUMBO], [gumbo >= 0.10.1],[
   AC_MSG_RESULT([no]); AM_CONDITIONAL([HAVE_GUMBO],[false])])
 
 PKG_CHECK_MODULES([FVAD], [libfvad >= 1.0],[
-  AM_CONDITIONAL([HAVE_FVAD],[true])],[
+  AM_CONDITIONAL([HAVE_FVAD],[false])],[
   AC_MSG_RESULT([no]); AM_CONDITIONAL([HAVE_FVAD],[false])])
 
 PKG_CHECK_MODULES([TPL], [libtpl >= 1.5],[
