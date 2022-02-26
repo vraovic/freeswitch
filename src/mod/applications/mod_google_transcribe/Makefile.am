@@ -2,7 +2,7 @@ include $(top_srcdir)/build/modmake.rulesam
 MODNAME=mod_google_transcribe
 
 mod_LTLIBRARIES = mod_google_transcribe.la
-mod_google_transcribe_la_SOURCES  = mod_google_transcribe.c google_glue.cpp
+mod_google_transcribe_la_SOURCES  = google_glue.cpp mod_google_transcribe.c 
 mod_google_transcribe_la_CFLAGS   = $(AM_CFLAGS)
 mod_google_transcribe_la_CXXFLAGS = -I $(top_srcdir)/libs/googleapis/gens $(AM_CXXFLAGS) -std=c++11
 
