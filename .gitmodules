@@ -10,3 +10,6 @@
 [submodule "libs/libwebsockets"]
 	path = libs/libwebsockets
 	url = /Users/openstack/src/ThirdParty/FSWITCH/vraovic/freeswitch/libs/libwebsockets
+[submodule "libs/googleapis"]
+	path = libs/googleapis
+	url = /Users/openstack/src/ThirdParty/FSWITCH/vraovic/freeswitch/libs/googleapis
