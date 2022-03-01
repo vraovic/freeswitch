@@ -1588,6 +1588,33 @@ AS_IF([test "x$enable_systemd" = "xyes"],[
 
 AC_SUBST(SYSTEMD_LIBS)
 
+dnl DH: Added for including libwebsockets
+AC_ARG_WITH(lws,
+  [AS_HELP_STRING([--with-lws],
+     [enable support for libwebsockets])],
+  [with_lws="$withval"],
+  [with_lws="no"])
+if test "$with_lws" = "yes"; then
+  PKG_CHECK_MODULES([LWS], [libwebsockets], [
+    AM_CONDITIONAL([HAVE_LWS],[true])], [
+    AC_MSG_RESULT([no]); AM_CONDITIONAL([HAVE_LWS],[false])])
+else
+    AM_CONDITIONAL([HAVE_LWS],[false])
+fi
+
+dnl DH: Added for including google protobuf libs
+AC_ARG_WITH(extra,
+   [AS_HELP_STRING([--with-extra],
+     [enable support for extra modules which require google rpc (libgrpc++ and libgrpc)])],
+   [with_extra="$withval"],
+   [with_extra="no"])
+if test "$with_extra" = "yes"; then
+   PKG_CHECK_MODULES([GRPC], [grpc++ grpc], [
+     AM_CONDITIONAL([HAVE_GRPC],[true])], [
+     AC_MSG_RESULT([no]); AM_CONDITIONAL([HAVE_GRPC],[false])])
+else
+     AM_CONDITIONAL([HAVE_GRPC],[false])
+fi
 
 dnl ---------------------------------------------------------------------------
 dnl - OpenLDAP SDK
@@ -2053,6 +2080,10 @@ AC_CONFIG_FILES([Makefile
 		tests/unit/Makefile
 		src/Makefile
 		src/mod/Makefile
+    		src/mod/applications/mod_audio_fork/Makefile
+    		src/mod/applications/mod_google_tts/Makefile
+    		src/mod/applications/mod_google_transcribe/Makefile
+    		src/mod/applications/mod_dialogflow/Makefile
 		src/mod/applications/mod_abstraction/Makefile
 		src/mod/applications/mod_avmd/Makefile
 		src/mod/applications/mod_bert/Makefile
