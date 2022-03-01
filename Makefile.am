@@ -776,7 +776,6 @@ SRTP_SRC =	libs/srtp/srtp/srtp.c libs/srtp/srtp/ekt.c libs/srtp/crypto/cipher/ci
 		libs/srtp/crypto/kernel/crypto_kernel.c libs/srtp/crypto/kernel/alloc.c \
 		libs/srtp/crypto/kernel/key.c libs/srtp/crypto/kernel/err.c \
 		libs/srtp/crypto/replay/rdb.c libs/srtp/crypto/replay/rdbx.c libs/srtp/crypto/replay/ut_sim.c 
-		libs/srtp/crypto/cipher/cipher_test_cases.c libs/srtp/crypto/hash/auth_test_cases.c
 
 libs/srtp/libsrtp.la: libs/srtp libs/srtp/.update $(SRTP_SRC)
 	touch $(switch_srcdir)/src/include/switch.h
