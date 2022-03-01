@@ -1,3 +1,7 @@
+applications/mod_audio_fork
+applications/mod_google_tts
+applications/mod_google_transcribe
+applications/mod_dialogflow
 #applications/mod_abstraction
 applications/mod_av
 #applications/mod_avmd
@@ -123,12 +127,12 @@ formats/mod_native_file
 formats/mod_png
 #formats/mod_portaudio_stream
 #formats/mod_shell_stream
-#formats/mod_shout
+formats/mod_shout
 formats/mod_sndfile
 #formats/mod_ssml
 formats/mod_tone_stream
 #formats/mod_vlc
-#formats/mod_opusfile
+formats/mod_opusfile
 #languages/mod_basic
 #languages/mod_java
 languages/mod_lua

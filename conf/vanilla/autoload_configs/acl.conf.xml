@@ -27,6 +27,7 @@
       <!-- <node type="allow" cidr="192.168.0.0/24"/> -->
     </list>
 
+    <!-- <list name="socket_acl" default="deny"><node type="allow" cidr="0.0.0.0/0"/></list> -->
   </network-lists>
 </configuration>
 
