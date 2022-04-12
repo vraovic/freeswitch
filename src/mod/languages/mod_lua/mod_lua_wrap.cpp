@@ -6657,6 +6657,46 @@ fail:
   return SWIG_arg;
 }
 
+static int _wrap_CoreSession_recordFileAndStream(lua_State* L) {
+  int SWIG_arg = 0;
+  CoreSession *arg1 = (CoreSession *) 0 ;
+  char *arg2 = (char *) 0 ;
+  int arg3 = (int) 0 ;
+  int arg4 = (int) 0 ;
+  int arg5 = (int) 0 ;
+  int result;
+  
+  SWIG_check_num_args("CoreSession::recordFile",2,5)
+  if(!SWIG_isptrtype(L,1)) SWIG_fail_arg("CoreSession::recordFile",1,"CoreSession *");
+  if(!SWIG_lua_isnilstring(L,2)) SWIG_fail_arg("CoreSession::recordFile",2,"char *");
+  if(lua_gettop(L)>=3 && !lua_isnumber(L,3)) SWIG_fail_arg("CoreSession::recordFile",3,"int");
+  if(lua_gettop(L)>=4 && !lua_isnumber(L,4)) SWIG_fail_arg("CoreSession::recordFile",4,"int");
+  if(lua_gettop(L)>=5 && !lua_isnumber(L,5)) SWIG_fail_arg("CoreSession::recordFile",5,"int");
+  
+  if (!SWIG_IsOK(SWIG_ConvertPtr(L,1,(void**)&arg1,SWIGTYPE_p_CoreSession,0))){
+    SWIG_fail_ptr("CoreSession_recordFile",1,SWIGTYPE_p_CoreSession);
+  }
+  
+  arg2 = (char *)lua_tostring(L, 2);
+  if(lua_gettop(L)>=3){
+    arg3 = (int)lua_tonumber(L, 3);
+  }
+  if(lua_gettop(L)>=4){
+    arg4 = (int)lua_tonumber(L, 4);
+  }
+  if(lua_gettop(L)>=5){
+    arg5 = (int)lua_tonumber(L, 5);
+  }
+  result = (int)(arg1)->recordFile(arg2,arg3,arg4,arg5);
+  lua_pushnumber(L, (lua_Number) result); SWIG_arg++;
+  return SWIG_arg;
+  
+  if(0) SWIG_fail;
+  
+fail:
+  lua_error(L);
+  return SWIG_arg;
+}
 
 static int _wrap_CoreSession_originate(lua_State* L) {
   int SWIG_arg = 0;
@@ -8068,6 +8108,7 @@ static swig_lua_method swig_CoreSession_methods[]= {
     { "hangupCause", _wrap_CoreSession_hangupCause},
     { "getState", _wrap_CoreSession_getState},
     { "recordFile", _wrap_CoreSession_recordFile},
+    { "recordFileAndStream", _wrap_CoreSession_recordFileAndStream},
     { "originate", _wrap_CoreSession_originate},
     { "destroy", _wrap_CoreSession_destroy},
     { "setDTMFCallback", _wrap_CoreSession_setDTMFCallback},

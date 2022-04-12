@@ -1316,6 +1316,30 @@ SWITCH_DECLARE(int) CoreSession::recordFile(char *file_name, int time_limit, int
 
 }
 
+SWITCH_DECLARE(int) CoreSession::recordFileAndStream(char *file_name, int time_limit, int silence_threshold, int silence_hits)
+{
+	switch_status_t status;
+	switch_file_handle_t local_fh;
+
+	this_check(-1);
+	sanity_check(-1);
+
+	if (!file_name) return 0;
+	memset(&local_fh, 0, sizeof(local_fh));
+	fhp = &local_fh;
+	local_fh.thresh = silence_threshold;
+	local_fh.silence_hits = silence_hits;
+
+	begin_allow_threads();
+	status = switch_ivr_record_file(session, &local_fh, file_name, ap, time_limit);
+	end_allow_threads();
+
+	fhp = NULL;
+
+    return status == SWITCH_STATUS_SUCCESS ? 1 : 0;
+
+}
+
 SWITCH_DECLARE(int) CoreSession::flushEvents()
 {
 	switch_event_t *event;
