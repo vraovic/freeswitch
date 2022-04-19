@@ -438,6 +438,10 @@ SWITCH_DECLARE(switch_status_t) switch_ivr_gentones(switch_core_session_t *sessi
 SWITCH_DECLARE(switch_status_t) switch_ivr_record_file(_In_ switch_core_session_t *session,
 													   _In_ switch_file_handle_t *fh,
 													   _In_z_ const char *file, _In_opt_ switch_input_args_t *args, _In_ uint32_t limit);
+SWITCH_DECLARE(switch_status_t) switch_ivr_record_file_and_stream(_In_ switch_core_session_t *session,
+													   _In_ switch_file_handle_t *fh,
+													   _In_z_ const char *file, _In_opt_ switch_input_args_t *args, _In_ uint32_t limit);
+
 /*!
   \brief record a file from the session to a file
   \param session the session to record from
@@ -449,6 +453,10 @@ SWITCH_DECLARE(switch_status_t) switch_ivr_record_file(_In_ switch_core_session_
   \return SWITCH_STATUS_SUCCESS if all is well
 */
 SWITCH_DECLARE(switch_status_t) switch_ivr_record_file_event(_In_ switch_core_session_t *session,
+													   _In_ switch_file_handle_t *fh,
+													   _In_z_ const char *file, _In_opt_ switch_input_args_t *args, _In_ uint32_t limit, switch_event_t *vars);
+
+SWITCH_DECLARE(switch_status_t) switch_ivr_record_file_event_and_stream(_In_ switch_core_session_t *session,
 													   _In_ switch_file_handle_t *fh,
 													   _In_z_ const char *file, _In_opt_ switch_input_args_t *args, _In_ uint32_t limit, switch_event_t *vars);
 

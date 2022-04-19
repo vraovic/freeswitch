@@ -1039,10 +1039,654 @@ SWITCH_DECLARE(switch_status_t) switch_ivr_record_file_event(switch_core_session
 	return status;
 }
 
+SWITCH_DECLARE(switch_status_t) switch_ivr_record_file_event_and_stream(switch_core_session_t *session,
+													   switch_file_handle_t *fh, const char *file, switch_input_args_t *args, uint32_t limit, switch_event_t *vars)
+{
+	switch_channel_t *channel = switch_core_session_get_channel(session);
+	switch_dtmf_t dtmf = { 0 };
+	switch_file_handle_t lfh = { 0 };
+	switch_file_handle_t vfh = { 0 };
+	switch_file_handle_t ind_fh = { 0 };
+	switch_frame_t *read_frame;
+	switch_codec_t codec, write_codec = { 0 };
+	char *codec_name;
+	switch_status_t status = SWITCH_STATUS_SUCCESS;
+	const char *p;
+	const char *vval;
+	time_t start = 0;
+	uint32_t org_silence_hits = 0;
+	int asis = 0;
+	int32_t sample_start = 0;
+	int waste_resources = 1400, fill_cng = 0;
+	switch_codec_implementation_t read_impl = { 0 };
+	switch_frame_t write_frame = { 0 };
+	unsigned char write_buf[SWITCH_RECOMMENDED_BUFFER_SIZE] = { 0 };
+	switch_event_t *event;
+	int divisor = 0;
+	int file_flags = SWITCH_FILE_FLAG_WRITE | SWITCH_FILE_DATA_SHORT;
+	int restart_limit_on_dtmf = 0;
+	const char *prefix, *var, *video_file = NULL;
+	int vid_play_file_flags = SWITCH_FILE_FLAG_READ | SWITCH_FILE_DATA_SHORT | SWITCH_FILE_FLAG_VIDEO;
+	int echo_on = 0;
+	const char *file_trimmed_ms = NULL;
+	const char *file_size = NULL;
+	const char *file_trimmed = NULL;
+
+	if (switch_channel_pre_answer(channel) != SWITCH_STATUS_SUCCESS) {
+		return SWITCH_STATUS_FALSE;
+	}
+
+	if (!switch_channel_media_ready(channel)) {
+		return SWITCH_STATUS_FALSE;
+	}
+
+	switch_core_session_get_read_impl(session, &read_impl);
+
+	if (!(divisor = read_impl.actual_samples_per_second / 8000)) {
+		divisor = 1;
+	}
+
+	arg_recursion_check_start(args);
+
+	// if (!fh) {
+	// 	fh = &lfh;
+	// }
+
+	// fh->channels = read_impl.number_of_channels;
+	// fh->native_rate = read_impl.actual_samples_per_second;
+
+	// if (fh->samples > 0) {
+	// 	sample_start = fh->samples;
+	// 	fh->samples = 0;
+	// }
+
+
+	if ((p = get_recording_var(channel, vars, fh, "record_sample_rate"))) {
+		int tmp = 0;
+
+		tmp = atoi(p);
+
+		if (switch_is_valid_rate(tmp)) {
+			fh->samplerate = tmp;
+		}
+	}
+
+	// if (!strstr(file, SWITCH_URL_SEPARATOR)) {
+	// 	char *ext;
+
+	// 	if (!switch_is_file_path(file)) {
+	// 		char *tfile = NULL;
+	// 		char *e;
+
+	// 		if (*file == '{') {
+	// 			tfile = switch_core_session_strdup(session, file);
+
+	// 			while (*file == '{') {
+	// 				if ((e = switch_find_end_paren(tfile, '{', '}'))) {
+	// 					*e = '\0';
+	// 					file = e + 1;
+	// 					while(*file == ' ') file++;
+	// 				} else {
+	// 					tfile = NULL;
+	// 					break;
+	// 				}
+	// 			}
+	// 		}
+
+	// 		file = switch_core_session_sprintf(session, "%s%s%s%s%s", switch_str_nil(tfile), tfile ? "}" : "", prefix, SWITCH_PATH_SEPARATOR, file);
+	// 	}
+	// 	if ((ext = strrchr(file, '.'))) {
+	// 		ext++;
+	// 	} else {
+	// 		ext = read_impl.iananame;
+	// 		file = switch_core_session_sprintf(session, "%s.%s", file, ext);
+	// 		asis = 1;
+	// 	}
+	// }
+
+	if (read_impl.encoded_bytes_per_packet == 0) {
+		switch_log_printf(SWITCH_CHANNEL_SESSION_LOG(session), SWITCH_LOG_ERROR, "%s cannot play or record native files with variable length data\n", switch_channel_get_name(channel));
+		switch_core_session_reset(session, SWITCH_TRUE, SWITCH_TRUE);
+		arg_recursion_check_stop(args);
+		return SWITCH_STATUS_GENERR;
+	}
+
+
+	// vval = get_recording_var(channel, vars, fh, "enable_file_write_buffering");
+	// if (!vval || switch_true(vval)) {
+	// 	fh->pre_buffer_datalen = SWITCH_DEFAULT_FILE_BUFFER_LEN;
+	// }
+
+	// if (switch_test_flag(fh, SWITCH_FILE_WRITE_APPEND) || recording_var_true(channel, vars, fh, "RECORD_APPEND")) {
+	// 	file_flags |= SWITCH_FILE_WRITE_APPEND;
+	// }
+
+	// if (switch_test_flag(fh, SWITCH_FILE_WRITE_OVER) || recording_var_true(channel, vars, fh, "RECORD_WRITE_OVER")) {
+	// 	file_flags |= SWITCH_FILE_WRITE_OVER;
+	// }
+
+	// if (!fh->prefix) {
+	// 	fh->prefix = prefix;
+	// }
+
+	// if (switch_channel_test_flag(channel, CF_VIDEO)) {
+	// 	switch_vid_params_t vid_params = { 0 };
+
+	// 	file_flags |= SWITCH_FILE_FLAG_VIDEO;
+	// 	switch_channel_set_flag_recursive(channel, CF_VIDEO_DECODED_READ);
+	// 	switch_core_session_request_video_refresh(session);
+	// 	if (switch_core_session_wait_for_video_input_params(session, 10000) != SWITCH_STATUS_SUCCESS) {
+	// 		switch_log_printf(SWITCH_CHANNEL_SESSION_LOG(session), SWITCH_LOG_ERROR, "Unable to establish inbound video stream\n");
+	// 		switch_core_session_reset(session, SWITCH_TRUE, SWITCH_TRUE);
+	// 		arg_recursion_check_stop(args);
+	// 		file_flags &= ~SWITCH_FILE_FLAG_VIDEO;
+	// 	} else {
+	// 		switch_core_media_get_vid_params(session, &vid_params);
+	// 		fh->mm.vw = vid_params.width;
+	// 		fh->mm.vh = vid_params.height;
+	// 		fh->mm.fps = vid_params.fps;
+	// 	}
+	// }
+
+	// if (switch_core_file_open(fh, file, fh->channels, read_impl.actual_samples_per_second, file_flags, NULL) != SWITCH_STATUS_SUCCESS) {
+	// 	switch_channel_hangup(channel, SWITCH_CAUSE_DESTINATION_OUT_OF_ORDER);
+	// 	switch_core_session_reset(session, SWITCH_TRUE, SWITCH_TRUE);
+	// 	arg_recursion_check_stop(args);
+	// 	return SWITCH_STATUS_GENERR;
+	// }
+
+
+	// if ((p = get_recording_var(channel, vars, fh, "record_fill_cng"))) {
+	// 	if (!strcasecmp(p, "true")) {
+	// 		fill_cng = 1400;
+	// 	} else {
+	// 		if ((fill_cng = atoi(p)) < 0) {
+	// 			fill_cng = 0;
+	// 		}
+	// 	}
+	// }
+
+	// if ((p = switch_channel_get_variable(channel, "record_indication")) || (fh->params && (p = switch_event_get_header(fh->params, "record_indication")))) {
+	// 	int flags = SWITCH_FILE_FLAG_READ | SWITCH_FILE_DATA_SHORT;
+	// 	waste_resources = 1400;
+
+	// 	if (switch_core_file_open(&ind_fh,
+	// 							  p,
+	// 							  read_impl.number_of_channels,
+	// 							  read_impl.actual_samples_per_second, flags, NULL) != SWITCH_STATUS_SUCCESS) {
+	// 		switch_log_printf(SWITCH_CHANNEL_SESSION_LOG(session), SWITCH_LOG_ERROR, "Indication file invalid\n");
+	// 	}
+	// }
+
+	// if ((p = get_recording_var(channel, vars, fh,  "record_waste_resources"))) {
+
+	// 	if (!strcasecmp(p, "true")) {
+	// 		waste_resources = 1400;
+	// 	} else {
+	// 		if ((waste_resources = atoi(p)) < 0) {
+	// 			waste_resources = 0;
+	// 		}
+	// 	}
+	// }
+
+	// if (fill_cng || waste_resources) {
+		if (switch_core_codec_init(&write_codec,
+								   "L16",
+								   NULL,
+								   NULL,
+								   read_impl.actual_samples_per_second,
+								   read_impl.microseconds_per_packet / 1000,
+								   read_impl.number_of_channels,
+								   SWITCH_CODEC_FLAG_ENCODE | SWITCH_CODEC_FLAG_DECODE, NULL,
+								   switch_core_session_get_pool(session)) == SWITCH_STATUS_SUCCESS) {
+			switch_log_printf(SWITCH_CHANNEL_SESSION_LOG(session), SWITCH_LOG_DEBUG, "Raw Codec Activated, ready to waste resources - ms_per_packet: %d samples_per_second:%d!\n", read_impl.microseconds_per_packet/1000,read_impl.actual_samples_per_second);
+			write_frame.data = write_buf;
+			write_frame.buflen = sizeof(write_buf);
+			write_frame.datalen = read_impl.decoded_bytes_per_packet;
+			write_frame.samples = write_frame.datalen / 2;
+			write_frame.codec = &write_codec;
+		} else {
+			arg_recursion_check_stop(args);
+			return SWITCH_STATUS_FALSE;
+		}
+	// }
+
+
+
+	// if (switch_core_file_has_video(fh, SWITCH_TRUE)) {
+	// 	switch_core_session_request_video_refresh(session);
+
+	// 	if ((p = get_recording_var(channel, vars, fh, "record_play_video"))) {
+
+	// 		video_file = switch_core_session_strdup(session, p);
+
+	// 		if (switch_core_file_open(&vfh, video_file, fh->channels,
+	// 								  read_impl.actual_samples_per_second, vid_play_file_flags, NULL) != SWITCH_STATUS_SUCCESS) {
+	// 			memset(&vfh, 0, sizeof(vfh));
+	// 			switch_log_printf(SWITCH_CHANNEL_SESSION_LOG(session), SWITCH_LOG_WARNING, "Failure opening video playback file.\n");
+	// 		}
+
+	// 		if (switch_core_file_has_video(&vfh, SWITCH_TRUE)) {
+	// 			switch_core_media_set_video_file(session, &vfh, SWITCH_RW_WRITE);
+	// 			switch_core_media_gen_key_frame(session);
+	// 		} else {
+	// 			switch_core_file_close(&vfh);
+	// 			switch_log_printf(SWITCH_CHANNEL_SESSION_LOG(session), SWITCH_LOG_WARNING, "Video playback file does not contain video\n");
+	// 			memset(&vfh, 0, sizeof(vfh));
+	// 		}
+	// 	}
+
+	// 	if (!switch_test_flag(&vfh, SWITCH_FILE_OPEN)) {
+	// 		echo_on = 1;
+	// 		switch_channel_set_flag_recursive(channel, CF_VIDEO_DECODED_READ);
+	// 		switch_channel_set_flag(channel, CF_VIDEO_ECHO);
+	// 	}
+
+	// 	switch_core_media_set_video_file(session, fh, SWITCH_RW_READ);
+	// } else if (switch_channel_test_flag(channel, CF_VIDEO)) {
+	// 	switch_channel_set_flag(channel, CF_VIDEO_BLANK);
+	// }
+
+	// if (sample_start > 0) {
+	// 	uint32_t pos = 0;
+	// 	switch_core_file_seek(fh, &pos, sample_start, SEEK_SET);
+	// 	switch_clear_flag_locked(fh, SWITCH_FILE_SEEK);
+	// 	fh->samples = 0;
+	// }
+
+
+	// if (switch_test_flag(fh, SWITCH_FILE_NATIVE)) {
+	// 	asis = 1;
+	// }
+
+	// restart_limit_on_dtmf = recording_var_true(channel, vars, fh, "record_restart_limit_on_dtmf");
+
+	// if ((p = get_recording_var(channel, vars, fh,  "record_title"))) {
+	// 	vval = switch_core_session_strdup(session, p);
+	// 	switch_core_file_set_string(fh, SWITCH_AUDIO_COL_STR_TITLE, vval);
+	// 	switch_channel_set_variable(channel, "record_title", NULL);
+	// }
+
+	// if ((p = get_recording_var(channel, vars, fh, "record_copyright"))) {
+	// 	vval = switch_core_session_strdup(session, p);
+	// 	switch_core_file_set_string(fh, SWITCH_AUDIO_COL_STR_COPYRIGHT, vval);
+	// 	switch_channel_set_variable(channel, "record_copyright", NULL);
+	// }
+
+	// if ((p = get_recording_var(channel, vars, fh, "record_software"))) {
+	// 	vval = switch_core_session_strdup(session, p);
+	// 	switch_core_file_set_string(fh, SWITCH_AUDIO_COL_STR_SOFTWARE, vval);
+	// 	switch_channel_set_variable(channel, "record_software", NULL);
+	// }
+
+	// if ((p = get_recording_var(channel, vars, fh,  "record_artist"))) {
+	// 	vval = switch_core_session_strdup(session, p);
+	// 	switch_core_file_set_string(fh, SWITCH_AUDIO_COL_STR_ARTIST, vval);
+	// 	switch_channel_set_variable(channel, "record_artist", NULL);
+	// }
+
+	// if ((p = get_recording_var(channel, vars, fh, "record_comment"))) {
+	// 	vval = switch_core_session_strdup(session, p);
+	// 	switch_core_file_set_string(fh, SWITCH_AUDIO_COL_STR_COMMENT, vval);
+	// 	switch_channel_set_variable(channel, "record_comment", NULL);
+	// }
+
+	// if ((p = get_recording_var(channel, vars, fh, "record_date"))) {
+	// 	vval = switch_core_session_strdup(session, p);
+	// 	switch_core_file_set_string(fh, SWITCH_AUDIO_COL_STR_DATE, vval);
+	// 	switch_channel_set_variable(channel, "record_date", NULL);
+	// }
+
+
+	switch_channel_set_variable(channel, "silence_hits_exhausted", "false");
+
+	if (!asis) {
+		codec_name = "L16";
+		if (switch_core_codec_init(&codec,
+								   codec_name,
+								   NULL,
+								   NULL,
+								   read_impl.actual_samples_per_second,
+								   read_impl.microseconds_per_packet / 1000,
+								   read_impl.number_of_channels,
+								   SWITCH_CODEC_FLAG_ENCODE | SWITCH_CODEC_FLAG_DECODE, NULL,
+								   switch_core_session_get_pool(session)) == SWITCH_STATUS_SUCCESS) {
+			switch_log_printf(SWITCH_CHANNEL_SESSION_LOG(session), SWITCH_LOG_DEBUG, "Raw Codec Activated - set read codec\n");
+			switch_core_session_set_read_codec(session, &codec);
+		} else {
+			switch_log_printf(SWITCH_CHANNEL_SESSION_LOG(session), SWITCH_LOG_ERROR,
+							  "Raw Codec Activation Failed %s@%uhz %u channels %dms\n", codec_name, fh->samplerate,
+							  fh->channels, read_impl.microseconds_per_packet / 1000);
+			// if (switch_core_file_has_video(fh, SWITCH_FALSE)) {
+			// 	if (echo_on) {
+			// 		switch_channel_clear_flag(channel, CF_VIDEO_ECHO);
+			// 		switch_channel_clear_flag_recursive(channel, CF_VIDEO_DECODED_READ);
+			// 	}
+			// 	switch_core_media_set_video_file(session, NULL, SWITCH_RW_READ);
+			// 	switch_core_media_set_video_file(session, NULL, SWITCH_RW_WRITE);
+			// }
+			// switch_channel_clear_flag(channel, CF_VIDEO_BLANK);
+			// switch_core_file_close(fh);
+
+			switch_core_session_reset(session, SWITCH_TRUE, SWITCH_TRUE);
+			arg_recursion_check_stop(args);
+			return SWITCH_STATUS_GENERR;
+		}
+	}
+
+	// if (limit) {
+	// 	start = switch_epoch_time_now(NULL);
+	// }
+
+	// if (fh->thresh) {
+	// 	if (asis) {
+	// 		switch_log_printf(SWITCH_CHANNEL_SESSION_LOG(session), SWITCH_LOG_WARNING, "Can't detect silence on a native recording.\n");
+	// 	} else {
+	// 		if (fh->silence_hits) {
+	// 			fh->silence_hits = fh->samplerate * fh->silence_hits / read_impl.samples_per_packet;
+	// 		} else {
+	// 			fh->silence_hits = fh->samplerate * 3 / read_impl.samples_per_packet;
+	// 		}
+	// 		org_silence_hits = fh->silence_hits;
+	// 	}
+	// }
+
+
+	// if (switch_event_create(&event, SWITCH_EVENT_RECORD_START) == SWITCH_STATUS_SUCCESS) {
+	// 	switch_channel_event_set_data(channel, event);
+	// 	switch_event_add_header_string(event, SWITCH_STACK_BOTTOM, "Record-File-Path", file);
+	// 	merge_recording_variables(vars, event);
+	// 	switch_event_fire(&event);
+	// }
+
+	// {
+	// 	const char *app_exec = NULL;
+	// 	if (vars && (app_exec = switch_event_get_header(vars, "execute_on_record_start"))) {
+	// 		switch_channel_execute_on_value(channel, app_exec);
+	// 	}
+	// 	switch_channel_execute_on(channel, "execute_on_record_start");
+	// 	switch_channel_api_on(channel, "api_on_record_start");
+	// }
+
+	for (;;) {
+		switch_size_t len;
+
+		// if (!switch_channel_ready(channel)) {
+		// 	status = SWITCH_STATUS_FALSE;
+		// 	break;
+		// }
+
+		// if (switch_channel_test_flag(channel, CF_BREAK)) {
+		// 	switch_channel_clear_flag(channel, CF_BREAK);
+		// 	status = SWITCH_STATUS_BREAK;
+		// 	break;
+		// }
+
+		switch_ivr_parse_all_events(session);
+
+		// if (start && (switch_epoch_time_now(NULL) - start) > limit) {
+		// 	break;
+		// }
+
+		if (args) {
+			/*
+			   dtmf handler function you can hook up to be executed when a digit is dialed during playback
+			   if you return anything but SWITCH_STATUS_SUCCESS the playback will stop.
+			 */
+			// if (switch_channel_has_dtmf(channel)) {
+
+			// 	if (limit && restart_limit_on_dtmf) {
+			// 		start = switch_epoch_time_now(NULL);
+			// 	}
+
+			// 	if (!args->input_callback && !args->buf && !args->dmachine) {
+			// 		status = SWITCH_STATUS_BREAK;
+			// 		break;
+			// 	}
+			// 	switch_channel_dequeue_dtmf(channel, &dtmf);
+
+			// 	if (args->dmachine) {
+			// 		char ds[2] = {dtmf.digit, '\0'};
+			// 		if ((status = switch_ivr_dmachine_feed(args->dmachine, ds, NULL)) != SWITCH_STATUS_SUCCESS) {
+			// 			break;
+			// 		}
+			// 	}
+
+			// 	if (args->input_callback) {
+			// 		status = args->input_callback(session, (void *) &dtmf, SWITCH_INPUT_TYPE_DTMF, args->buf, args->buflen);
+			// 	} else if (args->buf) {
+			// 		*((char *) args->buf) = dtmf.digit;
+			// 		status = SWITCH_STATUS_BREAK;
+			// 	}
+			// }
+
+			// if (args->input_callback) {
+			// 	switch_event_t *event = NULL;
+			// 	switch_status_t ostatus;
+
+			// 	if (switch_core_session_dequeue_event(session, &event, SWITCH_FALSE) == SWITCH_STATUS_SUCCESS) {
+			// 		if ((ostatus = args->input_callback(session, event, SWITCH_INPUT_TYPE_EVENT, args->buf, args->buflen)) != SWITCH_STATUS_SUCCESS) {
+			// 			status = ostatus;
+			// 		}
+
+			// 		switch_event_destroy(&event);
+			// 	}
+			// }
+
+			// if (status != SWITCH_STATUS_SUCCESS) {
+			// 	break;
+			// }
+		}
+
+		// status = switch_core_session_read_frame(session, &read_frame, SWITCH_IO_FLAG_NONE, 0);
+		// if (!SWITCH_READ_ACCEPTABLE(status)) {
+		// 	break;
+		// }
+
+		// if (args && args->dmachine) {
+		// 	if ((status = switch_ivr_dmachine_ping(args->dmachine, NULL)) != SWITCH_STATUS_SUCCESS) {
+		// 		break;
+		// 	}
+		// }
+
+		// if (args && (args->read_frame_callback)) {
+		// 	if ((status = args->read_frame_callback(session, read_frame, args->user_data)) != SWITCH_STATUS_SUCCESS) {
+		// 		break;
+		// 	}
+		// }
+
+		// if (switch_test_flag(&vfh, SWITCH_FILE_OPEN)) {
+		// 	switch_core_file_command(&vfh, SCFC_FLUSH_AUDIO);
+
+		// 	if (switch_test_flag(&vfh, SWITCH_FILE_FLAG_VIDEO_EOF)) {
+
+		// 		//switch_core_media_set_video_file(session, NULL, SWITCH_RW_WRITE);
+
+		// 		switch_core_media_lock_video_file(session, SWITCH_RW_WRITE);
+
+		// 		switch_core_file_close(&vfh);
+		// 		memset(&vfh, 0, sizeof(vfh));
+
+		// 		if (switch_core_file_open(&vfh, video_file, fh->channels,
+		// 								  read_impl.actual_samples_per_second, vid_play_file_flags, NULL) != SWITCH_STATUS_SUCCESS) {
+		// 			memset(&vfh, 0, sizeof(vfh));
+		// 			switch_log_printf(SWITCH_CHANNEL_SESSION_LOG(session), SWITCH_LOG_WARNING, "Failure opening video playback file.\n");
+		// 		}
+
+		// 		if (switch_core_file_has_video(&vfh, SWITCH_TRUE)) {
+		// 			//switch_core_media_set_video_file(session, &vfh, SWITCH_RW_WRITE);
+		// 			switch_core_media_gen_key_frame(session);
+		// 		} else {
+		// 			switch_core_media_set_video_file(session, NULL, SWITCH_RW_WRITE);
+		// 			switch_core_file_close(&vfh);
+		// 			switch_log_printf(SWITCH_CHANNEL_SESSION_LOG(session), SWITCH_LOG_WARNING, "Video playback file does not contain video\n");
+		// 			memset(&vfh, 0, sizeof(vfh));
+		// 		}
+
+		// 		switch_core_media_unlock_video_file(session, SWITCH_RW_WRITE);
+		// 	}
+
+		// }
+
+		// if (!asis && fh->thresh) {
+		// 	int16_t *fdata = (int16_t *) read_frame->data;
+		// 	uint32_t samples = read_frame->datalen / sizeof(*fdata);
+		// 	uint32_t score, count = 0, j = 0;
+		// 	double energy = 0;
+
+
+		// 	for (count = 0; count < samples * read_impl.number_of_channels; count++) {
+		// 		energy += abs(fdata[j++]);
+		// 	}
+
+		// 	score = (uint32_t) (energy / (samples / divisor));
+
+		// 	if (score < fh->thresh) {
+		// 		if (!--fh->silence_hits) {
+		// 			switch_channel_set_variable(channel, "silence_hits_exhausted", "true");
+		// 			break;
+		// 		}
+		// 	} else {
+		// 		fh->silence_hits = org_silence_hits;
+		// 	}
+		// }
+
+		// write_frame.datalen = read_impl.decoded_bytes_per_packet;
+		// write_frame.samples = write_frame.datalen / 2;
+
+		// if (switch_test_flag(&ind_fh, SWITCH_FILE_OPEN)) {
+		// 	switch_size_t olen = write_frame.codec->implementation->samples_per_packet;
+
+		// 	if (switch_core_file_read(&ind_fh, write_frame.data, &olen) == SWITCH_STATUS_SUCCESS) {
+		// 		write_frame.samples = olen;
+		// 		write_frame.datalen = olen * 2 * ind_fh.channels;;
+		// 	} else {
+		// 		switch_core_file_close(&ind_fh);
+		// 	}
+
+		// } else if (fill_cng) {
+		// 	switch_generate_sln_silence((int16_t *) write_frame.data, write_frame.samples, read_impl.number_of_channels, fill_cng);
+		// } else if (waste_resources) {
+		// 	switch_generate_sln_silence((int16_t *) write_frame.data, write_frame.samples, read_impl.number_of_channels, waste_resources);
+		// }
+
+		// if (!switch_test_flag(fh, SWITCH_FILE_PAUSE) && !switch_test_flag(read_frame, SFF_CNG)) {
+		// 	int16_t *data = read_frame->data;
+		// 	len = (switch_size_t) asis ? read_frame->datalen : read_frame->datalen / 2 / fh->channels;
+
+		// 	if (switch_core_file_write(fh, data, &len) != SWITCH_STATUS_SUCCESS) {
+		// 		break;
+		// 	}
+		// } else if (switch_test_flag(read_frame, SFF_CNG) && fill_cng) {
+		// 	len = write_frame.datalen / 2 / fh->channels;
+		// 	if (switch_core_file_write(fh, write_frame.data, &len) != SWITCH_STATUS_SUCCESS) {
+		// 		break;
+		// 	}
+		// }
+
+
+		// if (waste_resources || switch_test_flag(&ind_fh, SWITCH_FILE_OPEN)) {
+		// 	if (switch_core_session_write_frame(session, &write_frame, SWITCH_IO_FLAG_NONE, 0) != SWITCH_STATUS_SUCCESS) {
+		// 		break;
+		// 	}
+		// }
+	}
+
+	if (fill_cng || waste_resources) {
+		switch_core_codec_destroy(&write_codec);
+	}
+
+	if (switch_core_file_has_video(fh, SWITCH_FALSE)) {
+		if (echo_on) {
+			switch_channel_clear_flag(channel, CF_VIDEO_ECHO);
+			switch_channel_clear_flag_recursive(channel, CF_VIDEO_DECODED_READ);
+		}
+		switch_core_media_set_video_file(session, NULL, SWITCH_RW_READ);
+		switch_core_media_set_video_file(session, NULL, SWITCH_RW_WRITE);
+	}
+	switch_channel_clear_flag(channel, CF_VIDEO_BLANK);
+
+	switch_core_file_pre_close(fh);
+	switch_core_file_get_string(fh, SWITCH_AUDIO_COL_STR_FILE_SIZE, &file_size);
+	switch_core_file_get_string(fh, SWITCH_AUDIO_COL_STR_FILE_TRIMMED, &file_trimmed);
+	switch_core_file_get_string(fh, SWITCH_AUDIO_COL_STR_FILE_TRIMMED_MS, &file_trimmed_ms);
+	if (file_trimmed_ms) {
+		switch_channel_set_variable(channel, "record_record_trimmed_ms", file_trimmed_ms);
+		switch_channel_set_variable(channel, "record_trimmed_ms", file_trimmed_ms);
+	}
+	if (file_size) {
+		switch_channel_set_variable(channel, "record_record_file_size", file_size);
+		switch_channel_set_variable(channel, "record_file_size", file_size);
+	}
+	if (file_trimmed) {
+		switch_channel_set_variable(channel, "record_record_trimmed", file_trimmed);
+		switch_channel_set_variable(channel, "record_trimmed", file_trimmed);
+	}
+	switch_core_file_close(fh);
+
+
+	if ((var = switch_channel_get_variable(channel, "record_post_process_exec_api"))) {
+		char *cmd = switch_core_session_strdup(session, var);
+		char *data, *expanded = NULL;
+		switch_stream_handle_t stream = { 0 };
+
+		SWITCH_STANDARD_STREAM(stream);
+
+		if ((data = strchr(cmd, ':'))) {
+			*data++ = '\0';
+			expanded = switch_channel_expand_variables(channel, data);
+		}
+
+		switch_api_execute(cmd, expanded, session, &stream);
+
+		if (expanded && expanded != data) {
+			free(expanded);
+		}
+
+		switch_safe_free(stream.data);
+
+	}
+
+	if (read_impl.actual_samples_per_second && fh->native_rate >= 1000) {
+		switch_channel_set_variable_printf(channel, "record_seconds", "%d", fh->samples_out / fh->native_rate);
+		switch_channel_set_variable_printf(channel, "record_ms", "%d", fh->samples_out / (fh->native_rate / 1000));
+
+	}
+
+	switch_channel_set_variable_printf(channel, "record_samples", "%d", fh->samples_out);
+
+	if (switch_event_create(&event, SWITCH_EVENT_RECORD_STOP) == SWITCH_STATUS_SUCCESS) {
+		switch_channel_event_set_data(channel, event);
+		switch_event_add_header_string(event, SWITCH_STACK_BOTTOM, "Record-File-Path", file);
+		merge_recording_variables(vars, event);
+		switch_event_fire(&event);
+	}
+
+	{
+		const char *app_exec = NULL;
+		if (vars && (app_exec = switch_event_get_header(vars, "execute_on_record_stop"))) {
+			switch_channel_execute_on_value(channel, app_exec);
+		}
+		switch_channel_execute_on(channel, "execute_on_record_stop");
+		switch_channel_api_on(channel, "api_on_record_stop");
+	}
+
+	switch_core_session_reset(session, SWITCH_TRUE, SWITCH_TRUE);
+
+	arg_recursion_check_stop(args);
+	return status;
+}
+
 SWITCH_DECLARE(switch_status_t) switch_ivr_record_file(switch_core_session_t *session,
 													   switch_file_handle_t *fh, const char *file, switch_input_args_t *args, uint32_t limit)
 {
 	return switch_ivr_record_file_event(session, fh, file, args, limit, NULL);
+}
+
+SWITCH_DECLARE(switch_status_t) switch_ivr_record_file_and_stream(switch_core_session_t *session,
+													   switch_file_handle_t *fh, const char *file, switch_input_args_t *args, uint32_t limit)
+{
+	return switch_ivr_record_file_event_and_stream(session, fh, file, args, limit, NULL);
 }
 
 static int teletone_handler(teletone_generation_session_t *ts, teletone_tone_map_t *map)
