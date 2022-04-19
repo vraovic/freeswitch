@@ -1043,34 +1043,34 @@ SWITCH_DECLARE(switch_status_t) switch_ivr_record_file_event_and_stream(switch_c
 													   switch_file_handle_t *fh, const char *file, switch_input_args_t *args, uint32_t limit, switch_event_t *vars)
 {
 	switch_channel_t *channel = switch_core_session_get_channel(session);
-	switch_dtmf_t dtmf = { 0 };
-	switch_file_handle_t lfh = { 0 };
-	switch_file_handle_t vfh = { 0 };
-	switch_file_handle_t ind_fh = { 0 };
-	switch_frame_t *read_frame;
+	// switch_dtmf_t dtmf = { 0 };
+	// switch_file_handle_t lfh = { 0 };
+	// switch_file_handle_t vfh = { 0 };
+	// switch_file_handle_t ind_fh = { 0 };
+	// switch_frame_t *read_frame;
 	switch_codec_t codec, write_codec = { 0 };
 	char *codec_name;
 	switch_status_t status = SWITCH_STATUS_SUCCESS;
 	const char *p;
-	const char *vval;
-	time_t start = 0;
-	uint32_t org_silence_hits = 0;
+	// const char *vval;
+	// time_t start = 0;
+	// uint32_t org_silence_hits = 0;
 	int asis = 0;
-	int32_t sample_start = 0;
-	int waste_resources = 1400, fill_cng = 0;
+	// int32_t sample_start = 0;
+	// int waste_resources = 1400, fill_cng = 0;
 	switch_codec_implementation_t read_impl = { 0 };
 	switch_frame_t write_frame = { 0 };
 	unsigned char write_buf[SWITCH_RECOMMENDED_BUFFER_SIZE] = { 0 };
-	switch_event_t *event;
+	// switch_event_t *event;
 	int divisor = 0;
-	int file_flags = SWITCH_FILE_FLAG_WRITE | SWITCH_FILE_DATA_SHORT;
-	int restart_limit_on_dtmf = 0;
-	const char *prefix, *var, *video_file = NULL;
-	int vid_play_file_flags = SWITCH_FILE_FLAG_READ | SWITCH_FILE_DATA_SHORT | SWITCH_FILE_FLAG_VIDEO;
-	int echo_on = 0;
-	const char *file_trimmed_ms = NULL;
-	const char *file_size = NULL;
-	const char *file_trimmed = NULL;
+	// int file_flags = SWITCH_FILE_FLAG_WRITE | SWITCH_FILE_DATA_SHORT;
+	// int restart_limit_on_dtmf = 0;
+	// const char *prefix, *var, *video_file = NULL;
+	// int vid_play_file_flags = SWITCH_FILE_FLAG_READ | SWITCH_FILE_DATA_SHORT | SWITCH_FILE_FLAG_VIDEO;
+	// int echo_on = 0;
+	// const char *file_trimmed_ms = NULL;
+	// const char *file_size = NULL;
+	// const char *file_trimmed = NULL;
 
 	if (switch_channel_pre_answer(channel) != SWITCH_STATUS_SUCCESS) {
 		return SWITCH_STATUS_FALSE;
