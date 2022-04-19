@@ -1409,7 +1409,7 @@ SWITCH_DECLARE(switch_status_t) switch_ivr_record_file_event_and_stream(switch_c
 	// }
 
 	for (;;) {
-		switch_size_t len;
+		// switch_size_t len;
 
 		// if (!switch_channel_ready(channel)) {
 		// 	status = SWITCH_STATUS_FALSE;
@@ -1592,86 +1592,86 @@ SWITCH_DECLARE(switch_status_t) switch_ivr_record_file_event_and_stream(switch_c
 		// }
 	}
 
-	if (fill_cng || waste_resources) {
-		switch_core_codec_destroy(&write_codec);
-	}
+	// if (fill_cng || waste_resources) {
+	// 	switch_core_codec_destroy(&write_codec);
+	// }
 
-	if (switch_core_file_has_video(fh, SWITCH_FALSE)) {
-		if (echo_on) {
-			switch_channel_clear_flag(channel, CF_VIDEO_ECHO);
-			switch_channel_clear_flag_recursive(channel, CF_VIDEO_DECODED_READ);
-		}
-		switch_core_media_set_video_file(session, NULL, SWITCH_RW_READ);
-		switch_core_media_set_video_file(session, NULL, SWITCH_RW_WRITE);
-	}
-	switch_channel_clear_flag(channel, CF_VIDEO_BLANK);
+	// if (switch_core_file_has_video(fh, SWITCH_FALSE)) {
+	// 	if (echo_on) {
+	// 		switch_channel_clear_flag(channel, CF_VIDEO_ECHO);
+	// 		switch_channel_clear_flag_recursive(channel, CF_VIDEO_DECODED_READ);
+	// 	}
+	// 	switch_core_media_set_video_file(session, NULL, SWITCH_RW_READ);
+	// 	switch_core_media_set_video_file(session, NULL, SWITCH_RW_WRITE);
+	// }
+	// switch_channel_clear_flag(channel, CF_VIDEO_BLANK);
 
-	switch_core_file_pre_close(fh);
-	switch_core_file_get_string(fh, SWITCH_AUDIO_COL_STR_FILE_SIZE, &file_size);
-	switch_core_file_get_string(fh, SWITCH_AUDIO_COL_STR_FILE_TRIMMED, &file_trimmed);
-	switch_core_file_get_string(fh, SWITCH_AUDIO_COL_STR_FILE_TRIMMED_MS, &file_trimmed_ms);
-	if (file_trimmed_ms) {
-		switch_channel_set_variable(channel, "record_record_trimmed_ms", file_trimmed_ms);
-		switch_channel_set_variable(channel, "record_trimmed_ms", file_trimmed_ms);
-	}
-	if (file_size) {
-		switch_channel_set_variable(channel, "record_record_file_size", file_size);
-		switch_channel_set_variable(channel, "record_file_size", file_size);
-	}
-	if (file_trimmed) {
-		switch_channel_set_variable(channel, "record_record_trimmed", file_trimmed);
-		switch_channel_set_variable(channel, "record_trimmed", file_trimmed);
-	}
-	switch_core_file_close(fh);
+	// switch_core_file_pre_close(fh);
+	// switch_core_file_get_string(fh, SWITCH_AUDIO_COL_STR_FILE_SIZE, &file_size);
+	// switch_core_file_get_string(fh, SWITCH_AUDIO_COL_STR_FILE_TRIMMED, &file_trimmed);
+	// switch_core_file_get_string(fh, SWITCH_AUDIO_COL_STR_FILE_TRIMMED_MS, &file_trimmed_ms);
+	// if (file_trimmed_ms) {
+	// 	switch_channel_set_variable(channel, "record_record_trimmed_ms", file_trimmed_ms);
+	// 	switch_channel_set_variable(channel, "record_trimmed_ms", file_trimmed_ms);
+	// }
+	// if (file_size) {
+	// 	switch_channel_set_variable(channel, "record_record_file_size", file_size);
+	// 	switch_channel_set_variable(channel, "record_file_size", file_size);
+	// }
+	// if (file_trimmed) {
+	// 	switch_channel_set_variable(channel, "record_record_trimmed", file_trimmed);
+	// 	switch_channel_set_variable(channel, "record_trimmed", file_trimmed);
+	// }
+	// switch_core_file_close(fh);
 
 
-	if ((var = switch_channel_get_variable(channel, "record_post_process_exec_api"))) {
-		char *cmd = switch_core_session_strdup(session, var);
-		char *data, *expanded = NULL;
-		switch_stream_handle_t stream = { 0 };
+	// if ((var = switch_channel_get_variable(channel, "record_post_process_exec_api"))) {
+	// 	char *cmd = switch_core_session_strdup(session, var);
+	// 	char *data, *expanded = NULL;
+	// 	switch_stream_handle_t stream = { 0 };
 
-		SWITCH_STANDARD_STREAM(stream);
+	// 	SWITCH_STANDARD_STREAM(stream);
 
-		if ((data = strchr(cmd, ':'))) {
-			*data++ = '\0';
-			expanded = switch_channel_expand_variables(channel, data);
-		}
+	// 	if ((data = strchr(cmd, ':'))) {
+	// 		*data++ = '\0';
+	// 		expanded = switch_channel_expand_variables(channel, data);
+	// 	}
 
-		switch_api_execute(cmd, expanded, session, &stream);
+	// 	switch_api_execute(cmd, expanded, session, &stream);
 
-		if (expanded && expanded != data) {
-			free(expanded);
-		}
+	// 	if (expanded && expanded != data) {
+	// 		free(expanded);
+	// 	}
 
-		switch_safe_free(stream.data);
+	// 	switch_safe_free(stream.data);
 
-	}
+	// }
 
-	if (read_impl.actual_samples_per_second && fh->native_rate >= 1000) {
-		switch_channel_set_variable_printf(channel, "record_seconds", "%d", fh->samples_out / fh->native_rate);
-		switch_channel_set_variable_printf(channel, "record_ms", "%d", fh->samples_out / (fh->native_rate / 1000));
+	// if (read_impl.actual_samples_per_second && fh->native_rate >= 1000) {
+	// 	switch_channel_set_variable_printf(channel, "record_seconds", "%d", fh->samples_out / fh->native_rate);
+	// 	switch_channel_set_variable_printf(channel, "record_ms", "%d", fh->samples_out / (fh->native_rate / 1000));
 
-	}
+	// }
 
-	switch_channel_set_variable_printf(channel, "record_samples", "%d", fh->samples_out);
+	// switch_channel_set_variable_printf(channel, "record_samples", "%d", fh->samples_out);
 
-	if (switch_event_create(&event, SWITCH_EVENT_RECORD_STOP) == SWITCH_STATUS_SUCCESS) {
-		switch_channel_event_set_data(channel, event);
-		switch_event_add_header_string(event, SWITCH_STACK_BOTTOM, "Record-File-Path", file);
-		merge_recording_variables(vars, event);
-		switch_event_fire(&event);
-	}
+	// if (switch_event_create(&event, SWITCH_EVENT_RECORD_STOP) == SWITCH_STATUS_SUCCESS) {
+	// 	switch_channel_event_set_data(channel, event);
+	// 	switch_event_add_header_string(event, SWITCH_STACK_BOTTOM, "Record-File-Path", file);
+	// 	merge_recording_variables(vars, event);
+	// 	switch_event_fire(&event);
+	// }
 
-	{
-		const char *app_exec = NULL;
-		if (vars && (app_exec = switch_event_get_header(vars, "execute_on_record_stop"))) {
-			switch_channel_execute_on_value(channel, app_exec);
-		}
-		switch_channel_execute_on(channel, "execute_on_record_stop");
-		switch_channel_api_on(channel, "api_on_record_stop");
-	}
+	// {
+	// 	const char *app_exec = NULL;
+	// 	if (vars && (app_exec = switch_event_get_header(vars, "execute_on_record_stop"))) {
+	// 		switch_channel_execute_on_value(channel, app_exec);
+	// 	}
+	// 	switch_channel_execute_on(channel, "execute_on_record_stop");
+	// 	switch_channel_api_on(channel, "api_on_record_stop");
+	// }
 
-	switch_core_session_reset(session, SWITCH_TRUE, SWITCH_TRUE);
+	// switch_core_session_reset(session, SWITCH_TRUE, SWITCH_TRUE);
 
 	arg_recursion_check_stop(args);
 	return status;
