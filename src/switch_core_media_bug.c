@@ -981,6 +981,7 @@ SWITCH_DECLARE(switch_status_t) switch_core_media_bug_add(switch_core_session_t 
 	if (!session->bugs) {
 		session->bugs = bug;
 		added = 1;
+		switch_log_printf(SWITCH_CHANNEL_SESSION_LOG(session), SWITCH_LOG_DEBUG, "session->bugs = bug\n"));
 	}
 
 	if (!added && switch_test_flag(bug, SMBF_FIRST)) {
@@ -1004,6 +1005,7 @@ SWITCH_DECLARE(switch_status_t) switch_core_media_bug_add(switch_core_session_t 
 	*new_bug = bug;
 
 	if (tap_only) {
+		switch_log_printf(SWITCH_CHANNEL_SESSION_LOG(session), SWITCH_LOG_DEBUG, "Setting flag TAP_ONLY: %s\n", switch_channel_get_name(session->channel));
 		switch_set_flag(session, SSF_MEDIA_BUG_TAP_ONLY);
 	} else {
 		switch_clear_flag(session, SSF_MEDIA_BUG_TAP_ONLY);

@@ -1242,13 +1242,13 @@ SWITCH_DECLARE(switch_status_t) switch_ivr_record_file_event_and_stream(switch_c
 								   read_impl.number_of_channels,
 								   SWITCH_CODEC_FLAG_ENCODE | SWITCH_CODEC_FLAG_DECODE, NULL,
 								   switch_core_session_get_pool(session)) == SWITCH_STATUS_SUCCESS) {
-			switch_log_printf(SWITCH_CHANNEL_SESSION_LOG(session), SWITCH_LOG_DEBUG, "Raw Codec Activated, ready to waste resources - ReadCodec: ms_per_packet: %d samples_per_second:%d!\n", read_impl.microseconds_per_packet/1000,read_impl.actual_samples_per_second);
+			switch_log_printf(SWITCH_CHANNEL_SESSION_LOG(session), SWITCH_LOG_DEBUG, "L16 Codec Activated, ready to waste resources - ReadCodec: ms_per_packet: %d samples_per_second:%d!\n", read_impl.microseconds_per_packet/1000,read_impl.actual_samples_per_second);
 			write_frame.data = write_buf;
 			write_frame.buflen = sizeof(write_buf);
 			write_frame.datalen = read_impl.decoded_bytes_per_packet;
 			write_frame.samples = write_frame.datalen / 2;
 			write_frame.codec = &write_codec;
-			switch_log_printf(SWITCH_CHANNEL_SESSION_LOG(session), SWITCH_LOG_DEBUG, "WriteCodec: datalen: %d,samples: %d, name: %s\n", write_frame.datalen, write_frame.samples, write_codec.codec_interface->implementations->iananame);
+			switch_log_printf(SWITCH_CHANNEL_SESSION_LOG(session), SWITCH_LOG_DEBUG, "WriteCodec(L16): datalen: %d,samples: %d, name: %s\n", write_frame.datalen, write_frame.samples, write_codec.codec_interface->implementations->iananame);
 		} else {
 			arg_recursion_check_stop(args);
 			switch_log_printf(SWITCH_CHANNEL_SESSION_LOG(session), SWITCH_LOG_WARNING, "switch_core_codec_init - FAILED\n");
@@ -1356,11 +1356,11 @@ SWITCH_DECLARE(switch_status_t) switch_ivr_record_file_event_and_stream(switch_c
 								   read_impl.number_of_channels,
 								   SWITCH_CODEC_FLAG_ENCODE | SWITCH_CODEC_FLAG_DECODE, NULL,
 								   switch_core_session_get_pool(session)) == SWITCH_STATUS_SUCCESS) {
-			switch_log_printf(SWITCH_CHANNEL_SESSION_LOG(session), SWITCH_LOG_DEBUG, "Raw Codec Activated - set read codec\n");
+			switch_log_printf(SWITCH_CHANNEL_SESSION_LOG(session), SWITCH_LOG_DEBUG, "L16 Codec Activated - set read codec\n");
 			switch_core_session_set_read_codec(session, &codec);
 		} else {
 			switch_log_printf(SWITCH_CHANNEL_SESSION_LOG(session), SWITCH_LOG_ERROR,
-							  "Raw Codec Activation Failed %s@%uhz %u channels %dms\n", codec_name, fh->samplerate,
+							  "L16 Codec Activation Failed %s@%uhz %u channels %dms\n", codec_name, fh->samplerate,
 							  fh->channels, read_impl.microseconds_per_packet / 1000);
 			// if (switch_core_file_has_video(fh, SWITCH_FALSE)) {
 			// 	if (echo_on) {

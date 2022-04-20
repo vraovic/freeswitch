@@ -540,8 +540,14 @@ extern "C" {
         return SWITCH_STATUS_FALSE;
       }
 
-      if (!cb->vad) streamer->connect();
-
+      if (!cb->vad) {
+        switch_log_printf(SWITCH_CHANNEL_SESSION_LOG(session), SWITCH_LOG_DEBUG, "%s: calling streamer->connect\n", switch_channel_get_name(channel));
+        streamer->connect();
+      }
+      else
+      {
+        switch_log_printf(SWITCH_CHANNEL_SESSION_LOG(session), SWITCH_LOG_DEBUG, "%s: streamer->connect is NOT called\n", switch_channel_get_name(channel));
+      }
       // create the read thread
       switch_threadattr_t *thd_attr = NULL;
       switch_memory_pool_t *pool = switch_core_session_get_pool(session);
