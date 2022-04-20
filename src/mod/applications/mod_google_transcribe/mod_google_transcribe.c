@@ -270,7 +270,7 @@ static switch_status_t start_capture(switch_core_session_t *session, switch_medi
 	}
 	if (bug != NUL)
 	{
-		switch_log_printf(SWITCH_CHANNEL_LOG, SWITCH_LOG_DEBUG, "start_capture - we added media_bug - read_codec_name: %s write_codec_name: %s\n", bug->read_impl.iananame, bug->write_impl.iananame );
+		switch_log_printf(SWITCH_CHANNEL_LOG, SWITCH_LOG_DEBUG, "start_capture - we added media_bug - \n");
 	}
 	switch_channel_set_private(channel, MY_BUG_NAME, bug);
 
