@@ -981,7 +981,7 @@ SWITCH_DECLARE(switch_status_t) switch_core_media_bug_add(switch_core_session_t 
 	if (!session->bugs) {
 		session->bugs = bug;
 		added = 1;
-		switch_log_printf(SWITCH_CHANNEL_SESSION_LOG(session), SWITCH_LOG_DEBUG, "session->bugs = bug\n"));
+		switch_log_printf(SWITCH_CHANNEL_SESSION_LOG(session), SWITCH_LOG_DEBUG, "session->bugs = bug\n");
 	}
 
 	if (!added && switch_test_flag(bug, SMBF_FIRST)) {
