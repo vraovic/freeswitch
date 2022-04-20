@@ -77,6 +77,8 @@ SWITCH_DECLARE(switch_status_t) switch_core_session_read_frame(switch_core_sessi
 	switch_assert(session != NULL);
 
 	tap_only = switch_test_flag(session, SSF_MEDIA_BUG_TAP_ONLY);
+	switch_log_printf(SWITCH_CHANNEL_SESSION_LOG(session), SWITCH_LOG_WARNING, "%s - VR - switch_core_session_read_frame\n", switch_channel_get_name(session->channel));
+
 
 	switch_os_yield();
 
@@ -739,6 +741,7 @@ SWITCH_DECLARE(switch_status_t) switch_core_session_read_frame(switch_core_sessi
 					}
 
 					if (bp->callback) {
+						switch_log_printf(SWITCH_CHANNEL_SESSION_LOG(session), SWITCH_LOG_DEBUG, "VR\n");
 						ok = bp->callback(bp, bp->user_data, SWITCH_ABC_TYPE_READ);
 					}
 					switch_mutex_unlock(bp->read_mutex);
