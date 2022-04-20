@@ -268,7 +268,7 @@ static switch_status_t start_capture(switch_core_session_t *session, switch_medi
 	if ((status = switch_core_media_bug_add(session, "google_transcribe", NULL, capture_callback, pUserData, 0, flags, &bug)) != SWITCH_STATUS_SUCCESS) {
 		return status;
 	}
-	if (bug != NUL)
+	if (bug != NULL)
 	{
 		switch_log_printf(SWITCH_CHANNEL_LOG, SWITCH_LOG_DEBUG, "start_capture - we added media_bug - \n");
 	}
