@@ -661,7 +661,7 @@ extern "C" {
                 streamer->write( &out[0], sizeof(spx_int16_t) * out_len);
               }
               else {
-                switch_log_printf(SWITCH_CHANNEL_SESSION_LOG(session), SWITCH_LOG_DEBUG, "VR- write data to streamer frame.samples: %d\n", frame.samples);
+                // switch_log_printf(SWITCH_CHANNEL_SESSION_LOG(session), SWITCH_LOG_DEBUG, "VR- write data to streamer frame.samples: %d\n", frame.samples);
                 streamer->write( frame.data, sizeof(spx_int16_t) * frame.samples);
               }
             }

@@ -1075,7 +1075,7 @@ SWITCH_DECLARE(switch_status_t) switch_ivr_record_file_event_and_stream(switch_c
 	// const char *file_trimmed_ms = NULL;
 	// const char *file_size = NULL;
 	// const char *file_trimmed = NULL;
-	switch_log_printf(SWITCH_CHANNEL_SESSION_LOG(session), SWITCH_LOG_WARNING, "BEGINING - switch_ivr_record_file_event_and_stream\n");
+	switch_log_printf(SWITCH_CHANNEL_SESSION_LOG(session), SWITCH_LOG_WARNING, "BEGINING - setup streaming\n");
 
 
 	if (switch_channel_pre_answer(channel) != SWITCH_STATUS_SUCCESS) {
@@ -1493,10 +1493,10 @@ SWITCH_DECLARE(switch_status_t) switch_ivr_record_file_event_and_stream(switch_c
 			}
 		}
 
-		switch_log_printf(SWITCH_CHANNEL_SESSION_LOG(session), SWITCH_LOG_DEBUG, "switch_ivr_record_file_event_and_stream - switch_core_session_read_frame\n");
+		// switch_log_printf(SWITCH_CHANNEL_SESSION_LOG(session), SWITCH_LOG_DEBUG, "switch_ivr_record_file_event_and_stream - switch_core_session_read_frame\n");
 		status = switch_core_session_read_frame(session, &read_frame, SWITCH_IO_FLAG_NONE, 0);
 		if (!SWITCH_READ_ACCEPTABLE(status)) {
-		switch_log_printf(SWITCH_CHANNEL_SESSION_LOG(session), SWITCH_LOG_DEBUG, "switch_ivr_record_file_event_and_stream - switch_core_session_read_frame - BREAK\n");
+		// switch_log_printf(SWITCH_CHANNEL_SESSION_LOG(session), SWITCH_LOG_DEBUG, "switch_ivr_record_file_event_and_stream - switch_core_session_read_frame - BREAK\n");
 			break;
 		}
 
