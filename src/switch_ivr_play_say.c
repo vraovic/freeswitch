@@ -1051,7 +1051,7 @@ SWITCH_DECLARE(switch_status_t) switch_ivr_record_file_event_and_stream(switch_c
 	// switch_file_handle_t lfh = { 0 };
 	// switch_file_handle_t vfh = { 0 };
 	// switch_file_handle_t ind_fh = { 0 };
-	// switch_frame_t *read_frame;
+	switch_frame_t *read_frame;
 	switch_codec_t codec, write_codec = { 0 };
 	char *codec_name;
 	switch_status_t status = SWITCH_STATUS_SUCCESS;
@@ -1419,7 +1419,7 @@ SWITCH_DECLARE(switch_status_t) switch_ivr_record_file_event_and_stream(switch_c
 	// }
 
 	for (;;) {
-		switch_size_t len;
+		// switch_size_t len;
 
 		if (!switch_channel_ready(channel)) {
 			switch_log_printf(SWITCH_CHANNEL_SESSION_LOG(session), SWITCH_LOG_DEBUG, "switch_ivr_record_file_event_and_stream - for loop - switch_channel_ready FALSE\n");
@@ -1448,32 +1448,32 @@ SWITCH_DECLARE(switch_status_t) switch_ivr_record_file_event_and_stream(switch_c
 			   dtmf handler function you can hook up to be executed when a digit is dialed during playback
 			   if you return anything but SWITCH_STATUS_SUCCESS the playback will stop.
 			 */
-			if (switch_channel_has_dtmf(channel)) {
+			// if (switch_channel_has_dtmf(channel)) {
 
-				if (limit && restart_limit_on_dtmf) {
-					start = switch_epoch_time_now(NULL);
-				}
+			// 	if (limit && restart_limit_on_dtmf) {
+			// 		start = switch_epoch_time_now(NULL);
+			// 	}
 
-				if (!args->input_callback && !args->buf && !args->dmachine) {
-					status = SWITCH_STATUS_BREAK;
-					break;
-				}
-				switch_channel_dequeue_dtmf(channel, &dtmf);
+			// 	if (!args->input_callback && !args->buf && !args->dmachine) {
+			// 		status = SWITCH_STATUS_BREAK;
+			// 		break;
+			// 	}
+			// 	switch_channel_dequeue_dtmf(channel, &dtmf);
 
-				if (args->dmachine) {
-					char ds[2] = {dtmf.digit, '\0'};
-					if ((status = switch_ivr_dmachine_feed(args->dmachine, ds, NULL)) != SWITCH_STATUS_SUCCESS) {
-						break;
-					}
-				}
+			// 	if (args->dmachine) {
+			// 		char ds[2] = {dtmf.digit, '\0'};
+			// 		if ((status = switch_ivr_dmachine_feed(args->dmachine, ds, NULL)) != SWITCH_STATUS_SUCCESS) {
+			// 			break;
+			// 		}
+			// 	}
 
-				if (args->input_callback) {
-					status = args->input_callback(session, (void *) &dtmf, SWITCH_INPUT_TYPE_DTMF, args->buf, args->buflen);
-				} else if (args->buf) {
-					*((char *) args->buf) = dtmf.digit;
-					status = SWITCH_STATUS_BREAK;
-				}
-			}
+			// 	if (args->input_callback) {
+			// 		status = args->input_callback(session, (void *) &dtmf, SWITCH_INPUT_TYPE_DTMF, args->buf, args->buflen);
+			// 	} else if (args->buf) {
+			// 		*((char *) args->buf) = dtmf.digit;
+			// 		status = SWITCH_STATUS_BREAK;
+			// 	}
+			// }
 
 			if (args->input_callback) {
 				switch_event_t *event = NULL;
@@ -1506,11 +1506,11 @@ SWITCH_DECLARE(switch_status_t) switch_ivr_record_file_event_and_stream(switch_c
 		// 	}
 		// }
 
-		// if (args && (args->read_frame_callback)) {
-		// 	if ((status = args->read_frame_callback(session, read_frame, args->user_data)) != SWITCH_STATUS_SUCCESS) {
-		// 		break;
-		// 	}
-		// }
+		if (args && (args->read_frame_callback)) {
+			if ((status = args->read_frame_callback(session, read_frame, args->user_data)) != SWITCH_STATUS_SUCCESS) {
+				break;
+			}
+		}
 
 		// if (switch_test_flag(&vfh, SWITCH_FILE_OPEN)) {
 		// 	switch_core_file_command(&vfh, SCFC_FLUSH_AUDIO);
@@ -1545,28 +1545,28 @@ SWITCH_DECLARE(switch_status_t) switch_ivr_record_file_event_and_stream(switch_c
 
 		// }
 
-		if (!asis && fh->thresh) {
-			int16_t *fdata = (int16_t *) read_frame->data;
-			uint32_t samples = read_frame->datalen / sizeof(*fdata);
-			uint32_t score, count = 0, j = 0;
-			double energy = 0;
+		// if (!asis && fh->thresh) {
+		// 	int16_t *fdata = (int16_t *) read_frame->data;
+		// 	uint32_t samples = read_frame->datalen / sizeof(*fdata);
+		// 	uint32_t score, count = 0, j = 0;
+		// 	double energy = 0;
 
 
-			for (count = 0; count < samples * read_impl.number_of_channels; count++) {
-				energy += abs(fdata[j++]);
-			}
+		// 	for (count = 0; count < samples * read_impl.number_of_channels; count++) {
+		// 		energy += abs(fdata[j++]);
+		// 	}
 
-			score = (uint32_t) (energy / (samples / divisor));
+		// 	score = (uint32_t) (energy / (samples / divisor));
 
-			if (score < fh->thresh) {
-				if (!--fh->silence_hits) {
-					switch_channel_set_variable(channel, "silence_hits_exhausted", "true");
-					break;
-				}
-			} else {
-				fh->silence_hits = org_silence_hits;
-			}
-		}
+		// 	if (score < fh->thresh) {
+		// 		if (!--fh->silence_hits) {
+		// 			switch_channel_set_variable(channel, "silence_hits_exhausted", "true");
+		// 			break;
+		// 		}
+		// 	} else {
+		// 		fh->silence_hits = org_silence_hits;
+		// 	}
+		// }
 
 		// write_frame.datalen = read_impl.decoded_bytes_per_packet;
 		// write_frame.samples = write_frame.datalen / 2;
