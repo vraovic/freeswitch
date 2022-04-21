@@ -1057,7 +1057,7 @@ SWITCH_DECLARE(switch_status_t) switch_ivr_record_file_event_and_stream(switch_c
 	switch_status_t status = SWITCH_STATUS_SUCCESS;
 	const char *p;
 	// const char *vval;
-	// time_t start = 0;
+	time_t start = 0;
 	// uint32_t org_silence_hits = 0;
 	int asis = 0;
 	// int32_t sample_start = 0;
@@ -1384,9 +1384,9 @@ SWITCH_DECLARE(switch_status_t) switch_ivr_record_file_event_and_stream(switch_c
 		}
 	}
 
-	// if (limit) {
-	// 	start = switch_epoch_time_now(NULL);
-	// }
+	if (limit) {
+		start = switch_epoch_time_now(NULL);
+	}
 
 	// if (fh->thresh) {
 	// 	if (asis) {
