@@ -338,7 +338,10 @@ static void *SWITCH_THREAD_FUNC grpc_read_thread(switch_thread_t *thread, void *
     switch_log_printf(SWITCH_CHANNEL_LOG, SWITCH_LOG_NOTICE, "google transcribe grpc read thread exiting since we didnt connect\n") ;
     return nullptr;
   }
-
+  else 
+  {
+    switch_log_printf(SWITCH_CHANNEL_LOG, SWITCH_LOG_NOTICE, "google transcribe grpc read thread CONNECTED\n") ;
+  }
   // Read responses.
   StreamingRecognizeResponse response;
   while (streamer->read(&response)) {  // Returns false when no more to read.
@@ -658,6 +661,7 @@ extern "C" {
                 streamer->write( &out[0], sizeof(spx_int16_t) * out_len);
               }
               else {
+                switch_log_printf(SWITCH_CHANNEL_SESSION_LOG(session), SWITCH_LOG_DEBUG, "VR- write data to streamer frame.samples: %d\n", frame.samples);
                 streamer->write( frame.data, sizeof(spx_int16_t) * frame.samples);
               }
             }

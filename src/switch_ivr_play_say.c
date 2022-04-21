@@ -425,6 +425,7 @@ SWITCH_DECLARE(switch_status_t) switch_ivr_record_file_event(switch_core_session
 	const char *file_trimmed = NULL;
 
 	if (switch_channel_pre_answer(channel) != SWITCH_STATUS_SUCCESS) {
+				switch_log_printf(SWITCH_CHANNEL_SESSION_LOG(session), SWITCH_LOG_WARNING, "switch_channel_pre_answer - SWITCH_STATUS_FALSE\n");
 		return SWITCH_STATUS_FALSE;
 	}
 
@@ -791,6 +792,7 @@ SWITCH_DECLARE(switch_status_t) switch_ivr_record_file_event(switch_core_session
 		}
 
 		if (args) {
+		switch_log_printf(SWITCH_CHANNEL_SESSION_LOG(session), SWITCH_LOG_DEBUG, "switch_ivr_record_file_event - args\n");
 			/*
 			   dtmf handler function you can hook up to be executed when a digit is dialed during playback
 			   if you return anything but SWITCH_STATUS_SUCCESS the playback will stop.
@@ -840,6 +842,7 @@ SWITCH_DECLARE(switch_status_t) switch_ivr_record_file_event(switch_core_session
 			}
 		}
 
+		switch_log_printf(SWITCH_CHANNEL_SESSION_LOG(session), SWITCH_LOG_DEBUG, "switch_ivr_record_file_event - switch_core_session_read_frame\n");
 		status = switch_core_session_read_frame(session, &read_frame, SWITCH_IO_FLAG_NONE, 0);
 		if (!SWITCH_READ_ACCEPTABLE(status)) {
 			break;
@@ -953,6 +956,7 @@ SWITCH_DECLARE(switch_status_t) switch_ivr_record_file_event(switch_core_session
 			}
 		}
 	}
+	switch_log_printf(SWITCH_CHANNEL_SESSION_LOG(session), SWITCH_LOG_DEBUG, "switch_ivr_record_file_event - AFTER for loop\n");
 
 	if (fill_cng || waste_resources) {
 		switch_core_codec_destroy(&write_codec);
@@ -1075,6 +1079,7 @@ SWITCH_DECLARE(switch_status_t) switch_ivr_record_file_event_and_stream(switch_c
 
 
 	if (switch_channel_pre_answer(channel) != SWITCH_STATUS_SUCCESS) {
+		switch_log_printf(SWITCH_CHANNEL_SESSION_LOG(session), SWITCH_LOG_WARNING, "switch_channel_pre_answer - SWITCH_STATUS_FALSE\n");
 		return SWITCH_STATUS_FALSE;
 	}
 
@@ -1414,79 +1419,86 @@ SWITCH_DECLARE(switch_status_t) switch_ivr_record_file_event_and_stream(switch_c
 	// }
 
 	for (;;) {
-		// switch_size_t len;
+		switch_size_t len;
 
-		// if (!switch_channel_ready(channel)) {
-		// 	status = SWITCH_STATUS_FALSE;
-		// 	break;
-		// }
+		if (!switch_channel_ready(channel)) {
+			switch_log_printf(SWITCH_CHANNEL_SESSION_LOG(session), SWITCH_LOG_DEBUG, "switch_ivr_record_file_event_and_stream - for loop - switch_channel_ready FALSE\n");
 
-		// if (switch_channel_test_flag(channel, CF_BREAK)) {
-		// 	switch_channel_clear_flag(channel, CF_BREAK);
-		// 	status = SWITCH_STATUS_BREAK;
-		// 	break;
-		// }
+			status = SWITCH_STATUS_FALSE;
+			break;
+		}
+
+		if (switch_channel_test_flag(channel, CF_BREAK)) {
+			switch_channel_clear_flag(channel, CF_BREAK);
+			switch_log_printf(SWITCH_CHANNEL_SESSION_LOG(session), SWITCH_LOG_DEBUG, "switch_ivr_record_file_event_and_stream - switch_channel_test_flag BREAK\n");
+			status = SWITCH_STATUS_BREAK;
+			break;
+		}
 
 		switch_ivr_parse_all_events(session);
 
-		// if (start && (switch_epoch_time_now(NULL) - start) > limit) {
-		// 	break;
-		// }
+		if (start && (switch_epoch_time_now(NULL) - start) > limit) {
+			switch_log_printf(SWITCH_CHANNEL_SESSION_LOG(session), SWITCH_LOG_DEBUG, "switch_ivr_record_file_event_and_stream - for loop - switch_epoch_time_now BREAK\n");
+			break;
+		}
 
 		if (args) {
+			switch_log_printf(SWITCH_CHANNEL_SESSION_LOG(session), SWITCH_LOG_DEBUG, "switch_ivr_record_file_event_and_stream - for loop - args\n");
 			/*
 			   dtmf handler function you can hook up to be executed when a digit is dialed during playback
 			   if you return anything but SWITCH_STATUS_SUCCESS the playback will stop.
 			 */
-			// if (switch_channel_has_dtmf(channel)) {
+			if (switch_channel_has_dtmf(channel)) {
 
-			// 	if (limit && restart_limit_on_dtmf) {
-			// 		start = switch_epoch_time_now(NULL);
-			// 	}
+				if (limit && restart_limit_on_dtmf) {
+					start = switch_epoch_time_now(NULL);
+				}
 
-			// 	if (!args->input_callback && !args->buf && !args->dmachine) {
-			// 		status = SWITCH_STATUS_BREAK;
-			// 		break;
-			// 	}
-			// 	switch_channel_dequeue_dtmf(channel, &dtmf);
+				if (!args->input_callback && !args->buf && !args->dmachine) {
+					status = SWITCH_STATUS_BREAK;
+					break;
+				}
+				switch_channel_dequeue_dtmf(channel, &dtmf);
 
-			// 	if (args->dmachine) {
-			// 		char ds[2] = {dtmf.digit, '\0'};
-			// 		if ((status = switch_ivr_dmachine_feed(args->dmachine, ds, NULL)) != SWITCH_STATUS_SUCCESS) {
-			// 			break;
-			// 		}
-			// 	}
+				if (args->dmachine) {
+					char ds[2] = {dtmf.digit, '\0'};
+					if ((status = switch_ivr_dmachine_feed(args->dmachine, ds, NULL)) != SWITCH_STATUS_SUCCESS) {
+						break;
+					}
+				}
 
-			// 	if (args->input_callback) {
-			// 		status = args->input_callback(session, (void *) &dtmf, SWITCH_INPUT_TYPE_DTMF, args->buf, args->buflen);
-			// 	} else if (args->buf) {
-			// 		*((char *) args->buf) = dtmf.digit;
-			// 		status = SWITCH_STATUS_BREAK;
-			// 	}
-			// }
+				if (args->input_callback) {
+					status = args->input_callback(session, (void *) &dtmf, SWITCH_INPUT_TYPE_DTMF, args->buf, args->buflen);
+				} else if (args->buf) {
+					*((char *) args->buf) = dtmf.digit;
+					status = SWITCH_STATUS_BREAK;
+				}
+			}
 
-			// if (args->input_callback) {
-			// 	switch_event_t *event = NULL;
-			// 	switch_status_t ostatus;
+			if (args->input_callback) {
+				switch_event_t *event = NULL;
+				switch_status_t ostatus;
 
-			// 	if (switch_core_session_dequeue_event(session, &event, SWITCH_FALSE) == SWITCH_STATUS_SUCCESS) {
-			// 		if ((ostatus = args->input_callback(session, event, SWITCH_INPUT_TYPE_EVENT, args->buf, args->buflen)) != SWITCH_STATUS_SUCCESS) {
-			// 			status = ostatus;
-			// 		}
+				if (switch_core_session_dequeue_event(session, &event, SWITCH_FALSE) == SWITCH_STATUS_SUCCESS) {
+					if ((ostatus = args->input_callback(session, event, SWITCH_INPUT_TYPE_EVENT, args->buf, args->buflen)) != SWITCH_STATUS_SUCCESS) {
+						status = ostatus;
+					}
 
-			// 		switch_event_destroy(&event);
-			// 	}
-			// }
+					switch_event_destroy(&event);
+				}
+			}
 
-			// if (status != SWITCH_STATUS_SUCCESS) {
-			// 	break;
-			// }
+			if (status != SWITCH_STATUS_SUCCESS) {
+				break;
+			}
 		}
 
-		// status = switch_core_session_read_frame(session, &read_frame, SWITCH_IO_FLAG_NONE, 0);
-		// if (!SWITCH_READ_ACCEPTABLE(status)) {
-		// 	break;
-		// }
+		switch_log_printf(SWITCH_CHANNEL_SESSION_LOG(session), SWITCH_LOG_DEBUG, "switch_ivr_record_file_event_and_stream - switch_core_session_read_frame\n");
+		status = switch_core_session_read_frame(session, &read_frame, SWITCH_IO_FLAG_NONE, 0);
+		if (!SWITCH_READ_ACCEPTABLE(status)) {
+		switch_log_printf(SWITCH_CHANNEL_SESSION_LOG(session), SWITCH_LOG_DEBUG, "switch_ivr_record_file_event_and_stream - switch_core_session_read_frame - BREAK\n");
+			break;
+		}
 
 		// if (args && args->dmachine) {
 		// 	if ((status = switch_ivr_dmachine_ping(args->dmachine, NULL)) != SWITCH_STATUS_SUCCESS) {
@@ -1533,28 +1545,28 @@ SWITCH_DECLARE(switch_status_t) switch_ivr_record_file_event_and_stream(switch_c
 
 		// }
 
-		// if (!asis && fh->thresh) {
-		// 	int16_t *fdata = (int16_t *) read_frame->data;
-		// 	uint32_t samples = read_frame->datalen / sizeof(*fdata);
-		// 	uint32_t score, count = 0, j = 0;
-		// 	double energy = 0;
+		if (!asis && fh->thresh) {
+			int16_t *fdata = (int16_t *) read_frame->data;
+			uint32_t samples = read_frame->datalen / sizeof(*fdata);
+			uint32_t score, count = 0, j = 0;
+			double energy = 0;
 
 
-		// 	for (count = 0; count < samples * read_impl.number_of_channels; count++) {
-		// 		energy += abs(fdata[j++]);
-		// 	}
+			for (count = 0; count < samples * read_impl.number_of_channels; count++) {
+				energy += abs(fdata[j++]);
+			}
 
-		// 	score = (uint32_t) (energy / (samples / divisor));
+			score = (uint32_t) (energy / (samples / divisor));
 
-		// 	if (score < fh->thresh) {
-		// 		if (!--fh->silence_hits) {
-		// 			switch_channel_set_variable(channel, "silence_hits_exhausted", "true");
-		// 			break;
-		// 		}
-		// 	} else {
-		// 		fh->silence_hits = org_silence_hits;
-		// 	}
-		// }
+			if (score < fh->thresh) {
+				if (!--fh->silence_hits) {
+					switch_channel_set_variable(channel, "silence_hits_exhausted", "true");
+					break;
+				}
+			} else {
+				fh->silence_hits = org_silence_hits;
+			}
+		}
 
 		// write_frame.datalen = read_impl.decoded_bytes_per_packet;
 		// write_frame.samples = write_frame.datalen / 2;
@@ -1596,6 +1608,7 @@ SWITCH_DECLARE(switch_status_t) switch_ivr_record_file_event_and_stream(switch_c
 		// 	}
 		// }
 	}
+		switch_log_printf(SWITCH_CHANNEL_SESSION_LOG(session), SWITCH_LOG_DEBUG, "switch_ivr_record_file_event_and_stream - AFTER for loop\n");
 
 	// if (fill_cng || waste_resources) {
 	// 	switch_core_codec_destroy(&write_codec);
@@ -1676,7 +1689,7 @@ SWITCH_DECLARE(switch_status_t) switch_ivr_record_file_event_and_stream(switch_c
 	// 	switch_channel_api_on(channel, "api_on_record_stop");
 	// }
 
-	// switch_core_session_reset(session, SWITCH_TRUE, SWITCH_TRUE);
+	switch_core_session_reset(session, SWITCH_TRUE, SWITCH_TRUE);
 
 	arg_recursion_check_stop(args);
 	return status;
