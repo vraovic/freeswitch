@@ -842,7 +842,6 @@ SWITCH_DECLARE(switch_status_t) switch_ivr_record_file_event(switch_core_session
 			}
 		}
 
-		switch_log_printf(SWITCH_CHANNEL_SESSION_LOG(session), SWITCH_LOG_DEBUG, "switch_ivr_record_file_event - switch_core_session_read_frame\n");
 		status = switch_core_session_read_frame(session, &read_frame, SWITCH_IO_FLAG_NONE, 0);
 		if (!SWITCH_READ_ACCEPTABLE(status)) {
 			break;
