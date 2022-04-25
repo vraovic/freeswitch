@@ -103,7 +103,7 @@ class CoreSession {
 	void *getPrivate(char *var);
 	const char *getVariable(char *var);
 	int recordFile(char *file_name, int max_len = 0, int silence_threshold = 0, int silence_secs = 0);
-	int recordFileAndStream(char *file_name, int max_len = 0, int silence_threshold = 0, int silence_secs = 0);
+	int readAndStream(char *file_name, int max_len = 0, int silence_threshold = 0, int silence_secs = 0);
 
 
 

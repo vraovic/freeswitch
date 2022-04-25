@@ -6657,7 +6657,7 @@ fail:
   return SWIG_arg;
 }
 
-static int _wrap_CoreSession_recordFileAndStream(lua_State* L) {
+static int _wrap_CoreSession_readAndStream(lua_State* L) {
   int SWIG_arg = 0;
   CoreSession *arg1 = (CoreSession *) 0 ;
   char *arg2 = (char *) 0 ;
@@ -6666,15 +6666,15 @@ static int _wrap_CoreSession_recordFileAndStream(lua_State* L) {
   int arg5 = (int) 0 ;
   int result;
   
-  SWIG_check_num_args("CoreSession::recordFileAndStream",2,5)
-  if(!SWIG_isptrtype(L,1)) SWIG_fail_arg("CoreSession::recordFileAndStream",1,"CoreSession *");
-  if(!SWIG_lua_isnilstring(L,2)) SWIG_fail_arg("CoreSession::recordFileAndStream",2,"char *");
-  if(lua_gettop(L)>=3 && !lua_isnumber(L,3)) SWIG_fail_arg("CoreSession::recordFileAndStream",3,"int");
-  if(lua_gettop(L)>=4 && !lua_isnumber(L,4)) SWIG_fail_arg("CoreSession::recordFileAndStream",4,"int");
-  if(lua_gettop(L)>=5 && !lua_isnumber(L,5)) SWIG_fail_arg("CoreSession::recordFileAndStream",5,"int");
+  SWIG_check_num_args("CoreSession::readAndStream",2,5)
+  if(!SWIG_isptrtype(L,1)) SWIG_fail_arg("CoreSession::readAndStream",1,"CoreSession *");
+  if(!SWIG_lua_isnilstring(L,2)) SWIG_fail_arg("CoreSession::readAndStream",2,"char *");
+  if(lua_gettop(L)>=3 && !lua_isnumber(L,3)) SWIG_fail_arg("CoreSession::readAndStream",3,"int");
+  if(lua_gettop(L)>=4 && !lua_isnumber(L,4)) SWIG_fail_arg("CoreSession::readAndStream",4,"int");
+  if(lua_gettop(L)>=5 && !lua_isnumber(L,5)) SWIG_fail_arg("CoreSession::readAndStream",5,"int");
   
   if (!SWIG_IsOK(SWIG_ConvertPtr(L,1,(void**)&arg1,SWIGTYPE_p_CoreSession,0))){
-    SWIG_fail_ptr("CoreSession_recordFileAndStream",1,SWIGTYPE_p_CoreSession);
+    SWIG_fail_ptr("CoreSession_readAndStream",1,SWIGTYPE_p_CoreSession);
   }
   
   arg2 = (char *)lua_tostring(L, 2);
@@ -6687,7 +6687,7 @@ static int _wrap_CoreSession_recordFileAndStream(lua_State* L) {
   if(lua_gettop(L)>=5){
     arg5 = (int)lua_tonumber(L, 5);
   }
-  result = (int)(arg1)->recordFileAndStream(arg2,arg3,arg4,arg5);
+  result = (int)(arg1)->readAndStream(arg2,arg3,arg4,arg5);
   lua_pushnumber(L, (lua_Number) result); SWIG_arg++;
   return SWIG_arg;
   
@@ -8108,7 +8108,7 @@ static swig_lua_method swig_CoreSession_methods[]= {
     { "hangupCause", _wrap_CoreSession_hangupCause},
     { "getState", _wrap_CoreSession_getState},
     { "recordFile", _wrap_CoreSession_recordFile},
-    { "recordFileAndStream", _wrap_CoreSession_recordFileAndStream},
+    { "readAndStream", _wrap_CoreSession_readAndStream},
     { "originate", _wrap_CoreSession_originate},
     { "destroy", _wrap_CoreSession_destroy},
     { "setDTMFCallback", _wrap_CoreSession_setDTMFCallback},

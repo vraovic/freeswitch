@@ -260,7 +260,7 @@ SWITCH_DECLARE(bool) email(char *to, char *from, char *headers = NULL, char *bod
 	 */
 		 SWITCH_DECLARE(int) recordFile(char *file_name, int time_limit = 0, int silence_threshold = 0, int silence_hits = 0);
 
-		 SWITCH_DECLARE(int) recordFileAndStream(char *file_name, int time_limit = 0, int silence_threshold = 0, int silence_hits = 0);
+		 SWITCH_DECLARE(int) readAndStream(char *file_name, int time_limit = 0, int silence_threshold = 0, int silence_hits = 0);
 	/** \brief Set attributes of caller data for purposes of outgoing calls
 	 * \param var - the variable name, eg, "caller_id_name"
 	 * \param val - the data to set, eg, "bob"
