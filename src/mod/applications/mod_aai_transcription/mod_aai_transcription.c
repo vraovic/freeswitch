@@ -41,7 +41,7 @@ static switch_bool_t capture_callback(switch_media_bug_t *bug, void *user_data, 
 		break;
 	
 	case SWITCH_ABC_TYPE_READ:
-		return fork_frame(session, bug);
+		return aai_frame(session, bug);
 		break;
 
 	case SWITCH_ABC_TYPE_WRITE:
@@ -285,7 +285,7 @@ SWITCH_MODULE_LOAD_FUNCTION(mod_aai_transcription_load)
 	switch_console_set_complete("add uuid_aai_transcription start wss-url");
 	switch_console_set_complete("add uuid_aai_transcription stop");
 
-	fork_init();
+	aai_init();
 
 	switch_log_printf(SWITCH_CHANNEL_LOG, SWITCH_LOG_NOTICE, "mod_aai_transcription API successfully loaded\n");
 

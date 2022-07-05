@@ -457,7 +457,7 @@ SWITCH_MODULE_LOAD_FUNCTION(mod_aai_transcribe_load)
 /*
   Called when the system shuts down
   Macro expands to: switch_status_t mod_google_transcribe_shutdown() */
-SWITCH_MODULE_SHUTDOWN_FUNCTION(mod_transcribe_shutdown)
+SWITCH_MODULE_SHUTDOWN_FUNCTION(mod_aai_transcribe_shutdown)
 {
 	google_speech_cleanup();
 	switch_event_free_subclass(TRANSCRIBE_EVENT_RESULTS);
