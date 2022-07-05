@@ -132,7 +132,7 @@ static switch_status_t do_graceful_shutdown(switch_core_session_t *session)
 {
 	switch_status_t status = SWITCH_STATUS_SUCCESS;
 
-	status = fork_session_graceful_shutdown(session);
+	status = aai_session_graceful_shutdown(session);
 
 	return status;
 }

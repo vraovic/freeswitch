@@ -399,7 +399,7 @@ SWITCH_STANDARD_API(transcribe_function)
 	return SWITCH_STATUS_SUCCESS;
 }
 
-SWITCH_MODULE_LOAD_FUNCTION(mod_transcribe_load)
+SWITCH_MODULE_LOAD_FUNCTION(mod_aai_transcribe_load)
 {
 	switch_api_interface_t *api_interface;
 
