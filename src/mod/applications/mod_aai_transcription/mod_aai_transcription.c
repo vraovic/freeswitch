@@ -86,12 +86,12 @@ static switch_status_t start_capture(switch_core_session_t *session,
 		return SWITCH_STATUS_FALSE;
 	}
 
-	// switch_log_printf(SWITCH_CHANNEL_SESSION_LOG(session), SWITCH_LOG_DEBUG, "calling aai_session_init.\n");
-	// if (SWITCH_STATUS_FALSE == aai_session_init(session, responseHandler, read_codec->implementation->actual_samples_per_second, 
-	// 	host, port, path, sampling, sslFlags, channels, metadata, &pUserData)) {
-	// 	switch_log_printf(SWITCH_CHANNEL_SESSION_LOG(session), SWITCH_LOG_ERROR, "Error initializing mod_aai_transcription session.\n");
-	// 	return SWITCH_STATUS_FALSE;
-	// }
+	switch_log_printf(SWITCH_CHANNEL_SESSION_LOG(session), SWITCH_LOG_DEBUG, "calling aai_session_init.\n");
+	if (SWITCH_STATUS_FALSE == aai_session_init(session, responseHandler, read_codec->implementation->actual_samples_per_second, 
+		host, port, path, sampling, sslFlags, channels, metadata, &pUserData)) {
+		switch_log_printf(SWITCH_CHANNEL_SESSION_LOG(session), SWITCH_LOG_ERROR, "Error initializing mod_aai_transcription session.\n");
+		return SWITCH_STATUS_FALSE;
+	}
 	switch_log_printf(SWITCH_CHANNEL_SESSION_LOG(session), SWITCH_LOG_DEBUG, "adding bug.\n");
 	if ((status = switch_core_media_bug_add(session, MY_BUG_NAME, NULL, capture_callback, pUserData, 0, flags, &bug)) != SWITCH_STATUS_SUCCESS) {
 		return status;
