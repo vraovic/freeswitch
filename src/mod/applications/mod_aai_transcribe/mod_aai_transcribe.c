@@ -459,7 +459,7 @@ SWITCH_MODULE_LOAD_FUNCTION(mod_aai_transcribe_load)
   Macro expands to: switch_status_t mod_aai_transcribe_shutdown() */
 SWITCH_MODULE_SHUTDOWN_FUNCTION(mod_aai_transcribe_shutdown)
 {
-	aai_speech_cleanup();
+	// aai_speech_cleanup();
 	switch_event_free_subclass(TRANSCRIBE_EVENT_RESULTS);
 	switch_event_free_subclass(TRANSCRIBE_EVENT_END_OF_UTTERANCE);
 	switch_event_free_subclass(TRANSCRIBE_EVENT_START_OF_TRANSCRIPT);
