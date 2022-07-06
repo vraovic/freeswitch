@@ -36,7 +36,7 @@ static switch_bool_t capture_callback(switch_media_bug_t *bug, void *user_data, 
 	case SWITCH_ABC_TYPE_CLOSE:
 		{
 			switch_log_printf(SWITCH_CHANNEL_SESSION_LOG(session), SWITCH_LOG_INFO, "Got SWITCH_ABC_TYPE_CLOSE.\n");
-      fork_session_cleanup(session, NULL, 1);
+      		aai_session_cleanup(session, NULL, 1);
 		}
 		break;
 	
@@ -86,8 +86,8 @@ static switch_status_t start_capture(switch_core_session_t *session,
 		return SWITCH_STATUS_FALSE;
 	}
 
-	switch_log_printf(SWITCH_CHANNEL_SESSION_LOG(session), SWITCH_LOG_DEBUG, "calling fork_session_init.\n");
-	if (SWITCH_STATUS_FALSE == fork_session_init(session, responseHandler, read_codec->implementation->actual_samples_per_second, 
+	switch_log_printf(SWITCH_CHANNEL_SESSION_LOG(session), SWITCH_LOG_DEBUG, "calling aai_session_init.\n");
+	if (SWITCH_STATUS_FALSE == aai_session_init(session, responseHandler, read_codec->implementation->actual_samples_per_second, 
 		host, port, path, sampling, sslFlags, channels, metadata, &pUserData)) {
 		switch_log_printf(SWITCH_CHANNEL_SESSION_LOG(session), SWITCH_LOG_ERROR, "Error initializing mod_aai_transcription session.\n");
 		return SWITCH_STATUS_FALSE;
@@ -113,7 +113,7 @@ static switch_status_t do_stop(switch_core_session_t *session, char* text)
 	else {
 		switch_log_printf(SWITCH_CHANNEL_SESSION_LOG(session), SWITCH_LOG_INFO, "mod_aai_transcription: stop\n");
 	}
-	status = fork_session_cleanup(session, text, 0);
+	status = aai_session_cleanup(session, text, 0);
 
 	return status;
 }
@@ -123,7 +123,7 @@ static switch_status_t do_pauseresume(switch_core_session_t *session, int pause)
 	switch_status_t status = SWITCH_STATUS_SUCCESS;
 
 	switch_log_printf(SWITCH_CHANNEL_SESSION_LOG(session), SWITCH_LOG_INFO, "mod_aai_transcription: %s\n", pause ? "pause" : "resume");
-	status = fork_session_pauseresume(session, pause);
+	status = aai_session_pauseresume(session, pause);
 
 	return status;
 }
@@ -145,7 +145,7 @@ static switch_status_t send_text(switch_core_session_t *session, char* text) {
 
   if (bug) {
 		switch_log_printf(SWITCH_CHANNEL_SESSION_LOG(session), SWITCH_LOG_INFO, "mod_aai_transcription: sending text: %s.\n", text);
-    status = fork_session_send_text(session, text);
+    status = aai_session_send_text(session, text);
   }
   else {
 		switch_log_printf(SWITCH_CHANNEL_SESSION_LOG(session), SWITCH_LOG_ERROR, "mod_aai_transcription: no bug, failed sending text: %s.\n", text);
@@ -299,7 +299,7 @@ SWITCH_MODULE_LOAD_FUNCTION(mod_aai_transcription_load)
   Macro expands to: switch_status_t mod_aai_transcription_shutdown() */
 SWITCH_MODULE_SHUTDOWN_FUNCTION(mod_aai_transcription_shutdown)
 {
-	fork_cleanup();
+	aai_cleanup();
   //mod_running = 0;
 	switch_event_free_subclass(EVENT_TRANSCRIPTION);
 	switch_event_free_subclass(EVENT_TRANSFER);
