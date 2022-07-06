@@ -1,6 +1,6 @@
 /* 
  *
- * mod_google_transcribe.c -- Freeswitch module for real-time transcription using google's gRPC interface
+ * mod_aai_transcribe.c -- Freeswitch module for real-time transcription using google's gRPC interface
  *
  */
 #include "mod_aai_transcribe.h"
@@ -84,16 +84,16 @@ static switch_bool_t capture_callback(switch_media_bug_t *bug, void *user_data, 
 
 	case SWITCH_ABC_TYPE_CLOSE:
 		{
-			switch_log_printf(SWITCH_CHANNEL_LOG, SWITCH_LOG_INFO, "Got SWITCH_ABC_TYPE_CLOSE, calling google_speech_session_cleanup.\n");
+			switch_log_printf(SWITCH_CHANNEL_LOG, SWITCH_LOG_INFO, "Got SWITCH_ABC_TYPE_CLOSE, calling aai_speech_session_cleanup.\n");
 			responseHandler(session, "end_of_transcript");
-			google_speech_session_cleanup(session, 1);
+			aai_speech_session_cleanup(session, 1);
 			switch_log_printf(SWITCH_CHANNEL_LOG, SWITCH_LOG_INFO, "Finished SWITCH_ABC_TYPE_CLOSE.\n");
 		}
 		break;
 	
 	case SWITCH_ABC_TYPE_READ:
 
-		return google_speech_frame(bug, user_data);
+		return aai_speech_frame(bug, user_data);
 		break;
 
 	case SWITCH_ABC_TYPE_WRITE:
@@ -124,8 +124,8 @@ static switch_status_t do_stop(switch_core_session_t *session)
 	switch_media_bug_t *bug = switch_channel_get_private(channel, MY_BUG_NAME);
 
 	if (bug) {
-		switch_log_printf(SWITCH_CHANNEL_LOG, SWITCH_LOG_INFO, "Received user command command, calling google_speech_session_cleanup (possibly to stop prev transcribe)\n");
-		status = google_speech_session_cleanup(session, 0);
+		switch_log_printf(SWITCH_CHANNEL_LOG, SWITCH_LOG_INFO, "Received user command command, calling aai_speech_session_cleanup (possibly to stop prev transcribe)\n");
+		status = aai_speech_session_cleanup(session, 0);
 		switch_log_printf(SWITCH_CHANNEL_LOG, SWITCH_LOG_INFO, "stopped transcription.\n");
 	}
 
@@ -157,12 +157,12 @@ static switch_status_t start_capture2(switch_core_session_t *session, switch_med
 
 	samples_per_second = !strcasecmp(read_impl.iananame, "g722") ? read_impl.actual_samples_per_second : read_impl.samples_per_second;
 
-	if (SWITCH_STATUS_FALSE == google_speech_session_init(session, responseHandler, samples_per_second, flags & SMBF_STEREO ? 2 : 1, lang, interim, single_utterance,
+	if (SWITCH_STATUS_FALSE == aai_speech_session_init(session, responseHandler, samples_per_second, flags & SMBF_STEREO ? 2 : 1, lang, interim, single_utterance,
 	 separate_recognition, max_alternatives, profinity_filter, word_time_offset, punctuation, model, enhanced, hints, play_file, &pUserData)) {
 		switch_log_printf(SWITCH_CHANNEL_LOG, SWITCH_LOG_ERROR, "Error initializing google speech session.\n");
 		return SWITCH_STATUS_FALSE;
 	}
-	if ((status = switch_core_media_bug_add(session, "google_transcribe", NULL, capture_callback, pUserData, 0, flags, &bug)) != SWITCH_STATUS_SUCCESS) {
+	if ((status = switch_core_media_bug_add(session, "aai_transcribe", NULL, capture_callback, pUserData, 0, flags, &bug)) != SWITCH_STATUS_SUCCESS) {
 		return status;
 	}
 
@@ -250,7 +250,7 @@ static switch_status_t start_capture(switch_core_session_t *session, switch_medi
 
 	switch_log_printf(SWITCH_CHANNEL_LOG, SWITCH_LOG_DEBUG, "start_capture - samples_per_second: %d\n", samples_per_second);
 
-	if (SWITCH_STATUS_FALSE == google_speech_session_init(session, responseHandler, samples_per_second, flags & SMBF_STEREO ? 2 : 1, lang, interim, single_utterance,
+	if (SWITCH_STATUS_FALSE == aai_speech_session_init(session, responseHandler, samples_per_second, flags & SMBF_STEREO ? 2 : 1, lang, interim, single_utterance,
 	 separate_recognition, max_alternatives, profanity_filter, word_time_offset, punctuation, model, enhanced, hints, NULL, &pUserData)) {
 		switch_log_printf(SWITCH_CHANNEL_LOG, SWITCH_LOG_ERROR, "Error initializing google speech session.\n");
 		return SWITCH_STATUS_FALSE;
@@ -265,7 +265,7 @@ static switch_status_t start_capture(switch_core_session_t *session, switch_medi
 		switch_log_printf(SWITCH_CHANNEL_LOG, SWITCH_LOG_DEBUG, "start_capture - call media_bug_add bug != NULL\n");
 	}
 
-	if ((status = switch_core_media_bug_add(session, "google_transcribe", NULL, capture_callback, pUserData, 0, flags, &bug)) != SWITCH_STATUS_SUCCESS) {
+	if ((status = switch_core_media_bug_add(session, "aai_transcribe", NULL, capture_callback, pUserData, 0, flags, &bug)) != SWITCH_STATUS_SUCCESS) {
 		return status;
 	}
 	if (bug != NULL)
@@ -439,16 +439,16 @@ SWITCH_MODULE_LOAD_FUNCTION(mod_aai_transcribe_load)
 
 	switch_log_printf(SWITCH_CHANNEL_LOG, SWITCH_LOG_NOTICE, "Google Speech Transcription API loading..\n");
 
-  if (SWITCH_STATUS_FALSE == google_speech_init()) {
+  if (SWITCH_STATUS_FALSE == aai_speech_init()) {
 		switch_log_printf(SWITCH_CHANNEL_LOG, SWITCH_LOG_CRIT, "Failed initializing google speech interface\n");
 	}
 
 	switch_log_printf(SWITCH_CHANNEL_LOG, SWITCH_LOG_NOTICE, "Google Speech Transcription API successfully loaded\n");
 
-	SWITCH_ADD_API(api_interface, "uuid_google_transcribe", "Google Speech Transcription API", transcribe_function, TRANSCRIBE_API_SYNTAX);
-	SWITCH_ADD_API(api_interface, "uuid_google_transcribe2", "Google Speech Transcription API", transcribe2_function, TRANSCRIBE2_API_SYNTAX);
-	switch_console_set_complete("add uuid_google_transcribe start lang-code");
-	switch_console_set_complete("add uuid_google_transcribe stop ");
+	SWITCH_ADD_API(api_interface, "uuid_aai_transcribe", "Google Speech Transcription API", transcribe_function, TRANSCRIBE_API_SYNTAX);
+	SWITCH_ADD_API(api_interface, "uuid_aai_transcribe2", "Google Speech Transcription API", transcribe2_function, TRANSCRIBE2_API_SYNTAX);
+	switch_console_set_complete("add uuid_aai_transcribe start lang-code");
+	switch_console_set_complete("add uuid_aai_transcribe stop ");
 
 	/* indicate that the module should continue to be loaded */
 	return SWITCH_STATUS_SUCCESS;
@@ -456,10 +456,10 @@ SWITCH_MODULE_LOAD_FUNCTION(mod_aai_transcribe_load)
 
 /*
   Called when the system shuts down
-  Macro expands to: switch_status_t mod_google_transcribe_shutdown() */
+  Macro expands to: switch_status_t mod_aai_transcribe_shutdown() */
 SWITCH_MODULE_SHUTDOWN_FUNCTION(mod_aai_transcribe_shutdown)
 {
-	google_speech_cleanup();
+	aai_speech_cleanup();
 	switch_event_free_subclass(TRANSCRIBE_EVENT_RESULTS);
 	switch_event_free_subclass(TRANSCRIBE_EVENT_END_OF_UTTERANCE);
 	switch_event_free_subclass(TRANSCRIBE_EVENT_START_OF_TRANSCRIPT);

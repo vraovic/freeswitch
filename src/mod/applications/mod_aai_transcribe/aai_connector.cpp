@@ -8,7 +8,7 @@
 
 #include "google/cloud/speech/v1p1beta1/cloud_speech.grpc.pb.h"
 
-#include "mod_google_transcribe.h"
+#include "mod_aai_transcribe.h"
 #include "simple_buffer.h"
 
 using google::cloud::speech::v1p1beta1::RecognitionConfig;
@@ -455,7 +455,7 @@ static void *SWITCH_THREAD_FUNC grpc_read_thread(switch_thread_t *thread, void *
 
 extern "C" {
 
-    switch_status_t google_speech_init() {
+    switch_status_t aai_speech_init() {
       const char* gcsServiceKeyFile = std::getenv("GOOGLE_APPLICATION_CREDENTIALS");
       if (gcsServiceKeyFile) {
         try {
@@ -469,10 +469,10 @@ extern "C" {
       return SWITCH_STATUS_SUCCESS;
     }
 
-    switch_status_t google_speech_cleanup() {
+    switch_status_t aai_speech_cleanup() {
       return SWITCH_STATUS_SUCCESS;
     }
-    switch_status_t google_speech_session_init(switch_core_session_t *session, responseHandler_t responseHandler, 
+    switch_status_t aai_speech_session_init(switch_core_session_t *session, responseHandler_t responseHandler, 
           uint32_t samples_per_second, uint32_t channels, char* lang, int interim, int single_utterance,
           int separate_recognition, int max_alternatives, int profanity_filter, int word_time_offset,
           int punctuation, char* model, int enhanced, char* hints, char* play_file, void **ppUserData) {
@@ -563,7 +563,7 @@ extern "C" {
       return SWITCH_STATUS_SUCCESS;
     }
 
-    switch_status_t google_speech_session_cleanup(switch_core_session_t *session, int channelIsClosing) {
+    switch_status_t aai_speech_session_cleanup(switch_core_session_t *session, int channelIsClosing) {
       switch_channel_t *channel = switch_core_session_get_channel(session);
       switch_media_bug_t *bug = (switch_media_bug_t*) switch_channel_get_private(channel, MY_BUG_NAME);
 
@@ -594,10 +594,10 @@ extern "C" {
         if (streamer) {
           streamer->writesDone();
 
-          switch_log_printf(SWITCH_CHANNEL_SESSION_LOG(session), SWITCH_LOG_DEBUG, "google_speech_session_cleanup: GStreamer (%p) waiting for read thread to complete\n", (void*)streamer);
+          switch_log_printf(SWITCH_CHANNEL_SESSION_LOG(session), SWITCH_LOG_DEBUG, "aai_speech_session_cleanup: GStreamer (%p) waiting for read thread to complete\n", (void*)streamer);
           switch_status_t st;
           switch_thread_join(&st, cb->thread);
-          switch_log_printf(SWITCH_CHANNEL_SESSION_LOG(session), SWITCH_LOG_DEBUG, "google_speech_session_cleanup:  GStreamer (%p) read thread completed\n", (void*)streamer);
+          switch_log_printf(SWITCH_CHANNEL_SESSION_LOG(session), SWITCH_LOG_DEBUG, "aai_speech_session_cleanup:  GStreamer (%p) read thread completed\n", (void*)streamer);
 
           delete streamer;
           cb->streamer = NULL;
@@ -614,7 +614,7 @@ extern "C" {
           switch_core_media_bug_remove(session, &bug);
         }
 
-			  switch_log_printf(SWITCH_CHANNEL_SESSION_LOG(session), SWITCH_LOG_DEBUG, "google_speech_session_cleanup: Closed stream\n");
+			  switch_log_printf(SWITCH_CHANNEL_SESSION_LOG(session), SWITCH_LOG_DEBUG, "aai_speech_session_cleanup: Closed stream\n");
 
 			  switch_mutex_unlock(cb->mutex);
 
@@ -626,7 +626,7 @@ extern "C" {
       return SWITCH_STATUS_FALSE;
     }
 
-    switch_bool_t google_speech_frame(switch_media_bug_t *bug, void* user_data) {
+    switch_bool_t aai_speech_frame(switch_media_bug_t *bug, void* user_data) {
     	switch_core_session_t *session = switch_core_media_bug_get_session(bug);
     	struct cap_cb *cb = (struct cap_cb *) user_data;
 		  if (cb->streamer && !cb->end_of_utterance) {
