@@ -67,7 +67,7 @@ int AudioPipe::lws_callback(struct lws *wsi,
           // ap->getBasicAuth(username, password);
           // lwsl_notice("AudioPipe::lws_service_thread LWS_CALLBACK_CLIENT_APPEND_HANDSHAKE_HEADER username: %s, password: xxxxxx\n", username.c_str());
           // if (dch_lws_http_basic_auth_gen(username.c_str(), password.c_str(), b, sizeof(b))) break;
-          memcpy(, apiToken,strlen(apiToken));
+          memcpy(b, apiToken,strlen(apiToken));
           lwsl_notice("AudioPipe::lws_service_thread LWS_CALLBACK_CLIENT_APPEND_HANDSHAKE_HEADER Authorization: %s, afterc copy: %s\n", apiToken.c_str(), b.c_str());
           if (lws_add_http_header_by_token(wsi, WSI_TOKEN_HTTP_AUTHORIZATION, (unsigned char *)b, strlen(b), p, end)) return -1;
         // }
