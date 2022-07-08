@@ -12,6 +12,7 @@
 namespace {
   static const char* basicAuthUser = std::getenv("MOD_AUDIO_FORK_HTTP_AUTH_USER");
   static const char* basicAuthPassword = std::getenv("MOD_AUDIO_FORK_HTTP_AUTH_PASSWORD");
+  static const char* apiToken = std::getenv("MOD_AAI_TRANSCRIPTION_TOKEN");
 
   static const char *requestedTcpKeepaliveSecs = std::getenv("MOD_AUDIO_FORK_TCP_KEEPALIVE_SECS");
   static int nTcpKeepaliveSecs = requestedTcpKeepaliveSecs ? ::atoi(requestedTcpKeepaliveSecs) : 55;
@@ -58,16 +59,18 @@ int AudioPipe::lws_callback(struct lws *wsi,
     case LWS_CALLBACK_CLIENT_APPEND_HANDSHAKE_HEADER:
       {
         AudioPipe* ap = findPendingConnect(wsi);
-        if (ap && ap->hasBasicAuth()) {
+        // if (ap && ap->hasBasicAuth()) {
           unsigned char **p = (unsigned char **)in, *end = (*p) + len;
           char b[128];
           std::string username, password;
 
-          ap->getBasicAuth(username, password);
-          lwsl_notice("AudioPipe::lws_service_thread LWS_CALLBACK_CLIENT_APPEND_HANDSHAKE_HEADER username: %s, password: xxxxxx\n", username.c_str());
-          if (dch_lws_http_basic_auth_gen(username.c_str(), password.c_str(), b, sizeof(b))) break;
+          // ap->getBasicAuth(username, password);
+          // lwsl_notice("AudioPipe::lws_service_thread LWS_CALLBACK_CLIENT_APPEND_HANDSHAKE_HEADER username: %s, password: xxxxxx\n", username.c_str());
+          // if (dch_lws_http_basic_auth_gen(username.c_str(), password.c_str(), b, sizeof(b))) break;
+          memcpy(, apiToken,strlen(apiToken));
+          lwsl_notice("AudioPipe::lws_service_thread LWS_CALLBACK_CLIENT_APPEND_HANDSHAKE_HEADER Authorization: %s, afterc copy: %s\n", apiToken.c_str(), b.c_str());
           if (lws_add_http_header_by_token(wsi, WSI_TOKEN_HTTP_AUTHORIZATION, (unsigned char *)b, strlen(b), p, end)) return -1;
-        }
+        // }
       }
       break;
 
@@ -466,10 +469,10 @@ AudioPipe::AudioPipe(const char* uuid, const char* host, unsigned int port, cons
   m_audio_buffer_write_offset(LWS_PRE), m_recv_buf(nullptr), m_recv_buf_ptr(nullptr), 
   m_state(LWS_CLIENT_IDLE), m_wsi(nullptr), m_vhd(nullptr), m_callback(callback) {
 
-  if (username && password) {
-    m_username.assign(username);
-    m_password.assign(password);
-  }
+  // if (username && password) {
+  //   m_username.assign(username);
+  //   m_password.assign(password);
+  // }
 
   m_audio_buffer = new uint8_t[m_audio_buffer_max_len];
 }
@@ -498,6 +501,7 @@ bool AudioPipe::connect_client(struct lws_per_vhost_data *vhd) {
   i.ssl_connection = m_sslFlags;
   i.protocol = protocolName.c_str();
   i.pwsi = &(m_wsi);
+  i.method = NULL;
 
   m_state = LWS_CLIENT_CONNECTING;
   m_vhd = vhd;
