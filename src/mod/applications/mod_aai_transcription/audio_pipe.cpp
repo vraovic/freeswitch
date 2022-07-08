@@ -12,11 +12,11 @@
 namespace {
   static const char* basicAuthUser = std::getenv("MOD_AUDIO_FORK_HTTP_AUTH_USER");
   static const char* basicAuthPassword = std::getenv("MOD_AUDIO_FORK_HTTP_AUTH_PASSWORD");
-  static const char* apiToken = std::getenv("MOD_AAI_TRANSCRIPTION_TOKEN");
 
   static const char *requestedTcpKeepaliveSecs = std::getenv("MOD_AUDIO_FORK_TCP_KEEPALIVE_SECS");
   static int nTcpKeepaliveSecs = requestedTcpKeepaliveSecs ? ::atoi(requestedTcpKeepaliveSecs) : 55;
 }
+  static const char* apiToken = std::getenv("MOD_AAI_TRANSCRIPTION_TOKEN");
 
 // remove once we update to lws with this helper
 static int dch_lws_http_basic_auth_gen(const char *user, const char *pw, char *buf, size_t len) {
@@ -68,7 +68,7 @@ int AudioPipe::lws_callback(struct lws *wsi,
           // lwsl_notice("AudioPipe::lws_service_thread LWS_CALLBACK_CLIENT_APPEND_HANDSHAKE_HEADER username: %s, password: xxxxxx\n", username.c_str());
           // if (dch_lws_http_basic_auth_gen(username.c_str(), password.c_str(), b, sizeof(b))) break;
           memcpy(b, apiToken,strlen(apiToken));
-          lwsl_notice("AudioPipe::lws_service_thread LWS_CALLBACK_CLIENT_APPEND_HANDSHAKE_HEADER Authorization: %s, afterc copy: %s\n", apiToken.c_str(), b.c_str());
+          lwsl_notice("AudioPipe::lws_service_thread LWS_CALLBACK_CLIENT_APPEND_HANDSHAKE_HEADER Authorization: %s, after copy: %s\n", apiToken, b);
           if (lws_add_http_header_by_token(wsi, WSI_TOKEN_HTTP_AUTHORIZATION, (unsigned char *)b, strlen(b), p, end)) return -1;
         // }
       }
