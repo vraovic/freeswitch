@@ -205,19 +205,14 @@ namespace {
     }
   }
   switch_status_t aai_data_init(private_t *tech_pvt, switch_core_session_t *session, char * host, 
-    unsigned int port, char* path, int sslFlags, int sampling, int desiredSampling, int channels, char* metadata, responseHandler_t responseHandler) {
+    unsigned int port, char* path, int sslFlags, int sampling, int desiredSampling, int channels, responseHandler_t responseHandler) {
 
-    const char* username = nullptr;
-    const char* password = nullptr;
+    const char* api_token = nullptr;
     int err;
     switch_codec_implementation_t read_impl;
     switch_channel_t *channel = switch_core_session_get_channel(session);
 
     switch_core_session_get_read_impl(session, &read_impl);
-  
-    if (username = switch_channel_get_variable(channel, "MOD_AUDIO_BASIC_AUTH_USERNAME")) {
-      password = switch_channel_get_variable(channel, "MOD_AUDIO_BASIC_AUTH_PASSWORD");
-    }
 
     memset(tech_pvt, 0, sizeof(private_t));
   
@@ -233,14 +228,13 @@ namespace {
     tech_pvt->buffer_overrun_notified = 0;
     tech_pvt->audio_paused = 0;
     tech_pvt->graceful_shutdown = 0;
-    if (metadata) strncpy(tech_pvt->initialMetadata, metadata, MAX_METADATA_LEN);
     
     size_t buflen = LWS_PRE + (FRAME_SIZE_8000 * desiredSampling / 8000 * channels * 1000 / RTP_PACKETIZATION_PERIOD * nAudioBufferSecs);
 
     switch_log_printf(SWITCH_CHANNEL_SESSION_LOG(session), SWITCH_LOG_DEBUG, "aai_data_init - buflen: %u \n", buflen);
 
     AudioPipe* ap = new AudioPipe(tech_pvt->sessionId, host, port, path, sslFlags, 
-      buflen, read_impl.decoded_bytes_per_packet, username, password, eventCallback);
+      buflen, read_impl.decoded_bytes_per_packet, eventCallback);
     if (!ap) {
       switch_log_printf(SWITCH_CHANNEL_SESSION_LOG(session), SWITCH_LOG_ERROR, "Error allocating AudioPipe\n");
       return SWITCH_STATUS_FALSE;
@@ -397,7 +391,6 @@ extern "C" {
               int sampling,
               int sslFlags,
               int channels,
-              char* metadata, 
               void **ppUserData)
   {    	
     int err;
@@ -408,7 +401,7 @@ extern "C" {
       switch_log_printf(SWITCH_CHANNEL_SESSION_LOG(session), SWITCH_LOG_ERROR, "error allocating memory!\n");
       return SWITCH_STATUS_FALSE;
     }
-    if (SWITCH_STATUS_SUCCESS != aai_data_init(tech_pvt, session, host, port, path, sslFlags, samples_per_second, sampling, channels, metadata, responseHandler)) {
+    if (SWITCH_STATUS_SUCCESS != aai_data_init(tech_pvt, session, host, port, path, sslFlags, samples_per_second, sampling, channels, responseHandler)) {
       destroy_tech_pvt(tech_pvt);
       return SWITCH_STATUS_FALSE;
     }

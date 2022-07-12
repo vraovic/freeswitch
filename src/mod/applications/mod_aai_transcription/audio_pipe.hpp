@@ -39,7 +39,7 @@ public:
 
   // constructor
   AudioPipe(const char* uuid, const char* host, unsigned int port, const char* path, int sslFlags, 
-    size_t bufLen, size_t minFreespace, const char* username, const char* password, notifyHandler_t callback);
+    size_t bufLen, size_t minFreespace, notifyHandler_t callback);
   ~AudioPipe();  
 
   LwsState_t getLwsState(void) { return m_state; }
@@ -64,14 +64,6 @@ public:
     m_audio_mutex.lock();
   }
   void unlockAudioBuffer(void) ;
-  bool hasBasicAuth(void) {
-    return !m_username.empty() && !m_password.empty();
-  }
-
-  void getBasicAuth(std::string& username, std::string& password) {
-    username = m_username;
-    password = m_password;
-  }
 
   void do_graceful_shutdown();
   bool isGracefulShutdown(void) {
@@ -133,8 +125,7 @@ private:
   struct lws_per_vhost_data* m_vhd;
   notifyHandler_t m_callback;
   log_emit_function m_logger;
-  std::string m_username;
-  std::string m_password;
+  std::string m_api_token;
   bool m_gracefulShutdown;
 };
 

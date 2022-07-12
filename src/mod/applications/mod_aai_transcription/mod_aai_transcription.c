@@ -59,7 +59,6 @@ static switch_status_t start_capture(switch_core_session_t *session,
         char* path,
         int sampling,
         int sslFlags,
-	      char* metadata, 
         const char* base)
 {
 	switch_channel_t *channel = switch_core_session_get_channel(session);
@@ -88,7 +87,7 @@ static switch_status_t start_capture(switch_core_session_t *session,
 
 	switch_log_printf(SWITCH_CHANNEL_SESSION_LOG(session), SWITCH_LOG_DEBUG, "calling aai_session_init.\n");
 	if (SWITCH_STATUS_FALSE == aai_session_init(session, responseHandler, read_codec->implementation->actual_samples_per_second, 
-		host, port, path, sampling, sslFlags, channels, metadata, &pUserData)) {
+		host, port, path, sampling, sslFlags, channels, &pUserData)) {
 		switch_log_printf(SWITCH_CHANNEL_SESSION_LOG(session), SWITCH_LOG_ERROR, "Error initializing mod_aai_transcription session.\n");
 		return SWITCH_STATUS_FALSE;
 	}
@@ -325,7 +324,7 @@ SWITCH_STANDARD_API(aai_transcription_function)
         		}
         		else 
 				{
-          			status = start_capture(lsession, flags, host, port, path, sampling, sslFlags, metadata, "mod_aai_transcription");
+          			status = start_capture(lsession, flags, host, port, path, sampling, sslFlags, "mod_aai_transcription");
         		}
 			}
       		else 
