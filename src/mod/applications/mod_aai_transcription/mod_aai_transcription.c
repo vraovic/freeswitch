@@ -268,17 +268,17 @@ SWITCH_STANDARD_API(aai_transcription_function)
 		argc = switch_separate_string(mycmd, ' ', argv, (sizeof(argv) / sizeof(argv[0])));
 	}
 	assert(cmd);
-	switch_log_printf(SWITCH_CHANNEL_SESSION_LOG(session), SWITCH_LOG_DEBUG, "mod_aai_transcription cmd: %s\n", cmd);
+	switch_log_printf(SWITCH_CHANNEL_SESSION_LOG(session), SWITCH_LOG_DEBUG, "mod_aai_transcription cmd: %s argc:%u\n", cmd, argc);
 
 
-	if (zstr(cmd) || argc < 2 ||
-		(0 == strcmp(argv[1], "start") && argc < 4)) {
+	// if (zstr(cmd) || argc < 2 ||
+	// 	(0 == strcmp(argv[1], "start") && argc < 5)) {
 
-		switch_log_printf(SWITCH_CHANNEL_SESSION_LOG(session), SWITCH_LOG_ERROR, "Error with command %s %s %s.\n", cmd, argv[0], argv[1]);
-		stream->write_function(stream, "-USAGE: %s\n", AAI_API_SYNTAX);
-		goto done;
-	} 
-	else 
+	// 	switch_log_printf(SWITCH_CHANNEL_SESSION_LOG(session), SWITCH_LOG_ERROR, "Error with command %s %s %s.\n", cmd, argv[0], argv[1]);
+	// 	stream->write_function(stream, "-USAGE: %s\n", AAI_API_SYNTAX);
+	// 	goto done;
+	// } 
+	// else 
 	{
 		switch_core_session_t *lsession = NULL;
 
