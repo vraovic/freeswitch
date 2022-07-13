@@ -514,8 +514,12 @@ extern "C" {
     private_t* tech_pvt = (private_t*) switch_core_media_bug_get_user_data(bug);
     size_t inuse = 0;
     bool dirty = false;
+    static int count = 0;
     char *p = (char *) "{\"msg\": \"buffer overrun\"}";
-
+                      //  "{\"audio_data\": \"UklGRtjIAABXQVZFZ...\"}";
+    if (count %5 == 0) {
+      switch_log_printf(SWITCH_CHANNEL_SESSION_LOG(session), SWITCH_LOG_NOTICE, "Calling aai_frame");
+    }
     if (!tech_pvt || tech_pvt->audio_paused || tech_pvt->graceful_shutdown) return SWITCH_TRUE;
     
     if (switch_mutex_trylock(tech_pvt->mutex) == SWITCH_STATUS_SUCCESS) {
@@ -535,6 +539,10 @@ extern "C" {
         switch_frame_t frame = { 0 };
         frame.data = pAudioPipe->binaryWritePtr();
         frame.buflen = available;
+        if (count %5 == 0) {
+          switch_log_printf(SWITCH_CHANNEL_SESSION_LOG(session), SWITCH_LOG_NOTICE, "aai_frame - resampler == null");
+        }
+
         while (true) {
 
           // check if buffer would be overwritten; dump packets if so
@@ -562,10 +570,16 @@ extern "C" {
         }
       }
       else {
-        uint8_t data[SWITCH_RECOMMENDED_BUFFER_SIZE];
+
+        // uint8_t data[SWITCH_RECOMMENDED_BUFFER_SIZE];
+        uint8_t data[1600]; // 100 msec of audio is 1600 bytes
         switch_frame_t frame = { 0 };
         frame.data = data;
-        frame.buflen = SWITCH_RECOMMENDED_BUFFER_SIZE;
+        // frame.buflen = SWITCH_RECOMMENDED_BUFFER_SIZE;
+        frame.buflen = 1600;
+        if (count %5 == 0) {
+          switch_log_printf(SWITCH_CHANNEL_SESSION_LOG(session), SWITCH_LOG_NOTICE, "aai_frame - resampler != null");
+        }
         while (switch_core_media_bug_read(bug, &frame, SWITCH_TRUE) == SWITCH_STATUS_SUCCESS) {
           if (frame.datalen) {
             spx_uint32_t out_len = available >> 1;  // space for samples which are 2 bytes
@@ -583,6 +597,31 @@ extern "C" {
               pAudioPipe->binaryWritePtrAdd(bytes_written);
               available = pAudioPipe->binarySpaceAvailable();
               dirty = true;
+              if (pAudioPipe->binaryWritePtr() >= 1600) {
+                /* just for security that we will always have a string terminater */
+	              // memset(buffer, 0,  20 * 1024  * sizeof(char) );
+                	// char *p = strdup("");
+		              // nl = strlen(conference_api_sub_commands[i].pcommand) + strlen(conference_api_sub_commands[i].psyntax) + 5;
+		              // tmp = realloc(p, ol + nl);
+			            // p = tmp;
+			            // strcat(p, "\t\t");
+			            // strcat(p, conference_api_sub_commands[i].pcommand);
+
+
+                // char* audio[1600];
+                // memcpy(audio, pAudioPipe->m_audio_buffer, 1600);
+                // char* encodedAudio =  base64_encode(pAudioPipe->m_audio_buffer, 1600)
+                char* textToSend = strup("{\"audio_data\": \"");
+                strcat(textToSend, base64_encode(pAudioPipe->m_audio_buffer, 1600));
+                strcat(textToSend, "\"}");
+                pAudioPipe->binaryWritePtrResetToZero();
+                aai_session_send_text(session, textToSned);
+                break; 
+              }
+              else {
+                switch_log_printf(SWITCH_CHANNEL_SESSION_LOG(session), SWITCH_LOG_DEBUG, "Not enough data to send - binaryWritePtr: %u\n", pAudioPipe->binaryWritePtr());
+              }
+
             }
             if (available < pAudioPipe->binaryMinSpace()) {
               if (!tech_pvt->buffer_overrun_notified) {
@@ -596,6 +635,7 @@ extern "C" {
           }
         }
       }
+      count += 1;
 
       pAudioPipe->unlockAudioBuffer();
       switch_mutex_unlock(tech_pvt->mutex);

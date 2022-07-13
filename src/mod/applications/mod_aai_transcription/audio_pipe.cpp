@@ -376,6 +376,19 @@ void AudioPipe::addPendingWrite(AudioPipe* ap) {
   lws_cancel_service(ap->m_vhd->context);
 }
 
+// Python code to encode audio
+
+// print("Sending messages ...")
+//        async def send():
+//            while True:
+//                try:
+//                    data = stream.read(FRAMES_PER_BUFFER)
+//                    data = base64.b64encode(data).decode("utf-8")
+//                    json_data = json.dumps({"audio_data":str(data)})
+//                    await _ws.send(json_data)
+//                except websockets.exceptions.ConnectionClosedError as e:
+
+
 bool AudioPipe::lws_service_thread(unsigned int nServiceThread) {
   struct lws_context_creation_info info;
 
@@ -466,6 +479,9 @@ AudioPipe::AudioPipe(const char* uuid, const char* host, unsigned int port, cons
   m_state(LWS_CLIENT_IDLE), m_wsi(nullptr), m_vhd(nullptr), m_callback(callback) {
 
   m_audio_buffer = new uint8_t[m_audio_buffer_max_len];
+  if (apiToken) {
+    m_api_token.assign(apiToken);
+  }
 }
 AudioPipe::~AudioPipe() {
   if (m_audio_buffer) delete [] m_audio_buffer;
@@ -513,7 +529,7 @@ void AudioPipe::bufferForSending(const char* text) {
 }
 
 void AudioPipe::unlockAudioBuffer() {
-  if (m_audio_buffer_write_offset > LWS_PRE) addPendingWrite(this);
+  // if (m_audio_buffer_write_offset > LWS_PRE) addPendingWrite(this);
   m_audio_mutex.unlock();
 }
 

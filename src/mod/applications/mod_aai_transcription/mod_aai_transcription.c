@@ -28,6 +28,7 @@ static void responseHandler(switch_core_session_t* session, const char * eventNa
 static switch_bool_t capture_callback(switch_media_bug_t *bug, void *user_data, switch_abc_type_t type)
 {
 	switch_core_session_t *session = switch_core_media_bug_get_session(bug);
+	static int count = 0;
 
 	switch (type) {
 	case SWITCH_ABC_TYPE_INIT:
@@ -41,6 +42,11 @@ static switch_bool_t capture_callback(switch_media_bug_t *bug, void *user_data, 
 		break;
 	
 	case SWITCH_ABC_TYPE_READ:
+		switch_log_printf(SWITCH_CHANNEL_SESSION_LOG(session), SWITCH_LOG_INFO, "Got SWITCH_ABC_TYPE_CLOSE.\n");
+		if (count % 10 == 0) {
+			switch_log_printf(SWITCH_CHANNEL_SESSION_LOG(session), SWITCH_LOG_INFO, "AAI - capture_callback is called\n");
+			count += 1;
+		}
 		return aai_frame(session, bug);
 		break;
 
