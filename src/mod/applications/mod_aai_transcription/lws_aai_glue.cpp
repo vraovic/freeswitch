@@ -597,7 +597,7 @@ extern "C" {
               pAudioPipe->binaryWritePtrAdd(bytes_written);
               available = pAudioPipe->binarySpaceAvailable();
               dirty = true;
-              if (pAudioPipe->binaryWritePtr() >= 1600) {
+              if (pAudioPipe->binarySpaceSize) >= 1600) {
                 /* just for security that we will always have a string terminater */
 	              // memset(buffer, 0,  20 * 1024  * sizeof(char) );
                 	// char *p = strdup("");
@@ -611,11 +611,11 @@ extern "C" {
                 // char* audio[1600];
                 // memcpy(audio, pAudioPipe->m_audio_buffer, 1600);
                 // char* encodedAudio =  base64_encode(pAudioPipe->m_audio_buffer, 1600)
-                char* textToSend = strup("{\"audio_data\": \"");
+                char* textToSend = strdup("{\"audio_data\": \"");
                 strcat(textToSend, base64_encode(pAudioPipe->m_audio_buffer, 1600));
                 strcat(textToSend, "\"}");
                 pAudioPipe->binaryWritePtrResetToZero();
-                aai_session_send_text(session, textToSned);
+                aai_session_send_text(session, textToSend);
                 break; 
               }
               else {
