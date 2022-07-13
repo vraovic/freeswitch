@@ -66,9 +66,8 @@ public:
   void lockAudioBuffer(void) {
     m_audio_mutex.lock();
   }
-  std::string base64EncodedAudio(void) {
-    return drachtio::base64_encode(m_audio_buffer, 1600);
-  }
+  std::string base64EncodedAudio();
+  
   void unlockAudioBuffer(void) ;
 
   void do_graceful_shutdown();

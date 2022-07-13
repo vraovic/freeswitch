@@ -1,4 +1,5 @@
 #include "audio_pipe.hpp"
+#include "base64.hpp"
 
 #include <thread>
 #include <cassert>
@@ -542,3 +543,8 @@ void AudioPipe::do_graceful_shutdown() {
   m_gracefulShutdown = true;
   addPendingWrite(this);
 }
+
+std::string AudioPipe::base64EncodedAudio() {
+  return drachtio::base64_encode(m_audio_buffer, 1600);
+}
+
