@@ -571,12 +571,13 @@ extern "C" {
       }
       else {
 
-        // uint8_t data[SWITCH_RECOMMENDED_BUFFER_SIZE];
-        uint8_t data[1600]; // 100 msec of audio is 1600 bytes
+        uint8_t data[SWITCH_RECOMMENDED_BUFFER_SIZE];
+        // uint8_t data[1600]; // 100 msec of audio is 1600 bytes
         switch_frame_t frame = { 0 };
         frame.data = data;
-        // frame.buflen = SWITCH_RECOMMENDED_BUFFER_SIZE;
-        frame.buflen = 1600;
+        frame.buflen = SWITCH_RECOMMENDED_BUFFER_SIZE;
+        // frame.buflen = 1600;
+
         if (count %5 == 0) {
           switch_log_printf(SWITCH_CHANNEL_SESSION_LOG(session), SWITCH_LOG_NOTICE, "aai_frame - resampler != null");
         }
@@ -600,12 +601,13 @@ extern "C" {
             if (out_len > 0) {
               // bytes written = num samples * 2 * num channels
               size_t bytes_written = out_len << tech_pvt->channels;
-            if (count %5 == 0) {
-              switch_log_printf(SWITCH_CHANNEL_SESSION_LOG(session), SWITCH_LOG_NOTICE, "aai_frame - bytes_written:%u", bytes_written);
-            }
               pAudioPipe->binaryWritePtrAdd(bytes_written);
               available = pAudioPipe->binarySpaceAvailable();
               dirty = true;
+              if (count %5 == 0) {
+                switch_log_printf(SWITCH_CHANNEL_SESSION_LOG(session), SWITCH_LOG_NOTICE, "aai_frame - bytes_written:%u, available:%u, audioBufferSize: %u", bytes_written, available, pAudioPipe->binarySpaceSize());
+              }
+
               if (pAudioPipe->binarySpaceSize() >= 1600) {
                 /* just for security that we will always have a string terminater */
 	              // memset(buffer, 0,  20 * 1024  * sizeof(char) );
