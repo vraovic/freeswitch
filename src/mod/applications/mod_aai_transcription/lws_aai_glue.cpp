@@ -649,6 +649,8 @@ extern "C" {
       pAudioPipe->unlockAudioBuffer();
       switch_mutex_unlock(tech_pvt->mutex);
     }
+    switch_log_printf(SWITCH_CHANNEL_SESSION_LOG(session), SWITCH_LOG_DEBUG, "EXIT aai_frame \n");
+
     return SWITCH_TRUE;
   }
 
