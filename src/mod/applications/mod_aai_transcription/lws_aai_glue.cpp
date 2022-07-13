@@ -402,7 +402,7 @@ extern "C" {
       return SWITCH_STATUS_FALSE;
     }
 
-    switch_log_printf(SWITCH_CHANNEL_SESSION_LOG(session), SWITCH_LOG_DEBUG, "(%u) - aai_session_init - samples_per_second:%u,sampling:%d,channels:%d \n", id, samples_per_second,sampling, channels);
+    switch_log_printf(SWITCH_CHANNEL_SESSION_LOG(session), SWITCH_LOG_DEBUG, "aai_session_init - samples_per_second:%u,sampling:%d,channels:%d \n", samples_per_second,sampling, channels);
 
     if (SWITCH_STATUS_SUCCESS != aai_data_init(tech_pvt, session, host, port, path, sslFlags, samples_per_second, sampling, channels, responseHandler)) {
       destroy_tech_pvt(tech_pvt);
