@@ -625,7 +625,7 @@ extern "C" {
                 switch_log_printf(SWITCH_CHANNEL_SESSION_LOG(session), SWITCH_LOG_NOTICE, "aai_frame - base64_encode audio - textToSend:%s, len:%u", textToSend, strlen(textToSend));
                 pAudioPipe->binaryWritePtrSubtract(1600);
                 aai_session_send_text(session, textToSend);
-                break; 
+                // break; 
               }
               else {
                 switch_log_printf(SWITCH_CHANNEL_SESSION_LOG(session), SWITCH_LOG_DEBUG, "Not enough data to send - binarySpaceSize: %u\n", pAudioPipe->binarySpaceSize());
