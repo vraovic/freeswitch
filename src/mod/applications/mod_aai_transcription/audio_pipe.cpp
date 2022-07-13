@@ -545,13 +545,13 @@ void AudioPipe::do_graceful_shutdown() {
 }
 
 std::string AudioPipe::base64EncodedAudio() {
-  return drachtio::base64_encode(binaryReadPtr(), 1600);
+  return drachtio::base64_encode((unsigned char*)binaryReadPtr(), 1600);
 }
 
-void binaryWritePtrSubtract(size_t len) {
- lwsl_notice("binaryWritePtrSubtract - m_audio_buffer_write_offet: %u, len:%u\n", m_audio_buffer_write_offet,len);
+void AudioPipe::binaryWritePtrSubtract(size_t len) {
+ lwsl_notice("binaryWritePtrSubtract - m_audio_buffer_write_offset: %u, len:%u\n", m_audio_buffer_write_offset,len);
 
-  if ((m_audio_buffer_write_offet - LWS_PRE) > len ) {
+  if ((m_audio_buffer_write_offset - LWS_PRE) > len ) {
     memcpy(m_audio_buffer + LWS_PRE, m_audio_buffer + LWS_PRE + len, m_audio_buffer_write_offset - len);
   }
   m_audio_buffer_write_offset -= len;

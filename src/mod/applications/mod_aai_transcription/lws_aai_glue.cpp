@@ -602,7 +602,7 @@ extern "C" {
               dirty = true;
               switch_log_printf(SWITCH_CHANNEL_SESSION_LOG(session), SWITCH_LOG_NOTICE, "aai_frame - bytes_written:%u, available:%u, audioBufferSize: %u", bytes_written, available, pAudioPipe->binarySpaceSize());
 
-              if (pAudioPipe->binarySpaceSize() >= 1600) {
+              if (pAudioPipe->binarySpaceSize() > 1600) {
                 /* just for security that we will always have a string terminater */
 	              // memset(buffer, 0,  20 * 1024  * sizeof(char) );
                 	// char *p = strdup("");
@@ -625,7 +625,7 @@ extern "C" {
                 break; 
               }
               else {
-                switch_log_printf(SWITCH_CHANNEL_SESSION_LOG(session), SWITCH_LOG_DEBUG, "Not enough data to send - binaryWritePtr: %u\n", pAudioPipe->binaryWritePtr());
+                switch_log_printf(SWITCH_CHANNEL_SESSION_LOG(session), SWITCH_LOG_DEBUG, "Not enough data to send - binarySpaceSize: %u\n", pAudioPipe->binarySpaceSize());
               }
 
             }
