@@ -471,7 +471,10 @@ extern "C" {
     }
     private_t* tech_pvt = (private_t*) switch_core_media_bug_get_user_data(bug);
   
-    if (!tech_pvt) return SWITCH_STATUS_FALSE;
+    if (!tech_pvt) {
+      switch_log_printf(SWITCH_CHANNEL_SESSION_LOG(session), SWITCH_LOG_ERROR, "aai_session_send_text failed because no tech_pvt\n");
+      return SWITCH_STATUS_FALSE;
+    }
     AudioPipe *pAudioPipe = static_cast<AudioPipe *>(tech_pvt->pAudioPipe);
     if (pAudioPipe && text) pAudioPipe->bufferForSending(text);
 
@@ -596,7 +599,7 @@ extern "C" {
 
             if (out_len > 0) {
               // bytes written = num channels * 2 * num channels
-              size_t bytes_written = out_len << tech_pvt->channels;
+              size_t bytes_written = out_len ;//<< tech_pvt->channels;
               pAudioPipe->binaryWritePtrAdd(bytes_written);
               available = pAudioPipe->binarySpaceAvailable();
               dirty = true;

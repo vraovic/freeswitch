@@ -552,7 +552,10 @@ void AudioPipe::binaryWritePtrSubtract(size_t len) {
  lwsl_notice("binaryWritePtrSubtract - m_audio_buffer_write_offset: %u, len:%u\n", m_audio_buffer_write_offset,len);
 
   if ((m_audio_buffer_write_offset - LWS_PRE) > len ) {
-    memcpy(m_audio_buffer + LWS_PRE, m_audio_buffer + LWS_PRE + len, m_audio_buffer_write_offset - len);
+    uint8_t * buffer[m_audio_buffer_write_offset - len + 1];
+    memcpy(buffer, m_audio_buffer + LWS_PRE + len, m_audio_buffer_write_offset - len);
+    memcpy(m_audio_buffer + LWS_PRE, buffer, m_audio_buffer_write_offset - len);
+    // memcpy(m_audio_buffer + LWS_PRE, m_audio_buffer + LWS_PRE + len, m_audio_buffer_write_offset - len);
   }
   m_audio_buffer_write_offset -= len;
 }
