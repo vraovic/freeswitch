@@ -612,7 +612,7 @@ extern "C" {
                 // memcpy(audio, pAudioPipe->m_audio_buffer, 1600);
                 // char* encodedAudio =  base64_encode(pAudioPipe->m_audio_buffer, 1600)
                 char* textToSend = strdup("{\"audio_data\": \"");
-                strcat(textToSend, drachtio::base64_encode(pAudioPipe->m_audio_buffer, 1600));
+                strcat(textToSend, pAudioPipe->base64EncodedAudio().c_str());
                 strcat(textToSend, "\"}");
                 if (count %5 == 0) {
                   switch_log_printf(SWITCH_CHANNEL_SESSION_LOG(session), SWITCH_LOG_NOTICE, "aai_frame - base64_encode audio - textToSend:%s, len:%u", textToSend, strlen(textToSend));
