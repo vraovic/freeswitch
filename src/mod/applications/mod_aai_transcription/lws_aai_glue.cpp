@@ -597,7 +597,7 @@ extern "C" {
               pAudioPipe->binaryWritePtrAdd(bytes_written);
               available = pAudioPipe->binarySpaceAvailable();
               dirty = true;
-              if (pAudioPipe->binarySpaceSize) >= 1600) {
+              if (pAudioPipe->binarySpaceSize()) >= 1600) {
                 /* just for security that we will always have a string terminater */
 	              // memset(buffer, 0,  20 * 1024  * sizeof(char) );
                 	// char *p = strdup("");
