@@ -42,7 +42,6 @@ static switch_bool_t capture_callback(switch_media_bug_t *bug, void *user_data, 
 		break;
 	
 	case SWITCH_ABC_TYPE_READ:
-		switch_log_printf(SWITCH_CHANNEL_SESSION_LOG(session), SWITCH_LOG_INFO, "Got SWITCH_ABC_TYPE_CLOSE.\n");
 		if (count % 10 == 0) {
 			switch_log_printf(SWITCH_CHANNEL_SESSION_LOG(session), SWITCH_LOG_INFO, "AAI - capture_callback is called\n");
 			count += 1;
@@ -73,7 +72,8 @@ static switch_status_t start_capture(switch_core_session_t *session,
 	switch_codec_t* read_codec;
 
 	void *pUserData = NULL;
-  int channels = (flags & SMBF_STEREO) ? 2 : 1;
+//   int channels = (flags & SMBF_STEREO) ? 2 : 1;
+  	int channels = 1;
 
 	switch_log_printf(SWITCH_CHANNEL_SESSION_LOG(session), SWITCH_LOG_INFO, 
     "mod_aai_transcription: streaming %d sampling to %s path %s port %d tls: %s.\n", 
