@@ -31,6 +31,7 @@ namespace {
   static unsigned int nServiceThreads = std::max(1, std::min(requestedNumServiceThreads ? ::atoi(requestedNumServiceThreads) : 1, 5));
   static unsigned int idxCallCount = 0;
   static uint32_t playCount = 0;
+  static char textToSend[10000];
 
   void processIncomingMessage(private_t* tech_pvt, switch_core_session_t* session, const char* message) {
     std::string msg = message;
@@ -620,7 +621,6 @@ extern "C" {
                 // char* audio[AAI_TRANSCRIPTION_FRAME_SIZE];
                 // memcpy(audio, pAudioPipe->m_audio_buffer, AAI_TRANSCRIPTION_FRAME_SIZE);
                 // char* encodedAudio =  base64_encode(pAudioPipe->m_audio_buffer, AAI_TRANSCRIPTION_FRAME_SIZE)
-                char textToSend[10000];
                 memset(textToSend, '\0', sizeof(textToSend));
                 strcat(textToSend, "{\"audio_data\": \"");
                 strcat(textToSend, pAudioPipe->base64EncodedAudio(AAI_TRANSCRIPTION_FRAME_SIZE).c_str());
@@ -628,7 +628,7 @@ extern "C" {
                 switch_log_printf(SWITCH_CHANNEL_SESSION_LOG(session), SWITCH_LOG_NOTICE, "aai_frame - base64_encode audio - textToSend:%s, len:%u", textToSend, strlen(textToSend));
                 pAudioPipe->binaryWritePtrSubtract(AAI_TRANSCRIPTION_FRAME_SIZE);
                 aai_session_send_text(session, textToSend);
-                break; 
+                // break; 
               }
               else {
                 switch_log_printf(SWITCH_CHANNEL_SESSION_LOG(session), SWITCH_LOG_DEBUG, "Not enough data to send - binarySpaceSize: %u\n", pAudioPipe->binarySpaceSize());
