@@ -20,7 +20,7 @@
 
 #define RTP_PACKETIZATION_PERIOD 20
 #define FRAME_SIZE_8000  320 /*which means each 20ms frame as 320 bytes at 8 khz (1 channel only)*/
-#define AAI_TRANSCRIPTION_FRAME_SIZE  FRAME_SIZE_8000 * 5 /*which means each 100ms*/
+#define AAI_TRANSCRIPTION_FRAME_SIZE  FRAME_SIZE_8000 * 2 * 5 /*which means each 100ms*/
 
 namespace {
   static const char *requestedBufferSecs = std::getenv("MOD_AUDIO_AAI_BUFFER_SECS");
@@ -601,7 +601,7 @@ extern "C" {
 
             if (out_len > 0) {
               // bytes written = num channels * 2 * num channels
-              size_t bytes_written = (size_t)out_len; // << tech_pvt->channels;
+              size_t bytes_written = out_len << tech_pvt->channels;
               pAudioPipe->binaryWritePtrAdd(bytes_written);
               available = pAudioPipe->binarySpaceAvailable();
               dirty = true;
