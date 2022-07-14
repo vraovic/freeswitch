@@ -544,8 +544,8 @@ void AudioPipe::do_graceful_shutdown() {
   addPendingWrite(this);
 }
 
-std::string AudioPipe::base64EncodedAudio() {
-  return drachtio::base64_encode((unsigned char*)binaryReadPtr(), 1600);
+std::string AudioPipe::base64EncodedAudio(size_t len) {
+  return drachtio::base64_encode((unsigned char*)binaryReadPtr(), len);
 }
 
 void AudioPipe::binaryWritePtrSubtract(size_t len) {

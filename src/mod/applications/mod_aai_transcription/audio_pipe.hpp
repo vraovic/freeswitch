@@ -71,7 +71,7 @@ public:
   void lockAudioBuffer(void) {
     m_audio_mutex.lock();
   }
-  std::string base64EncodedAudio();
+  std::string base64EncodedAudio(size_t len);
   
   void unlockAudioBuffer(void) ;
 

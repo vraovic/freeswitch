@@ -20,6 +20,7 @@
 
 #define RTP_PACKETIZATION_PERIOD 20
 #define FRAME_SIZE_8000  320 /*which means each 20ms frame as 320 bytes at 8 khz (1 channel only)*/
+#define AAI_TRANSCRIPTION_FRAME_SIZE  FRAME_SIZE_8000 * 2 * 5 /*which means each 100ms*/
 
 namespace {
   static const char *requestedBufferSecs = std::getenv("MOD_AUDIO_AAI_BUFFER_SECS");
@@ -576,11 +577,11 @@ extern "C" {
       else {
 
         uint8_t data[SWITCH_RECOMMENDED_BUFFER_SIZE];
-        // uint8_t data[1600]; // 100 msec of audio is 1600 bytes
+        // uint8_t data[AAI_TRANSCRIPTION_FRAME_SIZE]; // 100 msec of audio
         switch_frame_t frame = { 0 };
         frame.data = data;
         frame.buflen = SWITCH_RECOMMENDED_BUFFER_SIZE;
-        // frame.buflen = 1600;
+        // frame.buflen = AAI_TRANSCRIPTION_FRAME_SIZE;
 
         // switch_log_printf(SWITCH_CHANNEL_SESSION_LOG(session), SWITCH_LOG_NOTICE, "aai_frame - resampler != null");
 
@@ -595,17 +596,17 @@ extern "C" {
               (spx_uint32_t *) &in_len, 
               (spx_int16_t *) ((char *) pAudioPipe->binaryWritePtr()),
               &out_len);
-              switch_log_printf(SWITCH_CHANNEL_SESSION_LOG(session), SWITCH_LOG_NOTICE, "aai_frame - new value out_len:%u", out_len);
+              switch_log_printf(SWITCH_CHANNEL_SESSION_LOG(session), SWITCH_LOG_NOTICE, "aai_frame - new value out_len:%u channels:%u", out_len, tech_pvt->channels);
 
             if (out_len > 0) {
               // bytes written = num channels * 2 * num channels
-              size_t bytes_written = out_len ;//<< tech_pvt->channels;
+              size_t bytes_written = out_len << tech_pvt->channels;
               pAudioPipe->binaryWritePtrAdd(bytes_written);
               available = pAudioPipe->binarySpaceAvailable();
               dirty = true;
               switch_log_printf(SWITCH_CHANNEL_SESSION_LOG(session), SWITCH_LOG_NOTICE, "aai_frame - bytes_written:%u, available:%u, audioBufferSize: %u", bytes_written, available, pAudioPipe->binarySpaceSize());
 
-              if (pAudioPipe->binarySpaceSize() > 1600) {
+              if (pAudioPipe->binarySpaceSize() > AAI_TRANSCRIPTION_FRAME_SIZE) {
                 /* just for security that we will always have a string terminater */
 	              // memset(buffer, 0,  20 * 1024  * sizeof(char) );
                 	// char *p = strdup("");
@@ -616,14 +617,14 @@ extern "C" {
 			            // strcat(p, conference_api_sub_commands[i].pcommand);
 
 
-                // char* audio[1600];
-                // memcpy(audio, pAudioPipe->m_audio_buffer, 1600);
-                // char* encodedAudio =  base64_encode(pAudioPipe->m_audio_buffer, 1600)
+                // char* audio[AAI_TRANSCRIPTION_FRAME_SIZE];
+                // memcpy(audio, pAudioPipe->m_audio_buffer, AAI_TRANSCRIPTION_FRAME_SIZE);
+                // char* encodedAudio =  base64_encode(pAudioPipe->m_audio_buffer, AAI_TRANSCRIPTION_FRAME_SIZE)
                 char* textToSend = strdup("{\"audio_data\": \"");
-                strcat(textToSend, pAudioPipe->base64EncodedAudio().c_str());
+                strcat(textToSend, pAudioPipe->base64EncodedAudio(AAI_TRANSCRIPTION_FRAME_SIZE).c_str());
                 strcat(textToSend, "\"}");
                 switch_log_printf(SWITCH_CHANNEL_SESSION_LOG(session), SWITCH_LOG_NOTICE, "aai_frame - base64_encode audio - textToSend:%s, len:%u", textToSend, strlen(textToSend));
-                pAudioPipe->binaryWritePtrSubtract(1600);
+                pAudioPipe->binaryWritePtrSubtract(AAI_TRANSCRIPTION_FRAME_SIZE);
                 aai_session_send_text(session, textToSend);
                 break; 
               }
