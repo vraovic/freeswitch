@@ -20,7 +20,7 @@
 
 #define RTP_PACKETIZATION_PERIOD 20
 #define FRAME_SIZE_8000  320 /*which means each 20ms frame as 320 bytes at 8 khz (1 channel only)*/
-#define AAI_TRANSCRIPTION_FRAME_SIZE  FRAME_SIZE_8000 * 2 * 5 /*which means each 100ms*/
+#define AAI_TRANSCRIPTION_FRAME_SIZE  FRAME_SIZE_8000 * 5 /*which means each 100ms*/
 
 namespace {
   static const char *requestedBufferSecs = std::getenv("MOD_AUDIO_AAI_BUFFER_SECS");
@@ -600,13 +600,13 @@ extern "C" {
 
             if (out_len > 0) {
               // bytes written = num channels * 2 * num channels
-              size_t bytes_written = out_len << tech_pvt->channels;
+              size_t bytes_written = (size_t)out_len; // << tech_pvt->channels;
               pAudioPipe->binaryWritePtrAdd(bytes_written);
               available = pAudioPipe->binarySpaceAvailable();
               dirty = true;
               switch_log_printf(SWITCH_CHANNEL_SESSION_LOG(session), SWITCH_LOG_NOTICE, "aai_frame - bytes_written:%u, available:%u, audioBufferSize: %u", bytes_written, available, pAudioPipe->binarySpaceSize());
 
-              if (pAudioPipe->binarySpaceSize() > AAI_TRANSCRIPTION_FRAME_SIZE) {
+              if (pAudioPipe->binarySpaceSize() > (size_t)AAI_TRANSCRIPTION_FRAME_SIZE) {
                 /* just for security that we will always have a string terminater */
 	              // memset(buffer, 0,  20 * 1024  * sizeof(char) );
                 	// char *p = strdup("");
@@ -620,7 +620,9 @@ extern "C" {
                 // char* audio[AAI_TRANSCRIPTION_FRAME_SIZE];
                 // memcpy(audio, pAudioPipe->m_audio_buffer, AAI_TRANSCRIPTION_FRAME_SIZE);
                 // char* encodedAudio =  base64_encode(pAudioPipe->m_audio_buffer, AAI_TRANSCRIPTION_FRAME_SIZE)
-                char* textToSend = strdup("{\"audio_data\": \"");
+                char textToSend[10000];
+                memset(textToSend, '\0', sizeof(textToSend));
+                strcat(textToSend, "{\"audio_data\": \"");
                 strcat(textToSend, pAudioPipe->base64EncodedAudio(AAI_TRANSCRIPTION_FRAME_SIZE).c_str());
                 strcat(textToSend, "\"}");
                 switch_log_printf(SWITCH_CHANNEL_SESSION_LOG(session), SWITCH_LOG_NOTICE, "aai_frame - base64_encode audio - textToSend:%s, len:%u", textToSend, strlen(textToSend));

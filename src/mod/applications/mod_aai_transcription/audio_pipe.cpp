@@ -96,6 +96,7 @@ int AudioPipe::lws_callback(struct lws *wsi,
           *ppAp = ap;
           ap->m_vhd = vhd;
           ap->m_state = LWS_CLIENT_CONNECTED;
+          lwsl_notice("AudioPipe::lws_service_thread LWS_CALLBACK_CLIENT_ESTABLISHED - %s - calling a-->m_callback\n"); 
           ap->m_callback(ap->m_uuid.c_str(), AudioPipe::CONNECT_SUCCESS, NULL);
         }
         else {
@@ -132,6 +133,7 @@ int AudioPipe::lws_callback(struct lws *wsi,
     case LWS_CALLBACK_CLIENT_RECEIVE:
       {
         AudioPipe* ap = *ppAp;
+        lwsl_notice("AudioPipe::lws_service_thread LWS_CALLBACK_CLIENT_RECEIVE - first response\n");
         if (!ap) {
           lwsl_err("AudioPipe::lws_service_thread LWS_CALLBACK_CLIENT_RECEIVE %s unable to find wsi %p..\n", ap->m_uuid.c_str(), wsi); 
           return 0;
