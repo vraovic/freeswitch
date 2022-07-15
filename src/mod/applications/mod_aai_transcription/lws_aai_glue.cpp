@@ -24,6 +24,7 @@
 
 namespace {
   static const char *requestedBufferSecs = std::getenv("MOD_AUDIO_AAI_BUFFER_SECS");
+  static const char *numberOfFramesForTranscription = std::getenv("MOD_AAI_TRANSCRIPTION_FRAME_SIZE");
   static int nAudioBufferSecs = std::max(1, std::min(requestedBufferSecs ? ::atoi(requestedBufferSecs) : 2, 5));
   static const char *requestedNumServiceThreads = std::getenv("MOD_AUDIO_FORK_SERVICE_THREADS");
   static const char* mySubProtocolName = std::getenv("MOD_AUDIO_FORK_SUBPROTOCOL_NAME") ?
@@ -231,7 +232,7 @@ namespace {
     tech_pvt->audio_paused = 0;
     tech_pvt->graceful_shutdown = 0;
     
-    size_t buflen = LWS_PRE + (FRAME_SIZE_8000 * desiredSampling / 8000 * channels * 1000 / RTP_PACKETIZATION_PERIOD * nAudioBufferSecs);
+    size_t buflen = (FRAME_SIZE_8000 * desiredSampling / 8000 * channels * 1000 / RTP_PACKETIZATION_PERIOD * nAudioBufferSecs);
 
     switch_log_printf(SWITCH_CHANNEL_SESSION_LOG(session), SWITCH_LOG_DEBUG, "aai_data_init -desiredSampling:%d,nAudioBufferSecs:%u decoded_bytes_per_packet:%u, buflen: %u \n",desiredSampling,nAudioBufferSecs,read_impl.decoded_bytes_per_packet, buflen);
 
@@ -584,6 +585,7 @@ extern "C" {
         frame.buflen = SWITCH_RECOMMENDED_BUFFER_SIZE;
         // frame.buflen = AAI_TRANSCRIPTION_FRAME_SIZE;
 
+        size_t transcription_size = FRAME_SIZE_8000 * numberOfFramesForTranscription;
         // switch_log_printf(SWITCH_CHANNEL_SESSION_LOG(session), SWITCH_LOG_NOTICE, "aai_frame - resampler != null");
 
         while (switch_core_media_bug_read(bug, &frame, SWITCH_TRUE) == SWITCH_STATUS_SUCCESS) {
@@ -607,7 +609,7 @@ extern "C" {
               dirty = true;
               switch_log_printf(SWITCH_CHANNEL_SESSION_LOG(session), SWITCH_LOG_NOTICE, "aai_frame - bytes_written:%u, available:%u, audioBufferSize: %u", bytes_written, available, pAudioPipe->binarySpaceSize());
 
-              if (pAudioPipe->binarySpaceSize() > (size_t)AAI_TRANSCRIPTION_FRAME_SIZE) {
+              if (pAudioPipe->binarySpaceSize() > transcription_size) {
                 /* just for security that we will always have a string terminater */
 	              // memset(buffer, 0,  20 * 1024  * sizeof(char) );
                 	// char *p = strdup("");
@@ -618,21 +620,18 @@ extern "C" {
 			            // strcat(p, conference_api_sub_commands[i].pcommand);
 
 
-                // char* audio[AAI_TRANSCRIPTION_FRAME_SIZE];
-                // memcpy(audio, pAudioPipe->m_audio_buffer, AAI_TRANSCRIPTION_FRAME_SIZE);
-                // char* encodedAudio =  base64_encode(pAudioPipe->m_audio_buffer, AAI_TRANSCRIPTION_FRAME_SIZE)
-                memset(textToSend, '\0', sizeof(textToSend));
-                strcat(textToSend, "{\"audio_data\": \"");
-                strcat(textToSend, pAudioPipe->base64EncodedAudio(AAI_TRANSCRIPTION_FRAME_SIZE).c_str());
-                strcat(textToSend, "\"}");
-                switch_log_printf(SWITCH_CHANNEL_SESSION_LOG(session), SWITCH_LOG_NOTICE, "aai_frame - base64_encode audio - textToSend:%s, len:%u", textToSend, strlen(textToSend));
-                pAudioPipe->binaryWritePtrSubtract(AAI_TRANSCRIPTION_FRAME_SIZE);
-
-                aai_session_send_text(session, textToSend);
+                // memset(textToSend, '\0', sizeof(textToSend));
+                // strcat(textToSend, "{\"audio_data\":\"");
+                // strcat(textToSend, pAudioPipe->base64EncodedAudio(transcription_size).c_str());
+                // strcat(textToSend, "\"}");
                 //TODO: Let me try this code later
-                // std::stringstream json;
-                // json << "{\"audio_data\":\"" << pAudioPipe->base64EncodedAudio(AAI_TRANSCRIPTION_FRAME_SIZE).c_str()) << "\"}";
-                // aai_session_send_text(session, json.str().c_str());
+                std::stringstream json;
+                json << "{\"audio_data\":\"" << pAudioPipe->base64EncodedAudio(transcription_size).c_str()) << "\"}";
+                switch_log_printf(SWITCH_CHANNEL_SESSION_LOG(session), SWITCH_LOG_NOTICE, "aai_frame - base64_encode audio - textToSend:%s, len:%u", json.str().c_str(), strlen(json.str()));
+                pAudioPipe->binaryWritePtrSubtract(transcription_size);
+
+                // aai_session_send_text(session, textToSend);
+                aai_session_send_text(session, json.str().c_str());
 
                 // break; 
               }

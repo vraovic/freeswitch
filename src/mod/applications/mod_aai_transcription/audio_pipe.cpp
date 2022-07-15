@@ -210,7 +210,7 @@ int AudioPipe::lws_callback(struct lws *wsi,
         if (ap->isGracefulShutdown()) {
           lwsl_notice("%s graceful shutdown - sending zero length binary frame to flush any final responses\n", ap->m_uuid.c_str());
           std::lock_guard<std::mutex> lk(ap->m_audio_mutex);
-          int sent = lws_write(wsi, (unsigned char *) ap->m_audio_buffer + LWS_PRE, 0, LWS_WRITE_BINARY);
+          int sent = lws_write(wsi, (unsigned char *) ap->m_audio_buffer, 0, LWS_WRITE_BINARY);
           return 0;
         }
 
@@ -243,14 +243,14 @@ int AudioPipe::lws_callback(struct lws *wsi,
         // check for audio packets
         {
           std::lock_guard<std::mutex> lk(ap->m_audio_mutex);
-          if (ap->m_audio_buffer_write_offset > LWS_PRE) {
-            size_t datalen = ap->m_audio_buffer_write_offset - LWS_PRE;
-            int sent = lws_write(wsi, (unsigned char *) ap->m_audio_buffer + LWS_PRE, datalen, LWS_WRITE_BINARY);
+          if (ap->m_audio_buffer_write_offset) {
+            size_t datalen = ap->m_audio_buffer_write_offset;
+            int sent = lws_write(wsi, (unsigned char *) ap->m_audio_buffer, datalen, LWS_WRITE_BINARY);
             if (sent < datalen) {
               lwsl_err("AudioPipe::lws_service_thread LWS_CALLBACK_CLIENT_WRITEABLE %s attemped to send %lu only sent %d wsi %p..\n", 
                 ap->m_uuid.c_str(), datalen, sent, wsi); 
             }
-            ap->m_audio_buffer_write_offset = LWS_PRE;
+            ap->m_audio_buffer_write_offset = 0;
           }
         }
 
@@ -486,7 +486,7 @@ AudioPipe::AudioPipe(const char* uuid, const char* host, unsigned int port, cons
   int sslFlags, size_t bufLen, size_t minFreespace, notifyHandler_t callback) :
   m_uuid(uuid), m_host(host), m_port(port), m_path(path), m_sslFlags(sslFlags),
   m_audio_buffer_min_freespace(minFreespace), m_audio_buffer_max_len(bufLen), m_gracefulShutdown(false),
-  m_audio_buffer_write_offset(LWS_PRE), m_recv_buf(nullptr), m_recv_buf_ptr(nullptr), 
+  m_audio_buffer_write_offset(0), m_recv_buf(nullptr), m_recv_buf_ptr(nullptr), 
   m_state(LWS_CLIENT_IDLE), m_wsi(nullptr), m_vhd(nullptr), m_callback(callback) {
 
   m_audio_buffer = new uint8_t[m_audio_buffer_max_len];
@@ -561,14 +561,15 @@ std::string AudioPipe::base64EncodedAudio(size_t len) {
 void AudioPipe::binaryWritePtrSubtract(size_t len) {
  lwsl_notice("binaryWritePtrSubtract - m_audio_buffer_write_offset: %u, len:%u\n", m_audio_buffer_write_offset,len);
 
-  if ((m_audio_buffer_write_offset - LWS_PRE) > len ) {
+  if ((m_audio_buffer_write_offset) > len ) {
     uint8_t * buffer[m_audio_buffer_write_offset - len + 1];
     memset(buffer, 0, sizeof(buffer));
-    memcpy(buffer, m_audio_buffer + LWS_PRE + len, m_audio_buffer_write_offset - len);
-    memcpy(m_audio_buffer + LWS_PRE, buffer, m_audio_buffer_write_offset - len);
+    memcpy(buffer, m_audio_buffer + len, m_audio_buffer_write_offset - len);
+    memcpy(m_audio_buffer, buffer, m_audio_buffer_write_offset - len);
     // memcpy(m_audio_buffer + LWS_PRE, m_audio_buffer + LWS_PRE + len, m_audio_buffer_write_offset - len);
   }
   m_audio_buffer_write_offset -= len;
+ lwsl_notice("binaryWritePtrSubtract - exit - m_audio_buffer_write_offset: %u\n", m_audio_buffer_write_offset);
 }
 
 
