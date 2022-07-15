@@ -221,6 +221,7 @@ int AudioPipe::lws_callback(struct lws *wsi,
             uint8_t buf[ap->m_metadata.length() + LWS_PRE];
             memcpy(buf + LWS_PRE, ap->m_metadata.c_str(), ap->m_metadata.length());
             int n = ap->m_metadata.length();
+            lwsl_notice("AudioPipe::lws_write: %s, length: %d\n",(buf + LWS_PRE), n); 
             int m = lws_write(wsi, buf + LWS_PRE, n, LWS_WRITE_TEXT);
             ap->m_metadata.clear();
             if (m < n) {

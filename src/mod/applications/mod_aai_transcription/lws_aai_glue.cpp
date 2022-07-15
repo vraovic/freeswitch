@@ -609,7 +609,7 @@ extern "C" {
               dirty = true;
               switch_log_printf(SWITCH_CHANNEL_SESSION_LOG(session), SWITCH_LOG_NOTICE, "aai_frame - bytes_written:%u, available:%u, audioBufferSize: %u", bytes_written, available, pAudioPipe->binarySpaceSize());
 
-              if (pAudioPipe->binarySpaceSize() > transcription_size) {
+              if (pAudioPipe->binarySpaceSize() >= transcription_size) {
                 /* just for security that we will always have a string terminater */
 	              // memset(buffer, 0,  20 * 1024  * sizeof(char) );
                 	// char *p = strdup("");
@@ -629,8 +629,13 @@ extern "C" {
                 // json << "{\"audio_data\":\"" << pAudioPipe->base64EncodedAudio(transcription_size).c_str() << "\"}";
                 switch_log_printf(SWITCH_CHANNEL_SESSION_LOG(session), SWITCH_LOG_NOTICE, "aai_frame - base64_encode audio - textToSend:%s, len:%u", textToSend, strlen(textToSend));
                 pAudioPipe->binaryWritePtrSubtract(transcription_size);
+                
+                
+                switch_log_printf(SWITCH_CHANNEL_SESSION_LOG(session), SWITCH_LOG_NOTICE, "aai_frame - m_metadata - len: %u", pAudioPipe->m_metadata.length());
+                pAudioPipe->bufferForSending(textToSend);
+                switch_log_printf(SWITCH_CHANNEL_SESSION_LOG(session), SWITCH_LOG_NOTICE, "aai_frame - AFTER m_metadata - len: %u", pAudioPipe->m_metadata.length());
 
-                aai_session_send_text(session, textToSend);
+                // aai_session_send_text(session, textToSend);
                 // aai_session_send_text(session, (char*)json.str());
 
                 // break; 
