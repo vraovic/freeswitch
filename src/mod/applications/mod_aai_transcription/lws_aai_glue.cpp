@@ -585,7 +585,7 @@ extern "C" {
         frame.buflen = SWITCH_RECOMMENDED_BUFFER_SIZE;
         // frame.buflen = AAI_TRANSCRIPTION_FRAME_SIZE;
 
-        size_t transcription_size = FRAME_SIZE_8000 * numberOfFramesForTranscription;
+        size_t transcription_size = FRAME_SIZE_8000 * ::atoi(numberOfFramesForTranscription);
         // switch_log_printf(SWITCH_CHANNEL_SESSION_LOG(session), SWITCH_LOG_NOTICE, "aai_frame - resampler != null");
 
         while (switch_core_media_bug_read(bug, &frame, SWITCH_TRUE) == SWITCH_STATUS_SUCCESS) {
@@ -626,12 +626,12 @@ extern "C" {
                 // strcat(textToSend, "\"}");
                 //TODO: Let me try this code later
                 std::stringstream json;
-                json << "{\"audio_data\":\"" << pAudioPipe->base64EncodedAudio(transcription_size).c_str()) << "\"}";
+                json << "{\"audio_data\":\"" << pAudioPipe->base64EncodedAudio(transcription_size).c_str() << "\"}";
                 switch_log_printf(SWITCH_CHANNEL_SESSION_LOG(session), SWITCH_LOG_NOTICE, "aai_frame - base64_encode audio - textToSend:%s, len:%u", json.str().c_str(), strlen(json.str()));
                 pAudioPipe->binaryWritePtrSubtract(transcription_size);
 
                 // aai_session_send_text(session, textToSend);
-                aai_session_send_text(session, json.str().c_str());
+                aai_session_send_text(session, (char*)json.str());
 
                 // break; 
               }
