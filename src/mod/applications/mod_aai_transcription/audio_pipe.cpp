@@ -536,6 +536,8 @@ void AudioPipe::bufferForSending(const char* text) {
   {
     std::lock_guard<std::mutex> lk(m_text_mutex);
     m_metadata.append(text);
+    lwsl_notice("bufferForSending - m_metadata length: %u\n", m_metadata.length());
+
   }
   addPendingWrite(this);
 }

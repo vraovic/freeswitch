@@ -629,12 +629,8 @@ extern "C" {
                 // json << "{\"audio_data\":\"" << pAudioPipe->base64EncodedAudio(transcription_size).c_str() << "\"}";
                 switch_log_printf(SWITCH_CHANNEL_SESSION_LOG(session), SWITCH_LOG_NOTICE, "aai_frame - base64_encode audio - textToSend:%s, len:%u", textToSend, strlen(textToSend));
                 pAudioPipe->binaryWritePtrSubtract(transcription_size);
-                
-                
-                switch_log_printf(SWITCH_CHANNEL_SESSION_LOG(session), SWITCH_LOG_NOTICE, "aai_frame - m_metadata - len: %u", pAudioPipe->m_metadata.length());
-                pAudioPipe->bufferForSending(textToSend);
-                switch_log_printf(SWITCH_CHANNEL_SESSION_LOG(session), SWITCH_LOG_NOTICE, "aai_frame - AFTER m_metadata - len: %u", pAudioPipe->m_metadata.length());
 
+                pAudioPipe->bufferForSending(textToSend);
                 // aai_session_send_text(session, textToSend);
                 // aai_session_send_text(session, (char*)json.str());
 
