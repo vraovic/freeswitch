@@ -620,18 +620,18 @@ extern "C" {
 			            // strcat(p, conference_api_sub_commands[i].pcommand);
 
 
-                // memset(textToSend, '\0', sizeof(textToSend));
-                // strcat(textToSend, "{\"audio_data\":\"");
-                // strcat(textToSend, pAudioPipe->base64EncodedAudio(transcription_size).c_str());
-                // strcat(textToSend, "\"}");
+                memset(textToSend, '\0', sizeof(textToSend));
+                strcat(textToSend, "{\"audio_data\":\"");
+                strcat(textToSend, pAudioPipe->base64EncodedAudio(transcription_size).c_str());
+                strcat(textToSend, "\"}");
                 //TODO: Let me try this code later
-                std::stringstream json;
-                json << "{\"audio_data\":\"" << pAudioPipe->base64EncodedAudio(transcription_size).c_str() << "\"}";
-                switch_log_printf(SWITCH_CHANNEL_SESSION_LOG(session), SWITCH_LOG_NOTICE, "aai_frame - base64_encode audio - textToSend:%s, len:%u", json.str().c_str(), strlen(json.str()));
+                // std::stringstream json;
+                // json << "{\"audio_data\":\"" << pAudioPipe->base64EncodedAudio(transcription_size).c_str() << "\"}";
+                switch_log_printf(SWITCH_CHANNEL_SESSION_LOG(session), SWITCH_LOG_NOTICE, "aai_frame - base64_encode audio - textToSend:%s, len:%u", textToSend, strlen(textToSend));
                 pAudioPipe->binaryWritePtrSubtract(transcription_size);
 
-                // aai_session_send_text(session, textToSend);
-                aai_session_send_text(session, (char*)json.str());
+                aai_session_send_text(session, textToSend);
+                // aai_session_send_text(session, (char*)json.str());
 
                 // break; 
               }
