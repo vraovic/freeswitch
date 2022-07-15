@@ -20,7 +20,7 @@
 
 #define RTP_PACKETIZATION_PERIOD 20
 #define FRAME_SIZE_8000  320 /*which means each 20ms frame as 320 bytes at 8 khz (1 channel only)*/
-#define AAI_TRANSCRIPTION_FRAME_SIZE  FRAME_SIZE_8000 * 2 * 5 /*which means each 100ms*/
+#define AAI_TRANSCRIPTION_FRAME_SIZE  FRAME_SIZE_8000  * 15 /*which means each 150ms*/
 
 namespace {
   static const char *requestedBufferSecs = std::getenv("MOD_AUDIO_AAI_BUFFER_SECS");
@@ -601,7 +601,7 @@ extern "C" {
 
             if (out_len > 0) {
               // bytes written = num channels * 2 * num channels
-              size_t bytes_written = out_len << tech_pvt->channels;
+              size_t bytes_written = out_len ;//<< tech_pvt->channels;
               pAudioPipe->binaryWritePtrAdd(bytes_written);
               available = pAudioPipe->binarySpaceAvailable();
               dirty = true;
@@ -627,7 +627,13 @@ extern "C" {
                 strcat(textToSend, "\"}");
                 switch_log_printf(SWITCH_CHANNEL_SESSION_LOG(session), SWITCH_LOG_NOTICE, "aai_frame - base64_encode audio - textToSend:%s, len:%u", textToSend, strlen(textToSend));
                 pAudioPipe->binaryWritePtrSubtract(AAI_TRANSCRIPTION_FRAME_SIZE);
+
                 aai_session_send_text(session, textToSend);
+                //TODO: Let me try this code later
+                // std::stringstream json;
+                // json << "{\"audio_data\":\"" << pAudioPipe->base64EncodedAudio(AAI_TRANSCRIPTION_FRAME_SIZE).c_str()) << "\"}";
+                // aai_session_send_text(session, json.str().c_str());
+
                 // break; 
               }
               else {

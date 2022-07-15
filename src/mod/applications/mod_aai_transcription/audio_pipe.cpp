@@ -51,6 +51,7 @@ int AudioPipe::lws_callback(struct lws *wsi,
 
   switch (reason) {
     case LWS_CALLBACK_PROTOCOL_INIT:
+      lwsl_notice("AudioPipe::lws_callback - LWS_CALLBACK_PROTOCOL_INIT\n");
       vhd = (struct AudioPipe::lws_per_vhost_data *) lws_protocol_vh_priv_zalloc(lws_get_vhost(wsi), lws_get_protocol(wsi), sizeof(struct AudioPipe::lws_per_vhost_data));
       vhd->context = lws_get_context(wsi);
       vhd->protocol = lws_get_protocol(wsi);
@@ -66,12 +67,13 @@ int AudioPipe::lws_callback(struct lws *wsi,
 
           memcpy(b, apiToken,strlen(apiToken));
           b[strlen(apiToken)] = '\0';
-          lwsl_notice("AudioPipe::lws_service_thread LWS_CALLBACK_CLIENT_APPEND_HANDSHAKE_HEADER Authorization: %s, after copy: %s\n", apiToken, b);
+          lwsl_notice("AudioPipe::lws_callback LWS_CALLBACK_CLIENT_APPEND_HANDSHAKE_HEADER Authorization: %s, after copy: %s\n", apiToken, b);
           if (lws_add_http_header_by_token(wsi, WSI_TOKEN_HTTP_AUTHORIZATION, (unsigned char *)b, strlen(b), p, end)) return -1;
       }
       break;
 
     case LWS_CALLBACK_EVENT_WAIT_CANCELLED:
+      lwsl_notice("AudioPipe::lws_callback - LWS_CALLBACK_EVENT_WAIT_CANCELLED\n");
       processPendingConnects(vhd);
       processPendingDisconnects(vhd);
       processPendingWrites();
@@ -80,11 +82,12 @@ int AudioPipe::lws_callback(struct lws *wsi,
       {
         AudioPipe* ap = findAndRemovePendingConnect(wsi);
         if (ap) {
+          lwsl_notice("AudioPipe::lws_callback - LWS_CALLBACK_CLIENT_CONNECTION_ERROR\n");
           ap->m_state = LWS_CLIENT_FAILED;
           ap->m_callback(ap->m_uuid.c_str(), AudioPipe::CONNECT_FAIL, (char *) in);
         }
         else {
-          lwsl_err("AudioPipe::lws_service_thread LWS_CALLBACK_CLIENT_CONNECTION_ERROR unable to find wsi %p..\n", wsi); 
+          lwsl_err("AudioPipe::lws_callback LWS_CALLBACK_CLIENT_CONNECTION_ERROR unable to find wsi %p..\n", wsi); 
         }
       }      
       break;
@@ -96,19 +99,20 @@ int AudioPipe::lws_callback(struct lws *wsi,
           *ppAp = ap;
           ap->m_vhd = vhd;
           ap->m_state = LWS_CLIENT_CONNECTED;
-          lwsl_notice("AudioPipe::lws_service_thread LWS_CALLBACK_CLIENT_ESTABLISHED - %s - calling a-->m_callback\n"); 
+          lwsl_notice("AudioPipe::lws_callback LWS_CALLBACK_CLIENT_ESTABLISHED - %s - calling a-->m_callback\n"); 
           ap->m_callback(ap->m_uuid.c_str(), AudioPipe::CONNECT_SUCCESS, NULL);
         }
         else {
-          lwsl_err("AudioPipe::lws_service_thread LWS_CALLBACK_CLIENT_ESTABLISHED %s unable to find wsi %p..\n", ap->m_uuid.c_str(), wsi); 
+          lwsl_err("AudioPipe::lws_callback LWS_CALLBACK_CLIENT_ESTABLISHED %s unable to find wsi %p..\n", ap->m_uuid.c_str(), wsi); 
         }
       }      
       break;
     case LWS_CALLBACK_CLIENT_CLOSED:
       {
+         lwsl_notice("AudioPipe::lws_callback LWS_CALLBACK_CLIENT_CLOSED \n"); 
         AudioPipe* ap = *ppAp;
         if (!ap) {
-          lwsl_err("AudioPipe::lws_service_thread LWS_CALLBACK_CLIENT_CLOSED %s unable to find wsi %p..\n", ap->m_uuid.c_str(), wsi); 
+          lwsl_err("AudioPipe::lws_callback LWS_CALLBACK_CLIENT_CLOSED %s unable to find wsi %p..\n", ap->m_uuid.c_str(), wsi); 
           return 0;
         }
         if (ap->m_state == LWS_CLIENT_DISCONNECTING) {
@@ -133,19 +137,20 @@ int AudioPipe::lws_callback(struct lws *wsi,
     case LWS_CALLBACK_CLIENT_RECEIVE:
       {
         AudioPipe* ap = *ppAp;
-        lwsl_notice("AudioPipe::lws_service_thread LWS_CALLBACK_CLIENT_RECEIVE - first response\n");
+        lwsl_notice("AudioPipe::lws_callback LWS_CALLBACK_CLIENT_RECEIVE - first response\n");
         if (!ap) {
-          lwsl_err("AudioPipe::lws_service_thread LWS_CALLBACK_CLIENT_RECEIVE %s unable to find wsi %p..\n", ap->m_uuid.c_str(), wsi); 
+          lwsl_err("AudioPipe::lws_callback LWS_CALLBACK_CLIENT_RECEIVE %s unable to find wsi %p..\n", ap->m_uuid.c_str(), wsi); 
           return 0;
         }
 
         if (lws_frame_is_binary(wsi)) {
-          lwsl_err("AudioPipe::lws_service_thread LWS_CALLBACK_CLIENT_RECEIVE received binary frame, discarding.\n");
+          lwsl_err("AudioPipe::lws_callback LWS_CALLBACK_CLIENT_RECEIVE received binary frame, discarding.\n");
           return 0;
         }
 
         if (lws_is_first_fragment(wsi)) {
           // allocate a buffer for the entire chunk of memory needed
+          lwsl_notice("AudioPipe::lws_callback - lws_is_first_fragment - yes\n");
           assert(nullptr == ap->m_recv_buf);
           ap->m_recv_buf_len = len + lws_remaining_packet_payload(wsi);
           ap->m_recv_buf = (uint8_t*) malloc(ap->m_recv_buf_len);
@@ -155,15 +160,16 @@ int AudioPipe::lws_callback(struct lws *wsi,
         size_t write_offset = ap->m_recv_buf_ptr - ap->m_recv_buf;
         size_t remaining_space = ap->m_recv_buf_len - write_offset;
         if (remaining_space < len) {
-          lwsl_notice("AudioPipe::lws_service_thread LWS_CALLBACK_CLIENT_RECEIVE buffer realloc needed.\n");
+          lwsl_notice("AudioPipe::lws_callback LWS_CALLBACK_CLIENT_RECEIVE buffer realloc needed.\n");
           size_t newlen = ap->m_recv_buf_len + RECV_BUF_REALLOC_SIZE;
           if (newlen > MAX_RECV_BUF_SIZE) {
             free(ap->m_recv_buf);
             ap->m_recv_buf = ap->m_recv_buf_ptr = nullptr;
             ap->m_recv_buf_len = 0;
-            lwsl_notice("AudioPipe::lws_service_thread LWS_CALLBACK_CLIENT_RECEIVE max buffer exceeded, truncating message.\n");
+            lwsl_notice("AudioPipe::lws_callback LWS_CALLBACK_CLIENT_RECEIVE max buffer exceeded, truncating message.\n");
           }
           else {
+            lwsl_notice("AudioPipe::lws_callback - newlen:%u\n",newlen);
             ap->m_recv_buf = (uint8_t*) realloc(ap->m_recv_buf, newlen);
             if (nullptr != ap->m_recv_buf) {
               ap->m_recv_buf_len = newlen;
@@ -178,6 +184,7 @@ int AudioPipe::lws_callback(struct lws *wsi,
             ap->m_recv_buf_ptr += len;
           }
           if (lws_is_final_fragment(wsi)) {
+            lwsl_notice("AudioPipe::lws_callback - lws_is_final_fragment - yes\n");
             if (nullptr != ap->m_recv_buf) {
               std::string msg((char *)ap->m_recv_buf, ap->m_recv_buf_ptr - ap->m_recv_buf);
               ap->m_callback(ap->m_uuid.c_str(), AudioPipe::MESSAGE, msg.c_str());
@@ -192,9 +199,10 @@ int AudioPipe::lws_callback(struct lws *wsi,
 
     case LWS_CALLBACK_CLIENT_WRITEABLE:
       {
+         lwsl_notice("AudioPipe::lws_callback LWS_CALLBACK_CLIENT_WRITEABLE \n"); 
         AudioPipe* ap = *ppAp;
         if (!ap) {
-          lwsl_err("AudioPipe::lws_service_thread LWS_CALLBACK_CLIENT_WRITEABLE %s unable to find wsi %p..\n", ap->m_uuid.c_str(), wsi); 
+          lwsl_err("AudioPipe::lws_callback LWS_CALLBACK_CLIENT_WRITEABLE %s unable to find wsi %p..\n", ap->m_uuid.c_str(), wsi); 
           return 0;
         }
 
