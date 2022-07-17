@@ -220,9 +220,10 @@ int AudioPipe::lws_callback(struct lws *wsi,
           if (ap->m_metadata.length() > 0) {
             uint8_t buf[ap->m_metadata.length() + LWS_PRE];
             memcpy(buf + LWS_PRE, ap->m_metadata.c_str(), ap->m_metadata.length());
+            buf[ap->m_metadata.length() + LWS_PRE] = '\0';
             int n = ap->m_metadata.length();
             lwsl_notice("AudioPipe::lws_write: %s, length: %d \n",ap->m_metadata.c_str(), n); 
-            lwsl_notice("AudioPipe::lws_write - sending buf: %s  \n",buf); 
+            lwsl_notice("AudioPipe::lws_write - sending buf: %s  \n",&buf[LWS_PRE]); 
             int m = lws_write(wsi, buf + LWS_PRE, n, LWS_WRITE_TEXT);
             ap->m_metadata.clear();
             if (m < n) {
