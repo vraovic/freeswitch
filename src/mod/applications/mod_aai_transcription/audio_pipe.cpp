@@ -218,13 +218,18 @@ int AudioPipe::lws_callback(struct lws *wsi,
         {
           std::lock_guard<std::mutex> lk(ap->m_text_mutex);
           if (ap->m_metadata.length() > 0) {
-            uint8_t buf[ap->m_metadata.length() + LWS_PRE];
-            memcpy(buf + LWS_PRE, ap->m_metadata.c_str(), ap->m_metadata.length());
-            buf[ap->m_metadata.length() + LWS_PRE] = '\0';
+            // uint8_t buf[ap->m_metadata.length() + LWS_PRE];
+            char textToSend[10000]
+            memset(textToSend, '\0', sizeof(textToSend));
+            memcpy(textToSend, ap->m_metadata.c_str(), ap->m_metadata.length());
+
+            // memcpy(buf + LWS_PRE, ap->m_metadata.c_str(), ap->m_metadata.length());
+            // buf[ap->m_metadata.length() + LWS_PRE] = '\0';
             int n = ap->m_metadata.length();
-            lwsl_notice("AudioPipe::lws_write: %s, length: %d \n",ap->m_metadata.c_str(), n); 
-            lwsl_notice("AudioPipe::lws_write - sending buf: %s  \n",&buf[LWS_PRE]); 
-            int m = lws_write(wsi, buf + LWS_PRE, n, LWS_WRITE_TEXT);
+            lwsl_notice("AudioPipe::lws_write: length:%d, metadata:%s\n",n, ap->m_metadata.c_str()); 
+            lwsl_notice("AudioPipe::lws_write - sending buf(len:%d):%s\n",strlen(textToSend),textToSend); 
+            // int m = lws_write(wsi, buf + LWS_PRE, n, LWS_WRITE_TEXT);
+            int m = lws_write(wsi, textToSend, n, LWS_WRITE_TEXT);
             ap->m_metadata.clear();
             if (m < n) {
               return -1;

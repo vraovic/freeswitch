@@ -627,7 +627,7 @@ extern "C" {
                 //TODO: Let me try this code later
                 // std::stringstream json;
                 // json << "{\"audio_data\":\"" << pAudioPipe->base64EncodedAudio(transcription_size).c_str() << "\"}";
-                switch_log_printf(SWITCH_CHANNEL_SESSION_LOG(session), SWITCH_LOG_NOTICE, "aai_frame - base64_encode audio - textToSend:%s, len:%u", textToSend, strlen(textToSend));
+                switch_log_printf(SWITCH_CHANNEL_SESSION_LOG(session), SWITCH_LOG_NOTICE, "aai_frame - base64_encode audio - textToSend:%s, len:%u\n", textToSend, strlen(textToSend));
                 pAudioPipe->binaryWritePtrSubtract(transcription_size);
 
                 pAudioPipe->bufferForSending(textToSend);
