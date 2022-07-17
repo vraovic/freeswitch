@@ -219,7 +219,7 @@ int AudioPipe::lws_callback(struct lws *wsi,
           std::lock_guard<std::mutex> lk(ap->m_text_mutex);
           if (ap->m_metadata.length() > 0) {
             // uint8_t buf[ap->m_metadata.length() + LWS_PRE];
-            char textToSend[10000]
+            char textToSend[10000];
             memset(textToSend, '\0', sizeof(textToSend));
             memcpy(textToSend, ap->m_metadata.c_str(), ap->m_metadata.length());
 
