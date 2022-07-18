@@ -231,7 +231,8 @@ int AudioPipe::lws_callback(struct lws *wsi,
             // lwsl_notice("AudioPipe::lws_write: length:%d, metadata:%s\n",n, ap->m_metadata); 
             // lwsl_notice("AudioPipe::lws_write - sending buf(len:%d):%s\n",strlen((char*)audio_data),audio_data); 
             // int m = lws_write(wsi, buf + LWS_PRE, n, LWS_WRITE_TEXT);
-            lwsl_notice("AudioPipe::lws_write - BEFORE metadata:%s, len:%u\n",ap->m_metadata,n); 
+            lwsl_notice("AudioPipe::lws_write - BEFORE \n"); 
+            // lwsl_notice("AudioPipe::lws_write - BEFORE metadata:%s, len:%u\n",ap->m_metadata,n); 
             int m = lws_write(wsi, audio_data + LWS_PRE, n, LWS_WRITE_TEXT);
             lwsl_notice("AudioPipe::lws_write - AFTER\n"); 
             
@@ -512,6 +513,8 @@ AudioPipe::AudioPipe(const char* uuid, const char* host, unsigned int port, cons
 
   m_audio_buffer = new uint8_t[m_audio_buffer_max_len];
   m_metadata = new uint8_t[m_audio_buffer_max_len];
+  m_metadata_data_size = 0;
+  m_metadata_write_offset = 0;
   if (apiToken) {
     m_api_token.assign(apiToken);
   }
