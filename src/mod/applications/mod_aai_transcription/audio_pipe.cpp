@@ -218,10 +218,10 @@ int AudioPipe::lws_callback(struct lws *wsi,
         {
           std::lock_guard<std::mutex> lk(ap->m_text_mutex);
           if ( ap->m_metadata_data_size > 0 && ap->m_metadata_write_offset > 0) {
-            lwsl_notice("AudioPipe::lws_write - about to send data - data_szie:%d offset:%d\n",ap->m_metadata_data_size, ap->m_metadata_write_offset); 
             // uint8_t buf[ap->m_metadata.length() + LWS_PRE];
             int n = ap->m_metadata_data_size;
             unsigned char audio_data[n + 1];
+            lwsl_notice("AudioPipe::lws_write - about to send data - data_szie:%d offset:%d\n",n, ap->m_metadata_write_offset); 
             memset(audio_data, '\0', sizeof(audio_data));
             memcpy(audio_data, ap->m_metadata, n);
 
@@ -230,9 +230,14 @@ int AudioPipe::lws_callback(struct lws *wsi,
             // lwsl_notice("AudioPipe::lws_write: length:%d, metadata:%s\n",n, ap->m_metadata); 
             // lwsl_notice("AudioPipe::lws_write - sending buf(len:%d):%s\n",strlen((char*)audio_data),audio_data); 
             // int m = lws_write(wsi, buf + LWS_PRE, n, LWS_WRITE_TEXT);
-            lwsl_notice("AudioPipe::lws_write - BEFORE\n"); 
+            lwsl_notice("AudioPipe::lws_write - BEFORE metadata:%s, len:%u\n",ap->m_metadata,n); 
             int m = lws_write(wsi, audio_data, n, LWS_WRITE_TEXT);
             lwsl_notice("AudioPipe::lws_write - AFTER\n"); 
+            
+            if (ap->m_metadata_write_offset > ap->m_metadata_data_size)
+            {
+              memcpy(ap->m_metadata,ap->m_metadata + ap->m_metadata_data_size, (ap->m_metadata_write_offset - ap->m_metadata_data_size));
+            }
             ap->m_metadata_write_offset -= ap->m_metadata_data_size;
             if (ap->m_metadata_write_offset < 0)
               ap->m_metadata_write_offset = 0;
