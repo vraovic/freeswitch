@@ -590,7 +590,7 @@ extern "C" {
 
         while (switch_core_media_bug_read(bug, &frame, SWITCH_TRUE) == SWITCH_STATUS_SUCCESS) {
           if (frame.datalen) {
-            spx_uint32_t out_len = available >> 1;  // space for samples which are 2 bytes
+            spx_uint32_t out_len = 320; //available >> 1;  // space for samples which are 2 bytes
             spx_uint32_t in_len = frame.samples;
 
             switch_log_printf(SWITCH_CHANNEL_SESSION_LOG(session), SWITCH_LOG_NOTICE, "aai_frame - reading frame - in_len: %u, out_len:%u", in_len, out_len);
