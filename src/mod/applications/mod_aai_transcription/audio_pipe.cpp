@@ -230,7 +230,9 @@ int AudioPipe::lws_callback(struct lws *wsi,
             // lwsl_notice("AudioPipe::lws_write: length:%d, metadata:%s\n",n, ap->m_metadata); 
             // lwsl_notice("AudioPipe::lws_write - sending buf(len:%d):%s\n",strlen((char*)audio_data),audio_data); 
             // int m = lws_write(wsi, buf + LWS_PRE, n, LWS_WRITE_TEXT);
+            lwsl_notice("AudioPipe::lws_write - BEFORE\n"); 
             int m = lws_write(wsi, audio_data, n, LWS_WRITE_TEXT);
+            lwsl_notice("AudioPipe::lws_write - AFTER\n"); 
             ap->m_metadata_write_offset = 0;
             if (m < n) {
               return -1;
@@ -545,8 +547,8 @@ void AudioPipe::bufferForSending(const char* text, size_t len) {
   if (m_state != LWS_CLIENT_CONNECTED) return;
   {
     std::lock_guard<std::mutex> lk(m_text_mutex);
-    memcpy(m_metadata + m_metadata_write_offset,text, len);
-    m_metadata_write_offset += len;
+    memcpy(m_metadata,text, len);
+    m_metadata_write_offset = len;
     // m_metadata.append(text);
     lwsl_notice("bufferForSending - add data to m_metadata length: %d write_offset:%d\n",len, m_metadata_write_offset );
 
