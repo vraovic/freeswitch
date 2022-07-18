@@ -44,7 +44,7 @@ public:
 
   LwsState_t getLwsState(void) { return m_state; }
   void connect(void);
-  void bufferForSending(const char* text);
+  void bufferForSending(const char* text, size_t len);
   size_t binarySpaceAvailable(void) {
     return m_audio_buffer_max_len - m_audio_buffer_write_offset;
   }
@@ -120,7 +120,8 @@ private:
   std::string m_host;
   unsigned int m_port;
   std::string m_path;
-  std::string m_metadata;
+  uint8_t *m_metadata;
+  size_t m_metadata_write_offset;
   std::mutex m_text_mutex;
   std::mutex m_audio_mutex;
   int m_sslFlags;

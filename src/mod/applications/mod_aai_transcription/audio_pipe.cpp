@@ -217,21 +217,21 @@ int AudioPipe::lws_callback(struct lws *wsi,
         // check for text frames to send
         {
           std::lock_guard<std::mutex> lk(ap->m_text_mutex);
-          if (ap->m_metadata.length() > 0) {
-            lwsl_notice("AudioPipe::lws_write - about to send data - length:%d\n",ap->m_metadata.length()); 
+          if (ap->m_metadata_write_offset > 0) {
+            lwsl_notice("AudioPipe::lws_write - about to send data - length:%d\n",ap->m_metadata_write_offset); 
             // uint8_t buf[ap->m_metadata.length() + LWS_PRE];
             unsigned char audio_data[10000];
             memset(audio_data, '\0', sizeof(audio_data));
-            memcpy(audio_data, ap->m_metadata.c_str(), ap->m_metadata.length());
+            memcpy(audio_data, ap->m_metadata, ap->m_metadata_write_offset);
 
             // memcpy(buf + LWS_PRE, ap->m_metadata.c_str(), ap->m_metadata.length());
             // buf[ap->m_metadata.length() + LWS_PRE] = '\0';
-            int n = ap->m_metadata.length();
-            lwsl_notice("AudioPipe::lws_write: length:%d, metadata:%s\n",n, ap->m_metadata.c_str()); 
+            int n = ap->m_metadata_write_offset;
+            lwsl_notice("AudioPipe::lws_write: length:%d, metadata:%s\n",n, ap->m_metadata); 
             lwsl_notice("AudioPipe::lws_write - sending buf(len:%d):%s\n",strlen((char*)audio_data),audio_data); 
             // int m = lws_write(wsi, buf + LWS_PRE, n, LWS_WRITE_TEXT);
             int m = lws_write(wsi, audio_data, n, LWS_WRITE_TEXT);
-            ap->m_metadata.clear();
+            ap->m_metadata_write_offset = 0;
             if (m < n) {
               return -1;
             }
@@ -499,12 +499,14 @@ AudioPipe::AudioPipe(const char* uuid, const char* host, unsigned int port, cons
   m_state(LWS_CLIENT_IDLE), m_wsi(nullptr), m_vhd(nullptr), m_callback(callback) {
 
   m_audio_buffer = new uint8_t[m_audio_buffer_max_len];
+  m_metadata = new uint8_t[m_audio_buffer_max_len];
   if (apiToken) {
     m_api_token.assign(apiToken);
   }
 }
 AudioPipe::~AudioPipe() {
   if (m_audio_buffer) delete [] m_audio_buffer;
+  if (m_metadata) delete [] m_metadata;
   if (m_recv_buf) delete [] m_recv_buf;
 }
 
@@ -539,12 +541,14 @@ bool AudioPipe::connect_client(struct lws_per_vhost_data *vhd) {
   return nullptr != m_wsi;
 }
 
-void AudioPipe::bufferForSending(const char* text) {
+void AudioPipe::bufferForSending(const char* text, size_t len) {
   if (m_state != LWS_CLIENT_CONNECTED) return;
   {
     std::lock_guard<std::mutex> lk(m_text_mutex);
-    m_metadata.append(text);
-    lwsl_notice("bufferForSending - m_metadata length: %u\n", m_metadata.length());
+    memcpy(m_metadata + m_metadata_write_offset,text, len)
+    m_metadata_write_offset += len;
+    // m_metadata.append(text);
+    lwsl_notice("bufferForSending - add data to m_metadata length: %d write_offset:%d\n",len, m_metadata_write_offset );
 
   }
   addPendingWrite(this);

@@ -457,7 +457,7 @@ extern "C" {
       free(tmp);
     }
 
-    if (pAudioPipe && text) pAudioPipe->bufferForSending(text);
+    if (pAudioPipe && text) pAudioPipe->bufferForSending(text, strlen(text));
     if (pAudioPipe) pAudioPipe->close();
 
     destroy_tech_pvt(tech_pvt);
@@ -479,7 +479,7 @@ extern "C" {
       return SWITCH_STATUS_FALSE;
     }
     AudioPipe *pAudioPipe = static_cast<AudioPipe *>(tech_pvt->pAudioPipe);
-    if (pAudioPipe && text) pAudioPipe->bufferForSending(text);
+    if (pAudioPipe && text) pAudioPipe->bufferForSending(text, strlen(text));
 
     return SWITCH_STATUS_SUCCESS;
   }
@@ -627,10 +627,10 @@ extern "C" {
                 //TODO: Let me try this code later
                 // std::stringstream json;
                 // json << "{\"audio_data\":\"" << pAudioPipe->base64EncodedAudio(transcription_size).c_str() << "\"}";
-                switch_log_printf(SWITCH_CHANNEL_SESSION_LOG(session), SWITCH_LOG_NOTICE, "aai_frame - base64_encode audio - textToSend:%s, len:%u", textToSend, strlen(textToSend));
+                switch_log_printf(SWITCH_CHANNEL_SESSION_LOG(session), SWITCH_LOG_NOTICE, "aai_frame - base64_encode audio - textToSend:%s, len:%u\n", textToSend, strlen(textToSend));
                 pAudioPipe->binaryWritePtrSubtract(transcription_size);
 
-                pAudioPipe->bufferForSending(textToSend);
+                pAudioPipe->bufferForSending(textToSend, strlen(textToSend));
                 // aai_session_send_text(session, textToSend);
                 // aai_session_send_text(session, (char*)json.str());
 
