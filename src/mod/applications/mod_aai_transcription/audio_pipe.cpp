@@ -227,8 +227,8 @@ int AudioPipe::lws_callback(struct lws *wsi,
             // memcpy(buf + LWS_PRE, ap->m_metadata.c_str(), ap->m_metadata.length());
             // buf[ap->m_metadata.length() + LWS_PRE] = '\0';
             int n = ap->m_metadata_write_offset;
-            lwsl_notice("AudioPipe::lws_write: length:%d, metadata:%s\n",n, ap->m_metadata); 
-            lwsl_notice("AudioPipe::lws_write - sending buf(len:%d):%s\n",strlen((char*)audio_data),audio_data); 
+            // lwsl_notice("AudioPipe::lws_write: length:%d, metadata:%s\n",n, ap->m_metadata); 
+            // lwsl_notice("AudioPipe::lws_write - sending buf(len:%d):%s\n",strlen((char*)audio_data),audio_data); 
             // int m = lws_write(wsi, buf + LWS_PRE, n, LWS_WRITE_TEXT);
             int m = lws_write(wsi, audio_data, n, LWS_WRITE_TEXT);
             ap->m_metadata_write_offset = 0;
