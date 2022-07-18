@@ -588,7 +588,7 @@ extern "C" {
         size_t transcription_size = FRAME_SIZE_8000 * ::atoi(numberOfFramesForTranscription);
         // switch_log_printf(SWITCH_CHANNEL_SESSION_LOG(session), SWITCH_LOG_NOTICE, "aai_frame - resampler != null");
 
-        while (switch_core_media_bug_read(bug, &frame, SWITCH_TRUE) == SWITCH_STATUS_SUCCESS) {
+        while (switch_core_media_bug_read(bug, &frame, SWITCH_TRUE) == SWITCH_STATUS_SUCCESS  && !switch_test_flag((&frame), SFF_CNG)) {
           if (frame.datalen) {
             spx_uint32_t out_len = 320; //available >> 1;  // space for samples which are 2 bytes
             spx_uint32_t in_len = frame.samples;
