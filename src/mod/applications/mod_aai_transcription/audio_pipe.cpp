@@ -18,6 +18,8 @@ namespace {
   static int nTcpKeepaliveSecs = requestedTcpKeepaliveSecs ? ::atoi(requestedTcpKeepaliveSecs) : 55;
 }
   static const char* apiToken = std::getenv("MOD_AAI_TRANSCRIPTION_TOKEN");
+static uint8_t audio_data[4285 + LWS_PRE];
+
 
 // remove once we update to lws with this helper
 static int dch_lws_http_basic_auth_gen(const char *user, const char *pw, char *buf, size_t len) {
@@ -220,7 +222,6 @@ int AudioPipe::lws_callback(struct lws *wsi,
           if ( ap->m_metadata_data_size > 0 && ap->m_metadata_write_offset > 0) {
             // uint8_t buf[ap->m_metadata.length() + LWS_PRE];
             int n = ap->m_metadata_data_size;
-            uint8_t audio_data[n + LWS_PRE];
             lwsl_notice("AudioPipe::lws_write - about to send data - data_szie:%d offset:%d\n",n, ap->m_metadata_write_offset); 
             memset(audio_data, '\0', sizeof(audio_data));
             memcpy(audio_data + LWS_PRE, ap->m_metadata, n);
