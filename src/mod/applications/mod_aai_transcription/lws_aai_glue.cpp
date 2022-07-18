@@ -593,13 +593,13 @@ extern "C" {
             spx_uint32_t out_len = 320; //available >> 1;  // space for samples which are 2 bytes
             spx_uint32_t in_len = frame.samples;
 
-            switch_log_printf(SWITCH_CHANNEL_SESSION_LOG(session), SWITCH_LOG_NOTICE, "aai_frame - reading frame - in_len: %u, out_len:%u", in_len, out_len);
+            switch_log_printf(SWITCH_CHANNEL_SESSION_LOG(session), SWITCH_LOG_NOTICE, "aai_frame - reading frame - in_len: %u, out_len:%u\n", in_len, out_len);
             speex_resampler_process_interleaved_int(tech_pvt->resampler, 
               (const spx_int16_t *) frame.data, 
               (spx_uint32_t *) &in_len, 
               (spx_int16_t *) ((char *) pAudioPipe->binaryWritePtr()),
               &out_len);
-              switch_log_printf(SWITCH_CHANNEL_SESSION_LOG(session), SWITCH_LOG_NOTICE, "aai_frame - new value out_len:%u channels:%u", out_len, tech_pvt->channels);
+              switch_log_printf(SWITCH_CHANNEL_SESSION_LOG(session), SWITCH_LOG_NOTICE, "aai_frame - new value out_len:%u channels:%u\n", out_len, tech_pvt->channels);
 
             if (out_len > 0) {
               // bytes written = num channels * 2 * num channels
@@ -607,7 +607,7 @@ extern "C" {
               pAudioPipe->binaryWritePtrAdd(bytes_written);
               available = pAudioPipe->binarySpaceAvailable();
               dirty = true;
-              switch_log_printf(SWITCH_CHANNEL_SESSION_LOG(session), SWITCH_LOG_NOTICE, "aai_frame - bytes_written:%u, available:%u, audioBufferSize: %u", bytes_written, available, pAudioPipe->binarySpaceSize());
+              switch_log_printf(SWITCH_CHANNEL_SESSION_LOG(session), SWITCH_LOG_NOTICE, "aai_frame - bytes_written:%u, available:%u, audioBufferSize: %u\n", bytes_written, available, pAudioPipe->binarySpaceSize());
 
               if (pAudioPipe->binarySpaceSize() >= transcription_size) {
                 /* just for security that we will always have a string terminater */
