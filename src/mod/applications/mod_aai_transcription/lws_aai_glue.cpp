@@ -633,8 +633,7 @@ extern "C" {
                 pAudioPipe->bufferForSending(textToSend, strlen(textToSend));
                 // aai_session_send_text(session, textToSend);
                 // aai_session_send_text(session, (char*)json.str());
-
-                // break; 
+                break; 
               }
               else {
                 switch_log_printf(SWITCH_CHANNEL_SESSION_LOG(session), SWITCH_LOG_DEBUG, "Not enough data to send - binarySpaceSize: %u\n", pAudioPipe->binarySpaceSize());
