@@ -244,7 +244,7 @@ SWITCH_DECLARE(switch_status_t) switch_core_media_bug_read(switch_media_bug_t *b
 	switch_core_session_get_read_impl(bug->session, &read_impl);
 
 	bytes = read_impl.decoded_bytes_per_packet;
-	switch_log_printf(SWITCH_CHANNEL_SESSION_LOG(bug->session), SWITCH_LOG_DEBUG, "bytes_per_packet: %d\n", bytes);
+	switch_log_printf(SWITCH_CHANNEL_SESSION_LOG(bug->session), SWITCH_LOG_DEBUG, "bytes_per_packet: %ld\n", bytes);
 
 	if (frame->buflen < bytes) {
 		switch_log_printf(SWITCH_CHANNEL_SESSION_LOG(switch_core_media_bug_get_session(bug)), SWITCH_LOG_ERROR, "%s frame buffer too small!\n",
@@ -269,7 +269,7 @@ SWITCH_DECLARE(switch_status_t) switch_core_media_bug_read(switch_media_bug_t *b
 		has_read = 1;
 		switch_mutex_lock(bug->read_mutex);
 		do_read = switch_buffer_inuse(bug->raw_read_buffer);
-		switch_log_printf(SWITCH_CHANNEL_SESSION_LOG(bug->session), SWITCH_LOG_DEBUG, "do_read: %d\n", do_read);
+		switch_log_printf(SWITCH_CHANNEL_SESSION_LOG(bug->session), SWITCH_LOG_DEBUG, "do_read: %ld\n", do_read);
 		switch_mutex_unlock(bug->read_mutex);
 	}
 
@@ -341,7 +341,7 @@ SWITCH_DECLARE(switch_status_t) switch_core_media_bug_read(switch_media_bug_t *b
 	if (do_read) {
 		switch_mutex_lock(bug->read_mutex);
 		frame->datalen = (uint32_t) switch_buffer_read(bug->raw_read_buffer, frame->data, do_read);
-		switch_log_printf(SWITCH_CHANNEL_SESSION_LOG(bug->session), SWITCH_LOG_DEBUG, "do_read(%d) - datalen: %d\n",do_read, frame->datalen);
+		switch_log_printf(SWITCH_CHANNEL_SESSION_LOG(bug->session), SWITCH_LOG_DEBUG, "do_read(%ld) - datalen: %d\n",do_read, frame->datalen);
 		if (frame->datalen != do_read) {
 			switch_log_printf(SWITCH_CHANNEL_SESSION_LOG(switch_core_media_bug_get_session(bug)), SWITCH_LOG_ERROR, "Framing Error Reading!\n");
 			switch_core_media_bug_flush(bug);
