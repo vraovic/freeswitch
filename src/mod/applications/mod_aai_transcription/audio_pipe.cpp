@@ -512,7 +512,7 @@ AudioPipe::AudioPipe(const char* uuid, const char* host, unsigned int port, cons
   m_state(LWS_CLIENT_IDLE), m_wsi(nullptr), m_vhd(nullptr), m_callback(callback) {
 
   m_audio_buffer = new uint8_t[m_audio_buffer_max_len];
-  m_metadata = new uint8_t[m_audio_buffer_max_len];
+  m_metadata = new uint8_t[m_audio_buffer_max_len * 3];
   m_metadata_data_size = 0;
   m_metadata_write_offset = 0;
   if (apiToken) {
