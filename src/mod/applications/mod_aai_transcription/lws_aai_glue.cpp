@@ -169,8 +169,12 @@ namespace {
         if (tech_pvt) {
           switch (event) {
             case AudioPipe::CONNECT_SUCCESS:
-              switch_log_printf(SWITCH_CHANNEL_SESSION_LOG(session), SWITCH_LOG_INFO, "connection successful\n");
+              switch_log_printf(SWITCH_CHANNEL_SESSION_LOG(session), SWITCH_LOG_INFO, "connection successful - flush media_bug_buffer\n");
               tech_pvt->responseHandler(session, EVENT_CONNECT_SUCCESS, NULL);
+              
+              //We are connected and ready for transcription; let's flush audio buffer
+              switch_core_media_bug_flush(bug);
+
               // if (strlen(tech_pvt->initialMetadata) > 0) {
               //   switch_log_printf(SWITCH_CHANNEL_SESSION_LOG(session), SWITCH_LOG_DEBUG, "sending initial metadata %s\n", tech_pvt->initialMetadata);
               //   AudioPipe *pAudioPipe = static_cast<AudioPipe *>(tech_pvt->pAudioPipe);
