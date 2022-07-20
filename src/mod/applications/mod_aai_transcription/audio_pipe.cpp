@@ -18,7 +18,6 @@ namespace {
   static int nTcpKeepaliveSecs = requestedTcpKeepaliveSecs ? ::atoi(requestedTcpKeepaliveSecs) : 55;
 }
   static const char* apiToken = std::getenv("MOD_AAI_TRANSCRIPTION_TOKEN");
-static uint8_t audio_data[4285 + LWS_PRE];
 
 
 // remove once we update to lws with this helper
@@ -75,7 +74,7 @@ int AudioPipe::lws_callback(struct lws *wsi,
       break;
 
     case LWS_CALLBACK_EVENT_WAIT_CANCELLED:
-      lwsl_notice("AudioPipe::lws_callback - LWS_CALLBACK_EVENT_WAIT_CANCELLED\n");
+      lwsl_notice("AudioPipe::lws_callback - LWS_CALLBACK_EVENT_WAIT_CANCELLED - processPendingWrites\n");
       processPendingConnects(vhd);
       processPendingDisconnects(vhd);
       processPendingWrites();
@@ -220,11 +219,10 @@ int AudioPipe::lws_callback(struct lws *wsi,
         {
           std::lock_guard<std::mutex> lk(ap->m_text_mutex);
           if ( ap->m_metadata_data_size > 0 && ap->m_metadata_write_offset > 0) {
-            // uint8_t buf[ap->m_metadata.length() + LWS_PRE];
+            uint8_t buf[ap->m_metadata_data_size + LWS_PRE];
             int n = ap->m_metadata_data_size;
-            lwsl_notice("AudioPipe::lws_write - about to send data - data_szie:%d offset:%d\n",n, ap->m_metadata_write_offset); 
-            memset(audio_data, '\0', sizeof(audio_data));
-            memcpy(audio_data + LWS_PRE, ap->m_metadata, n);
+            lwsl_notice("AudioPipe::lws_write - about to send data - data_szie:%d offset:%d packet_index:%d\n",n, ap->m_metadata_write_offset, (ap->m_metadata_write_offset - n)); 
+            memcpy(buf + LWS_PRE, ap->m_metadata + (ap->m_metadata_write_offset - ap->m_metadata_data_size), n);
 
             // memcpy(buf + LWS_PRE, ap->m_metadata.c_str(), ap->m_metadata.length());
             // buf[ap->m_metadata.length() + LWS_PRE] = '\0';
@@ -233,13 +231,9 @@ int AudioPipe::lws_callback(struct lws *wsi,
             // int m = lws_write(wsi, buf + LWS_PRE, n, LWS_WRITE_TEXT);
             lwsl_notice("AudioPipe::lws_write - BEFORE \n"); 
             // lwsl_notice("AudioPipe::lws_write - BEFORE metadata:%s, len:%u\n",ap->m_metadata,n); 
-            int m = lws_write(wsi, audio_data + LWS_PRE, n, LWS_WRITE_TEXT);
+            int m = lws_write(wsi, buf + LWS_PRE, n, LWS_WRITE_TEXT);
             lwsl_notice("AudioPipe::lws_write - AFTER\n"); 
             
-            if (ap->m_metadata_write_offset > ap->m_metadata_data_size)
-            {
-              memcpy(ap->m_metadata,ap->m_metadata + ap->m_metadata_data_size, (ap->m_metadata_write_offset - ap->m_metadata_data_size));
-            }
             ap->m_metadata_write_offset -= ap->m_metadata_data_size;
             if (ap->m_metadata_write_offset < 0)
               ap->m_metadata_write_offset = 0;
@@ -254,6 +248,9 @@ int AudioPipe::lws_callback(struct lws *wsi,
             lws_callback_on_writable(wsi);
 
             return 0;
+          }
+          else {
+            lwsl_notice("AudioPipe::lws_write - NO DATA to send\n"); 
           }
         }
 
@@ -343,12 +340,16 @@ void AudioPipe::processPendingWrites() {
   {
     std::lock_guard<std::mutex> guard(mutex_writes);
     for (auto it = pendingWrites.begin(); it != pendingWrites.end(); ++it) {
-       if ((*it)->m_state == LWS_CLIENT_CONNECTED) writes.push_back(*it);
+       if ((*it)->m_state == LWS_CLIENT_CONNECTED) {
+        lwsl_notice("AudioPipe-processPendingWrites move to writes\n"); 
+         writes.push_back(*it);
+       }
     }  
     pendingWrites.clear();
   }
   for (auto it = writes.begin(); it != writes.end(); ++it) {
     AudioPipe* ap = *it;
+    lwsl_notice("AudioPipe-processPendingWrites write to lws - buffer size:%ld\n",ap->textBufferSize()); 
     lws_callback_on_writable(ap->m_wsi);
   }
 }
@@ -512,7 +513,7 @@ AudioPipe::AudioPipe(const char* uuid, const char* host, unsigned int port, cons
   m_state(LWS_CLIENT_IDLE), m_wsi(nullptr), m_vhd(nullptr), m_callback(callback) {
 
   m_audio_buffer = new uint8_t[m_audio_buffer_max_len];
-  m_metadata = new uint8_t[m_audio_buffer_max_len];
+  m_metadata = new uint8_t[8570 + LWS_PRE];
   m_metadata_data_size = 0;
   m_metadata_write_offset = 0;
   if (apiToken) {
@@ -560,10 +561,13 @@ void AudioPipe::bufferForSending(const char* text, size_t len) {
   if (m_state != LWS_CLIENT_CONNECTED) return;
   {
     std::lock_guard<std::mutex> lk(m_text_mutex);
-    memcpy(m_metadata + m_metadata_write_offset,text, len);
-    m_metadata_write_offset += len;
     if(m_metadata_data_size == 0)
       m_metadata_data_size = len;
+    if (m_metadata_write_offset >= 2 * m_metadata_data_size)
+      m_metadata_write_offset = 0;
+    memcpy(m_metadata + m_metadata_write_offset,text, len);
+    m_metadata_write_offset += len;
+
     // m_metadata.append(text);
     lwsl_notice("bufferForSending - add data to m_metadata length: %d write_offset:%d\n",len, m_metadata_write_offset );
 
