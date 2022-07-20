@@ -54,7 +54,7 @@ public:
   char * binaryWritePtr(void) { 
     return (char *) m_audio_buffer + m_audio_buffer_write_offset;
   }
-  void audioWritePtrAdd(size_t len) {
+  void binaryWritePtrAdd(size_t len) {
     m_audio_buffer_write_offset += len;
   }
   void binaryWritePtrResetToZero(void) {
