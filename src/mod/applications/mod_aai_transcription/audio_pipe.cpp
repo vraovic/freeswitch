@@ -138,7 +138,7 @@ int AudioPipe::lws_callback(struct lws *wsi,
     case LWS_CALLBACK_CLIENT_RECEIVE:
       {
         AudioPipe* ap = *ppAp;
-        lwsl_notice("AudioPipe::lws_callback LWS_CALLBACK_CLIENT_RECEIVE - first response\n");
+        lwsl_notice("AudioPipe::lws_callback LWS_CALLBACK_CLIENT_RECEIVE\n");
         if (!ap) {
           lwsl_err("AudioPipe::lws_callback LWS_CALLBACK_CLIENT_RECEIVE %s unable to find wsi %p..\n", ap->m_uuid.c_str(), wsi); 
           return 0;
@@ -151,7 +151,7 @@ int AudioPipe::lws_callback(struct lws *wsi,
 
         if (lws_is_first_fragment(wsi)) {
           // allocate a buffer for the entire chunk of memory needed
-          lwsl_notice("AudioPipe::lws_callback - lws_is_first_fragment - yes\n");
+          lwsl_notice("AudioPipe::LWS_CALLBACK_CLIENT_RECEIVE - lws_is_first_fragment - yes\n");
           assert(nullptr == ap->m_recv_buf);
           ap->m_recv_buf_len = len + lws_remaining_packet_payload(wsi);
           ap->m_recv_buf = (uint8_t*) malloc(ap->m_recv_buf_len);
@@ -170,7 +170,7 @@ int AudioPipe::lws_callback(struct lws *wsi,
             lwsl_notice("AudioPipe::lws_callback LWS_CALLBACK_CLIENT_RECEIVE max buffer exceeded, truncating message.\n");
           }
           else {
-            lwsl_notice("AudioPipe::lws_callback - newlen:%u\n",newlen);
+            lwsl_notice("AudioPipe::lws_callback LWS_CALLBACK_CLIENT_RECEIVE - newlen:%u\n",newlen);
             ap->m_recv_buf = (uint8_t*) realloc(ap->m_recv_buf, newlen);
             if (nullptr != ap->m_recv_buf) {
               ap->m_recv_buf_len = newlen;
@@ -185,9 +185,10 @@ int AudioPipe::lws_callback(struct lws *wsi,
             ap->m_recv_buf_ptr += len;
           }
           if (lws_is_final_fragment(wsi)) {
-            lwsl_notice("AudioPipe::lws_callback - lws_is_final_fragment - yes\n");
+            lwsl_notice("AudioPipe::lws_callback LWS_CALLBACK_CLIENT_RECEIVE - lws_is_final_fragment - yes\n");
             if (nullptr != ap->m_recv_buf) {
               std::string msg((char *)ap->m_recv_buf, ap->m_recv_buf_ptr - ap->m_recv_buf);
+            lwsl_notice("AudioPipe::lws_callback LWS_CALLBACK_CLIENT_RECEIVE - MSG: %s\n", msg.c_str());
               ap->m_callback(ap->m_uuid.c_str(), AudioPipe::MESSAGE, msg.c_str());
               if (nullptr != ap->m_recv_buf) free(ap->m_recv_buf);
             }
