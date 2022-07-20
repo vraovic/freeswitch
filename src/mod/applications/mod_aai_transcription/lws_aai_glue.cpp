@@ -545,10 +545,10 @@ extern "C" {
       }
 
       pAudioPipe->lockAudioBuffer();
-      size_t available = pAudioPipe->binarySpaceAvailable();
+      size_t available = pAudioPipe->audioSpaceAvailable();
       if (NULL == tech_pvt->resampler) {
         switch_frame_t frame = { 0 };
-        frame.data = pAudioPipe->binaryWritePtr();
+        frame.data = pAudioPipe->audioWritePtr();
         frame.buflen = available;
         if (count %5 == 0) {
           switch_log_printf(SWITCH_CHANNEL_SESSION_LOG(session), SWITCH_LOG_NOTICE, "aai_frame - resampler == null");
@@ -557,25 +557,25 @@ extern "C" {
         while (true) {
 
           // check if buffer would be overwritten; dump packets if so
-          if (available < pAudioPipe->binaryMinSpace()) {
+          if (available < pAudioPipe->audioMinSpace()) {
             if (!tech_pvt->buffer_overrun_notified) {
               tech_pvt->buffer_overrun_notified = 1;
               tech_pvt->responseHandler(session, EVENT_BUFFER_OVERRUN, NULL);
             }
             switch_log_printf(SWITCH_CHANNEL_SESSION_LOG(session), SWITCH_LOG_ERROR, "(%u) dropping packets!\n", 
               tech_pvt->id);
-            pAudioPipe->binaryWritePtrResetToZero();
+            pAudioPipe->audioWritePtrResetToZero();
 
-            frame.data = pAudioPipe->binaryWritePtr();
-            frame.buflen = available = pAudioPipe->binarySpaceAvailable();
+            frame.data = pAudioPipe->audioWritePtr();
+            frame.buflen = available = pAudioPipe->audioSpaceAvailable();
           }
 
           switch_status_t rv = switch_core_media_bug_read(bug, &frame, SWITCH_TRUE);
           if (rv != SWITCH_STATUS_SUCCESS) break;
           if (frame.datalen) {
-            pAudioPipe->binaryWritePtrAdd(frame.datalen);
-            frame.buflen = available = pAudioPipe->binarySpaceAvailable();
-            frame.data = pAudioPipe->binaryWritePtr();
+            pAudioPipe->audioWritePtrAdd(frame.datalen);
+            frame.buflen = available = pAudioPipe->audioSpaceAvailable();
+            frame.data = pAudioPipe->audioWritePtr();
             dirty = true;
           }
         }
@@ -601,19 +601,19 @@ extern "C" {
             speex_resampler_process_interleaved_int(tech_pvt->resampler, 
               (const spx_int16_t *) frame.data, 
               (spx_uint32_t *) &in_len, 
-              (spx_int16_t *) ((char *) pAudioPipe->binaryWritePtr()),
+              (spx_int16_t *) ((char *) pAudioPipe->audioWritePtr()),
               &out_len);
               switch_log_printf(SWITCH_CHANNEL_SESSION_LOG(session), SWITCH_LOG_NOTICE, "aai_frame - new value out_len:%u channels:%u\n", out_len, tech_pvt->channels);
 
             if (out_len > 0) {
               // bytes written = num channels * 2 * num channels
               size_t bytes_written = out_len ;//<< tech_pvt->channels;
-              pAudioPipe->binaryWritePtrAdd(bytes_written);
-              available = pAudioPipe->binarySpaceAvailable();
+              pAudioPipe->audioWritePtrAdd(bytes_written);
+              available = pAudioPipe->audioSpaceAvailable();
               dirty = true;
-              switch_log_printf(SWITCH_CHANNEL_SESSION_LOG(session), SWITCH_LOG_NOTICE, "aai_frame - bytes_written:%u, available:%u, audioBufferSize: %u\n", bytes_written, available, pAudioPipe->binarySpaceSize());
+              switch_log_printf(SWITCH_CHANNEL_SESSION_LOG(session), SWITCH_LOG_NOTICE, "aai_frame - bytes_written:%u, available:%u, audioBufferSize: %u\n", bytes_written, available, pAudioPipe->audioSpaceSize());
 
-              if (pAudioPipe->binarySpaceSize() >= transcription_size) {
+              if (pAudioPipe->audioSpaceSize() >= transcription_size) {
                 /* just for security that we will always have a string terminater */
 	              // memset(buffer, 0,  20 * 1024  * sizeof(char) );
                 	// char *p = strdup("");
@@ -632,7 +632,7 @@ extern "C" {
                 // std::stringstream json;
                 // json << "{\"audio_data\":\"" << pAudioPipe->base64EncodedAudio(transcription_size).c_str() << "\"}";
                 switch_log_printf(SWITCH_CHANNEL_SESSION_LOG(session), SWITCH_LOG_NOTICE, "aai_frame - base64_encode audio - textToSend:%s, len:%u\n", textToSend, strlen(textToSend));
-                pAudioPipe->binaryWritePtrSubtract(transcription_size);
+                pAudioPipe->audioWritePtrSubtract(transcription_size);
 
                 pAudioPipe->bufferForSending(textToSend, strlen(textToSend));
                 // aai_session_send_text(session, textToSend);
@@ -640,11 +640,11 @@ extern "C" {
                 break; 
               }
               else {
-                switch_log_printf(SWITCH_CHANNEL_SESSION_LOG(session), SWITCH_LOG_DEBUG, "Not enough data to send - binarySpaceSize: %u\n", pAudioPipe->binarySpaceSize());
+                switch_log_printf(SWITCH_CHANNEL_SESSION_LOG(session), SWITCH_LOG_DEBUG, "Not enough data to send - audioSpaceSize: %u\n", pAudioPipe->audioSpaceSize());
               }
 
             }
-            if (available < pAudioPipe->binaryMinSpace()) {
+            if (available < pAudioPipe->audioMinSpace()) {
               if (!tech_pvt->buffer_overrun_notified) {
                 tech_pvt->buffer_overrun_notified = 1;
                 switch_log_printf(SWITCH_CHANNEL_SESSION_LOG(session), SWITCH_LOG_ERROR, "(%u) dropping packets!\n", 

@@ -592,11 +592,11 @@ void AudioPipe::do_graceful_shutdown() {
 }
 
 std::string AudioPipe::base64EncodedAudio(size_t len) {
-  return drachtio::base64_encode((unsigned char*)binaryReadPtr(), len);
+  return drachtio::base64_encode((unsigned char*)audioReadPtr(), len);
 }
 
-void AudioPipe::binaryWritePtrSubtract(size_t len) {
- lwsl_notice("binaryWritePtrSubtract - m_audio_buffer_write_offset: %u, len:%u\n", m_audio_buffer_write_offset,len);
+void AudioPipe::audioWritePtrSubtract(size_t len) {
+ lwsl_notice("audioWritePtrSubtract - m_audio_buffer_write_offset: %u, len:%u\n", m_audio_buffer_write_offset,len);
 
   if ((m_audio_buffer_write_offset) > len ) {
     uint8_t * buffer[m_audio_buffer_write_offset - len + 1];
@@ -606,7 +606,7 @@ void AudioPipe::binaryWritePtrSubtract(size_t len) {
     // memcpy(m_audio_buffer + LWS_PRE, m_audio_buffer + LWS_PRE + len, m_audio_buffer_write_offset - len);
   }
   m_audio_buffer_write_offset -= len;
- lwsl_notice("binaryWritePtrSubtract - exit - m_audio_buffer_write_offset: %u\n", m_audio_buffer_write_offset);
+ lwsl_notice("audioWritePtrSubtract - exit - m_audio_buffer_write_offset: %u\n", m_audio_buffer_write_offset);
 }
 
 

@@ -45,27 +45,27 @@ public:
   LwsState_t getLwsState(void) { return m_state; }
   void connect(void);
   void bufferForSending(const char* text, size_t len);
-  size_t binarySpaceAvailable(void) {
+  size_t audioSpaceAvailable(void) {
     return m_audio_buffer_max_len - m_audio_buffer_write_offset;
   }
-  size_t binarySpaceSize(void) {
+  size_t audioSpaceSize(void) {
     return m_audio_buffer_write_offset;
   }
-  size_t binaryMinSpace(void) {
+  size_t audioMinSpace(void) {
     return m_audio_buffer_min_freespace;
   }
-  char * binaryWritePtr(void) { 
+  char * audioWritePtr(void) { 
     return (char *) m_audio_buffer + m_audio_buffer_write_offset;
   }
-  char * binaryReadPtr(void) { 
+  char * audioReadPtr(void) { 
     return (char *) m_audio_buffer;
   }
-  void binaryWritePtrAdd(size_t len) {
+  void audioWritePtrAdd(size_t len) {
     m_audio_buffer_write_offset += len;
   }
-  void binaryWritePtrSubtract(size_t len);
+  void audioWritePtrSubtract(size_t len);
   
-  void binaryWritePtrResetToZero(void) {
+  void audioWritePtrResetToZero(void) {
     m_audio_buffer_write_offset = 0;
   }
 
@@ -127,6 +127,7 @@ private:
   std::string m_path;
   uint8_t *m_metadata;
   size_t m_metadata_write_offset;
+  size_t m_metadata_max_length;
   size_t m_metadata_data_size;
   std::mutex m_text_mutex;
   std::mutex m_audio_mutex;
