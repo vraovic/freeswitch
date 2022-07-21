@@ -594,6 +594,10 @@ void AudioPipe::do_graceful_shutdown() {
 std::string AudioPipe::base64EncodedAudio(size_t len) {
   return drachtio::base64_encode((unsigned char*)audioReadPtr(), len);
 }
+char* AudioPipe::b64AudioEncoding(size_t len) {
+  return drachtio::b64_encode((unsigned char*)audioReadPtr(), len);
+}
+
 
 void AudioPipe::audioWritePtrSubtract(size_t len) {
  lwsl_notice("audioWritePtrSubtract - m_audio_buffer_write_offset: %u, len:%u\n", m_audio_buffer_write_offset,len);

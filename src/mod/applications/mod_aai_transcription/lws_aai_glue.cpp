@@ -527,7 +527,7 @@ extern "C" {
     private_t* tech_pvt = (private_t*) switch_core_media_bug_get_user_data(bug);
     size_t inuse = 0;
     bool dirty = false;
-    static int count = 0;
+
     char *p = (char *) "{\"msg\": \"buffer overrun\"}";
                       //  "{\"audio_data\": \"UklGRtjIAABXQVZFZ...\"}";
 
@@ -628,7 +628,7 @@ extern "C" {
                 memset(textToSend, '\0', sizeof(textToSend));
                 strcat(textToSend, "{\"audio_data\":\"");
                 // strcat(textToSend, pAudioPipe->base64EncodedAudio(transcription_size).c_str());
-                strcat(textToSend, pAudioPipe->base64AudioEncoding(transcription_size));
+                strcat(textToSend, pAudioPipe->b64AudioEncoding(transcription_size));
                 strcat(textToSend, "\"}");
                 //TODO: Let me try this code later
                 // std::stringstream json;
@@ -658,7 +658,6 @@ extern "C" {
           }
         }
       }
-      count += 1;
 
       pAudioPipe->unlockAudioBuffer();
       switch_mutex_unlock(tech_pvt->mutex);

@@ -78,7 +78,7 @@ public:
   }
   std::string base64EncodedAudio(size_t len);
 
-  char* base64AudioEncoding(size_t len);
+  char* b64AudioEncoding(size_t len);
 
   void unlockAudioBuffer(void) ;
 
