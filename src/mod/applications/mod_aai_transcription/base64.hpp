@@ -59,23 +59,23 @@ static inline bool is_base64(unsigned char c) {
 
 //////////////////
 // base64 source - ixwebsocket - IXWebSocketHandshakeKeyGen.h
-    static inline void base64(unsigned char* src, char* dst)
+static inline void base64(unsigned char* src, char* dst)
+{
+    const char* b64 = "ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz0123456789+/";
+    for (int i = 0; i < 18; i += 3)
     {
-        const char* b64 = "ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz0123456789+/";
-        for (int i = 0; i < 18; i += 3)
-        {
-            *dst++ = b64[(src[i] >> 2) & 63];
-            *dst++ = b64[((src[i] & 3) << 4) | ((src[i + 1] & 240) >> 4)];
-            *dst++ = b64[((src[i + 1] & 15) << 2) | ((src[i + 2] & 192) >> 6)];
-            *dst++ = b64[src[i + 2] & 63];
-        }
-        *dst++ = b64[(src[18] >> 2) & 63];
-        *dst++ = b64[((src[18] & 3) << 4) | ((src[19] & 240) >> 4)];
-        *dst++ = b64[((src[19] & 15) << 2)];
-        *dst++ = '=';
+        *dst++ = b64[(src[i] >> 2) & 63];
+        *dst++ = b64[((src[i] & 3) << 4) | ((src[i + 1] & 240) >> 4)];
+        *dst++ = b64[((src[i + 1] & 15) << 2) | ((src[i + 2] & 192) >> 6)];
+        *dst++ = b64[src[i + 2] & 63];
     }
+    *dst++ = b64[(src[18] >> 2) & 63];
+    *dst++ = b64[((src[18] & 3) << 4) | ((src[19] & 240) >> 4)];
+    *dst++ = b64[((src[19] & 15) << 2)];
+    *dst++ = '=';
+}
 //// https://nachtimwald.com/2017/11/18/base64-encode-and-decode-in-c/
-size_t b64_encoded_size(size_t inlen)
+static inline size_t b64_encoded_size(size_t inlen)
 {
 	size_t ret;
 
@@ -88,7 +88,7 @@ size_t b64_encoded_size(size_t inlen)
 	return ret;
 }
 const char b64chars[] = "ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz0123456789+/";
-char* b64_encode(const unsigned char *in, size_t len)
+inline char* b64_encode(const unsigned char *in, size_t len)
 {
 	char*   out;
 	size_t  elen;
