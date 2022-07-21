@@ -32,7 +32,7 @@ namespace {
   static unsigned int nServiceThreads = std::max(1, std::min(requestedNumServiceThreads ? ::atoi(requestedNumServiceThreads) : 1, 5));
   static unsigned int idxCallCount = 0;
   static uint32_t playCount = 0;
-  static uint32_t base64AudioSize = drachtio:b64_encoded_size(FRAME_SIZE_8000 * numberOfFramesForTranscription );
+  static uint32_t base64AudioSize = drachtio::b64_encoded_size(FRAME_SIZE_8000 * numberOfFramesForTranscription );
   static char textToSend[(base64AudioSize  + 20) * 2];
 
   void processIncomingMessage(private_t* tech_pvt, switch_core_session_t* session, const char* message) {
