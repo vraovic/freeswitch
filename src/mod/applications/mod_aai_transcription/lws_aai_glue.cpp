@@ -33,7 +33,7 @@ namespace {
   static unsigned int idxCallCount = 0;
   static uint32_t playCount = 0;
   static uint32_t base64AudioSize = drachtio::b64_encoded_size(FRAME_SIZE_8000 * ::atoi(numberOfFramesForTranscription) );
-  static char textToSend[(base64AudioSize  + 20) * 2];
+  // static char textToSend[(base64AudioSize  + 20) * 2];
 
   void processIncomingMessage(private_t* tech_pvt, switch_core_session_t* session, const char* message) {
     std::string msg = message;
@@ -626,6 +626,7 @@ extern "C" {
 			            // strcat(p, conference_api_sub_commands[i].pcommand);
 
 
+                char textToSend[(base64AudioSize  + 20) * 2];
                 memset(textToSend, '\0', sizeof(textToSend));
                 strcat(textToSend, "{\"audio_data\":\"");
                 // strcat(textToSend, pAudioPipe->base64EncodedAudio(transcription_size).c_str());
