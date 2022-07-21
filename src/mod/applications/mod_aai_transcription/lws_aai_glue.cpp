@@ -628,7 +628,7 @@ extern "C" {
                 memset(textToSend, '\0', sizeof(textToSend));
                 strcat(textToSend, "{\"audio_data\":\"");
                 // strcat(textToSend, pAudioPipe->base64EncodedAudio(transcription_size).c_str());
-                strcat(textToSend, pAudioPipe->base64Encode(transcription_size));
+                strcat(textToSend, pAudioPipe->base64AudioEncoding(transcription_size));
                 strcat(textToSend, "\"}");
                 //TODO: Let me try this code later
                 // std::stringstream json;
