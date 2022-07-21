@@ -18,9 +18,9 @@
 #include "mod_aai_transcription.h"
 #include "audio_pipe.hpp"
 
-#define RTP_PACKETIZATION_PERIOD 20
-#define FRAME_SIZE_8000  320 /*which means each 20ms frame as 320 bytes at 8 khz (1 channel only)*/
-#define AAI_TRANSCRIPTION_FRAME_SIZE  FRAME_SIZE_8000  * 15 /*which means each 150ms*/
+// #define RTP_PACKETIZATION_PERIOD 20
+// #define FRAME_SIZE_8000  320 /*which means each 20ms frame as 320 bytes at 8 khz (1 channel only)*/
+// #define AAI_TRANSCRIPTION_FRAME_SIZE  FRAME_SIZE_8000  * 15 /*which means each 150ms*/
 
 namespace {
   static const char *requestedBufferSecs = std::getenv("MOD_AUDIO_AAI_BUFFER_SECS");

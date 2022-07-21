@@ -7,6 +7,10 @@
 
 #include <libwebsockets.h>
 
+#define RTP_PACKETIZATION_PERIOD 20
+#define FRAME_SIZE_8000  320 /*which means each 20ms frame as 320 bytes at 8 khz (1 channel only)*/
+#define AAI_TRANSCRIPTION_FRAME_SIZE  FRAME_SIZE_8000  * 15 /*which means each 150ms*/
+
 class AudioPipe {
 public:
   enum LwsState_t {
