@@ -90,7 +90,7 @@ size_t b64_encoded_size(size_t inlen)
 const char b64chars[] = "ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz0123456789+/";
 char* b64_encode(const unsigned char *in, size_t len)
 {
-	char   *out;
+	char*   out;
 	size_t  elen;
 	size_t  i;
 	size_t  j;
@@ -100,7 +100,7 @@ char* b64_encode(const unsigned char *in, size_t len)
 		return NULL;
 
 	elen = b64_encoded_size(len);
-	out  = malloc(elen+1);
+	out  = (char*) malloc(elen+1);
 	out[elen] = '\0';
 
 	for (i=0, j=0; i<len; i+=3, j+=4) {
