@@ -32,7 +32,7 @@ namespace {
   static unsigned int nServiceThreads = std::max(1, std::min(requestedNumServiceThreads ? ::atoi(requestedNumServiceThreads) : 1, 5));
   static unsigned int idxCallCount = 0;
   static uint32_t playCount = 0;
-  static uint32_t base64AudioSize = drachtio::b64_encoded_size(FRAME_SIZE_8000 * ::atoi(numberOfFramesForTranscription) );
+  static uint32_t base64AudioSize = drachtio::b64_encoded_size(FRAME_SIZE_8000 * ::atoi(numberOfFramesForTranscription) * 2);
   // static char textToSend[(base64AudioSize  + 20) * 2];
 
   void processIncomingMessage(private_t* tech_pvt, switch_core_session_t* session, const char* message) {
@@ -533,18 +533,18 @@ extern "C" {
                       //  "{\"audio_data\": \"UklGRtjIAABXQVZFZ...\"}";
 
     if (!tech_pvt || tech_pvt->audio_paused || tech_pvt->graceful_shutdown) {
-      switch_log_printf(SWITCH_CHANNEL_SESSION_LOG(session), SWITCH_LOG_NOTICE, "aai_frame - return - audio paused or shutdown");
+      switch_log_printf(SWITCH_CHANNEL_SESSION_LOG(session), SWITCH_LOG_NOTICE, "aai_frame - return - audio paused or shutdown\n");
       return SWITCH_TRUE;
     }
     if (switch_mutex_trylock(tech_pvt->mutex) == SWITCH_STATUS_SUCCESS) {
       if (!tech_pvt->pAudioPipe) {
         switch_mutex_unlock(tech_pvt->mutex);
-        switch_log_printf(SWITCH_CHANNEL_SESSION_LOG(session), SWITCH_LOG_NOTICE, "aai_frame - return - no pAudioPipe");
+        switch_log_printf(SWITCH_CHANNEL_SESSION_LOG(session), SWITCH_LOG_NOTICE, "aai_frame - return - no pAudioPipe\n");
         return SWITCH_TRUE;
       }
       AudioPipe *pAudioPipe = static_cast<AudioPipe *>(tech_pvt->pAudioPipe);
       if (pAudioPipe->getLwsState() != AudioPipe::LWS_CLIENT_CONNECTED) {
-        switch_log_printf(SWITCH_CHANNEL_SESSION_LOG(session), SWITCH_LOG_NOTICE, "aai_frame - return - pAudioPipe is not CONNECTED");
+        switch_log_printf(SWITCH_CHANNEL_SESSION_LOG(session), SWITCH_LOG_NOTICE, "aai_frame - return - pAudioPipe is not CONNECTED\n");
         switch_mutex_unlock(tech_pvt->mutex);
         return SWITCH_TRUE;
       }
@@ -591,7 +591,7 @@ extern "C" {
         frame.buflen = FRAME_SIZE_8000;
         // frame.buflen = AAI_TRANSCRIPTION_FRAME_SIZE;
 
-        size_t transcription_size = FRAME_SIZE_8000 * ::atoi(numberOfFramesForTranscription);
+        size_t transcription_size = FRAME_SIZE_8000 * ::atoi(numberOfFramesForTranscription) * 2;
         // switch_log_printf(SWITCH_CHANNEL_SESSION_LOG(session), SWITCH_LOG_NOTICE, "aai_frame - resampler != null");
 
         while (switch_core_media_bug_read(bug, &frame, SWITCH_TRUE) == SWITCH_STATUS_SUCCESS ) {
@@ -609,7 +609,7 @@ extern "C" {
 
             if (out_len > 0) {
               // bytes written = num channels * 2 * num channels
-              size_t bytes_written = out_len ;//<< tech_pvt->channels;
+              size_t bytes_written = out_len << tech_pvt->channels;
               pAudioPipe->audioWritePtrAdd(bytes_written);
               available = pAudioPipe->audioSpaceAvailable();
               dirty = true;
@@ -626,7 +626,7 @@ extern "C" {
 			            // strcat(p, conference_api_sub_commands[i].pcommand);
 
 
-                char textToSend[(base64AudioSize  + 20) * 2];
+                char textToSend[(base64AudioSize  + 20)];
                 memset(textToSend, '\0', sizeof(textToSend));
                 strcat(textToSend, "{\"audio_data\":\"");
                 // strcat(textToSend, pAudioPipe->base64EncodedAudio(transcription_size).c_str());
