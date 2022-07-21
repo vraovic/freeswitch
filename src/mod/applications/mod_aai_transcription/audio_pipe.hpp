@@ -77,7 +77,9 @@ public:
     m_audio_mutex.lock();
   }
   std::string base64EncodedAudio(size_t len);
-  
+
+  char* AudioPipe::base64Encode(size_t len);
+
   void unlockAudioBuffer(void) ;
 
   void do_graceful_shutdown();

@@ -327,6 +327,7 @@ SWITCH_DECLARE(switch_status_t) switch_core_media_bug_read(switch_media_bug_t *b
 	}
 
 	if ((fill_read && fill_write) || (fill && (fill_read || fill_write))) {
+		switch_log_printf(SWITCH_CHANNEL_SESSION_LOG(bug->session), SWITCH_LOG_ERROR, "media_bug_read - NO AUDIO - return FALSE\n");
 		return SWITCH_STATUS_FALSE;
 	}
 
@@ -341,7 +342,7 @@ SWITCH_DECLARE(switch_status_t) switch_core_media_bug_read(switch_media_bug_t *b
 	if (do_read) {
 		switch_mutex_lock(bug->read_mutex);
 		frame->datalen = (uint32_t) switch_buffer_read(bug->raw_read_buffer, frame->data, do_read);
-		switch_log_printf(SWITCH_CHANNEL_SESSION_LOG(bug->session), SWITCH_LOG_ERROR, "do_read(%ld) - datalen: %d\n",do_read, frame->datalen);
+		switch_log_printf(SWITCH_CHANNEL_SESSION_LOG(bug->session), SWITCH_LOG_ERROR, "do_read:%ld - datalen:%d\n",do_read, frame->datalen);
 		if (frame->datalen != do_read) {
 			switch_log_printf(SWITCH_CHANNEL_SESSION_LOG(switch_core_media_bug_get_session(bug)), SWITCH_LOG_ERROR, "Framing Error Reading!\n");
 			switch_core_media_bug_flush(bug);

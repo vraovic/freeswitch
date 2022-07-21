@@ -531,15 +531,19 @@ extern "C" {
     char *p = (char *) "{\"msg\": \"buffer overrun\"}";
                       //  "{\"audio_data\": \"UklGRtjIAABXQVZFZ...\"}";
 
-    if (!tech_pvt || tech_pvt->audio_paused || tech_pvt->graceful_shutdown) return SWITCH_TRUE;
-    
+    if (!tech_pvt || tech_pvt->audio_paused || tech_pvt->graceful_shutdown) {
+      switch_log_printf(SWITCH_CHANNEL_SESSION_LOG(session), SWITCH_LOG_NOTICE, "aai_frame - return - audio paused or shutdown");
+      return SWITCH_TRUE;
+    }
     if (switch_mutex_trylock(tech_pvt->mutex) == SWITCH_STATUS_SUCCESS) {
       if (!tech_pvt->pAudioPipe) {
         switch_mutex_unlock(tech_pvt->mutex);
+        switch_log_printf(SWITCH_CHANNEL_SESSION_LOG(session), SWITCH_LOG_NOTICE, "aai_frame - return - no pAudioPipe");
         return SWITCH_TRUE;
       }
       AudioPipe *pAudioPipe = static_cast<AudioPipe *>(tech_pvt->pAudioPipe);
       if (pAudioPipe->getLwsState() != AudioPipe::LWS_CLIENT_CONNECTED) {
+        switch_log_printf(SWITCH_CHANNEL_SESSION_LOG(session), SWITCH_LOG_NOTICE, "aai_frame - return - pAudioPipe is not CONNECTED");
         switch_mutex_unlock(tech_pvt->mutex);
         return SWITCH_TRUE;
       }
@@ -550,9 +554,6 @@ extern "C" {
         switch_frame_t frame = { 0 };
         frame.data = pAudioPipe->audioWritePtr();
         frame.buflen = available;
-        if (count %5 == 0) {
-          switch_log_printf(SWITCH_CHANNEL_SESSION_LOG(session), SWITCH_LOG_NOTICE, "aai_frame - resampler == null");
-        }
 
         while (true) {
 
@@ -582,11 +583,11 @@ extern "C" {
       }
       else {
 
-        uint8_t data[SWITCH_RECOMMENDED_BUFFER_SIZE];
+        uint8_t data[FRAME_SIZE_8000];
         // uint8_t data[AAI_TRANSCRIPTION_FRAME_SIZE]; // 100 msec of audio
         switch_frame_t frame = { 0 };
         frame.data = data;
-        frame.buflen = SWITCH_RECOMMENDED_BUFFER_SIZE;
+        frame.buflen = FRAME_SIZE_8000;
         // frame.buflen = AAI_TRANSCRIPTION_FRAME_SIZE;
 
         size_t transcription_size = FRAME_SIZE_8000 * ::atoi(numberOfFramesForTranscription);
@@ -594,7 +595,7 @@ extern "C" {
 
         while (switch_core_media_bug_read(bug, &frame, SWITCH_TRUE) == SWITCH_STATUS_SUCCESS ) {
           if (frame.datalen) {
-            spx_uint32_t out_len = 320; //available >> 1;  // space for samples which are 2 bytes
+            spx_uint32_t out_len = available >> 1;  // space for samples which are 2 bytes
             spx_uint32_t in_len = frame.samples;
 
             switch_log_printf(SWITCH_CHANNEL_SESSION_LOG(session), SWITCH_LOG_NOTICE, "aai_frame - reading frame:%s, - in_len: %u, out_len:%u\n",frame.data, in_len, out_len);
@@ -626,7 +627,8 @@ extern "C" {
 
                 memset(textToSend, '\0', sizeof(textToSend));
                 strcat(textToSend, "{\"audio_data\":\"");
-                strcat(textToSend, pAudioPipe->base64EncodedAudio(transcription_size).c_str());
+                // strcat(textToSend, pAudioPipe->base64EncodedAudio(transcription_size).c_str());
+                strcat(textToSend, pAudioPipe->base64Encode(transcription_size));
                 strcat(textToSend, "\"}");
                 //TODO: Let me try this code later
                 // std::stringstream json;
