@@ -32,7 +32,7 @@ namespace {
   static unsigned int nServiceThreads = std::max(1, std::min(requestedNumServiceThreads ? ::atoi(requestedNumServiceThreads) : 1, 5));
   static unsigned int idxCallCount = 0;
   static uint32_t playCount = 0;
-  static uint32_t base64AudioSize = drachtio::b64_encoded_size(FRAME_SIZE_8000 * ::atoi(numberOfFramesForTranscription) * 2);
+  static uint32_t base64AudioSize = norwood::b64_encoded_size(FRAME_SIZE_8000 * ::atoi(numberOfFramesForTranscription) * 2);
   // static char textToSend[(base64AudioSize  + 20) * 2];
 
   void processIncomingMessage(private_t* tech_pvt, switch_core_session_t* session, const char* message) {
@@ -91,7 +91,7 @@ namespace {
           if (validAudio) {
             char szFilePath[256];
 
-            std::string rawAudio = drachtio::base64_decode(jsonAudio->valuestring);
+            std::string rawAudio = norwood::base64_decode(jsonAudio->valuestring);
             switch_snprintf(szFilePath, 256, "%s%s%s_%d.tmp%s", SWITCH_GLOBAL_dirs.temp_dir, 
               SWITCH_PATH_SEPARATOR, tech_pvt->sessionId, playCount++, fileType);
             std::ofstream f(szFilePath, std::ofstream::binary);
@@ -599,13 +599,12 @@ extern "C" {
             spx_uint32_t out_len = available >> 1;  // space for samples which are 2 bytes
             spx_uint32_t in_len = frame.samples;
 
-            switch_log_printf(SWITCH_CHANNEL_SESSION_LOG(session), SWITCH_LOG_NOTICE, "aai_frame - reading frame:%s, - in_len: %u, out_len:%u\n",frame.data, in_len, out_len);
             speex_resampler_process_interleaved_int(tech_pvt->resampler, 
               (const spx_int16_t *) frame.data, 
               (spx_uint32_t *) &in_len, 
               (spx_int16_t *) ((char *) pAudioPipe->audioWritePtr()),
               &out_len);
-              switch_log_printf(SWITCH_CHANNEL_SESSION_LOG(session), SWITCH_LOG_NOTICE, "aai_frame - new value out_len:%u channels:%u\n", out_len, tech_pvt->channels);
+              switch_log_printf(SWITCH_CHANNEL_SESSION_LOG(session), SWITCH_LOG_NOTICE, "aai_frame - in_len: %u, new value out_len:%u channels:%u\n",in_len, out_len, tech_pvt->channels);
 
             if (out_len > 0) {
               // bytes written = num channels * 2 * num channels

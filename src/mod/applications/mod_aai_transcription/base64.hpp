@@ -38,7 +38,7 @@
 
 #include <string>
 
-namespace drachtio {
+namespace norwood {
 
 static std::string const base64_chars =
              "ABCDEFGHIJKLMNOPQRSTUVWXYZ"
