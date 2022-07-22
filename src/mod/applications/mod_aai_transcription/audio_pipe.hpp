@@ -73,10 +73,6 @@ public:
     m_audio_buffer_write_offset = 0;
   }
 
-  size_t textBufferSize(void) {
-    return m_metadata_write_offset;
-  }
-
   void lockAudioBuffer(void) {
     m_audio_mutex.lock();
   }
