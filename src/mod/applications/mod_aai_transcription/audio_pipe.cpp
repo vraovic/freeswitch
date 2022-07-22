@@ -219,26 +219,13 @@ int AudioPipe::lws_callback(struct lws *wsi,
         // check for text frames to send
         {
           std::lock_guard<std::mutex> lk(ap->m_text_mutex);
-          if ( ap->m_metadata_data_size > 0 && ap->m_metadata_write_offset > 0) {
-            uint8_t buf[ap->m_metadata_data_size + LWS_PRE];
-            int n = ap->m_metadata_data_size;
-            lwsl_notice("AudioPipe::lws_write - about to send data - data_szie:%d offset:%d packet_index:%d\n",n, ap->m_metadata_write_offset, (ap->m_metadata_write_offset - n)); 
-            memcpy(buf + LWS_PRE, ap->m_metadata + (ap->m_metadata_write_offset - ap->m_metadata_data_size), n);
-
-            // memcpy(buf + LWS_PRE, ap->m_metadata.c_str(), ap->m_metadata.length());
-            // buf[ap->m_metadata.length() + LWS_PRE] = '\0';
-            // lwsl_notice("AudioPipe::lws_write: length:%d, metadata:%s\n",n, ap->m_metadata); 
-            // lwsl_notice("AudioPipe::lws_write - sending buf(len:%d):%s\n",strlen((char*)audio_data),audio_data); 
-            // int m = lws_write(wsi, buf + LWS_PRE, n, LWS_WRITE_TEXT);
-            lwsl_notice("AudioPipe::lws_write - BEFORE \n"); 
-            // lwsl_notice("AudioPipe::lws_write - BEFORE metadata:%s, len:%u\n",ap->m_metadata,n); 
+          if (ap->m_metadata.length() > 0) {
+            uint8_t buf[ap->m_metadata.length() + LWS_PRE];
+            memcpy(buf + LWS_PRE, ap->m_metadata.c_str(), ap->m_metadata.length());
+            int n = ap->m_metadata.length();
+            lwsl_notice("AudioPipe::lws_write - send m_metadata (audio) - length: %ld\n",n); 
             int m = lws_write(wsi, buf + LWS_PRE, n, LWS_WRITE_TEXT);
-            lwsl_notice("AudioPipe::lws_write - AFTER\n"); 
-            
-            ap->m_metadata_write_offset -= ap->m_metadata_data_size;
-            if (ap->m_metadata_write_offset < 0)
-              ap->m_metadata_write_offset = 0;
-            
+            ap->m_metadata.clear();
             if (m < n) {
               lwsl_notice("AudioPipe::lws_write - CAN'T send all data\n"); 
               return -1;
@@ -251,7 +238,7 @@ int AudioPipe::lws_callback(struct lws *wsi,
             return 0;
           }
           else {
-            lwsl_notice("AudioPipe::lws_write - NO DATA to send\n"); 
+            lwsl_notice("AudioPipe::lws_write - NO DATA (m_metadata) to send\n"); 
           }
         }
 
@@ -350,7 +337,7 @@ void AudioPipe::processPendingWrites() {
   }
   for (auto it = writes.begin(); it != writes.end(); ++it) {
     AudioPipe* ap = *it;
-    lwsl_notice("AudioPipe-processPendingWrites write to lws - buffer size:%ld\n",ap->textBufferSize()); 
+    lwsl_notice("AudioPipe-processPendingWrites write to lws - buffer size:xxx\n"); 
     lws_callback_on_writable(ap->m_wsi);
   }
 }
@@ -514,16 +501,12 @@ AudioPipe::AudioPipe(const char* uuid, const char* host, unsigned int port, cons
   m_state(LWS_CLIENT_IDLE), m_wsi(nullptr), m_vhd(nullptr), m_callback(callback) {
 
   m_audio_buffer = new uint8_t[m_audio_buffer_max_len];
-  m_metadata = new uint8_t[((drachtio::b64_encoded_size(FRAME_SIZE_8000 * ::atoi(std::getenv("MOD_AAI_TRANSCRIPTION_FRAME_SIZE")) * 2))  + 20) * 2 + LWS_PRE];
-  m_metadata_data_size = 0;
-  m_metadata_write_offset = 0;
   if (apiToken) {
     m_api_token.assign(apiToken);
   }
 }
 AudioPipe::~AudioPipe() {
   if (m_audio_buffer) delete [] m_audio_buffer;
-  if (m_metadata) delete [] m_metadata;
   if (m_recv_buf) delete [] m_recv_buf;
 }
 
@@ -562,16 +545,7 @@ void AudioPipe::bufferForSending(const char* text, size_t len) {
   if (m_state != LWS_CLIENT_CONNECTED) return;
   {
     std::lock_guard<std::mutex> lk(m_text_mutex);
-    if(m_metadata_data_size == 0)
-      m_metadata_data_size = len;
-    if (m_metadata_write_offset >= 2 * m_metadata_data_size)
-      m_metadata_write_offset = 0;
-    memcpy(m_metadata + m_metadata_write_offset,text, len);
-    m_metadata_write_offset += len;
-
-    // m_metadata.append(text);
-    lwsl_notice("bufferForSending - add data to m_metadata length: %d write_offset:%d\n",len, m_metadata_write_offset );
-
+    m_metadata.append(text);
   }
   addPendingWrite(this);
 }
@@ -592,10 +566,10 @@ void AudioPipe::do_graceful_shutdown() {
 }
 
 std::string AudioPipe::base64EncodedAudio(size_t len) {
-  return drachtio::base64_encode((unsigned char*)audioReadPtr(), len);
+  return norwood::base64_encode((unsigned char*)audioReadPtr(), len);
 }
 char* AudioPipe::b64AudioEncoding(size_t len) {
-  return drachtio::b64_encode((unsigned char*)audioReadPtr(), len);
+  return norwood::b64_encode((unsigned char*)audioReadPtr(), len);
 }
 
 

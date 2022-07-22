@@ -131,10 +131,7 @@ private:
   std::string m_host;
   unsigned int m_port;
   std::string m_path;
-  uint8_t *m_metadata;
-  size_t m_metadata_write_offset;
-  size_t m_metadata_max_length;
-  size_t m_metadata_data_size;
+  std::string m_metadata;
   std::mutex m_text_mutex;
   std::mutex m_audio_mutex;
   int m_sslFlags;
