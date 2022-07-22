@@ -226,10 +226,10 @@ int AudioPipe::lws_callback(struct lws *wsi,
             lwsl_notice("AudioPipe::lws_write - send audio to AAI - length: %ld\n",n); 
             int m = lws_write(wsi, buf + LWS_PRE, 8553, LWS_WRITE_TEXT);
             ap->m_metadata.clear();
-            if (m < n) {
-              lwsl_notice("AudioPipe::lws_write - CAN'T send all data\n"); 
-              return -1;
-            }
+            // if (m < n) {
+            //   lwsl_notice("AudioPipe::lws_write - CAN'T send all data\n"); 
+            //   return -1;
+            // }
 
             // there may be audio data, but only one write per writeable event
             // get it next time
