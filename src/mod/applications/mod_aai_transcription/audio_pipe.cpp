@@ -236,7 +236,7 @@ int AudioPipe::lws_callback(struct lws *wsi,
 
             // there may be audio data, but only one write per writeable event
             // get it next time
-            lws_callback_on_writable(ap->m_wsi);
+            // lws_callback_on_writable(ap->m_wsi);
 
             return 0;
           }
