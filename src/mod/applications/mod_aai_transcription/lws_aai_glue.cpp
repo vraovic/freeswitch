@@ -149,17 +149,19 @@ namespace {
       else if (0 == type.compare("json")) {
         switch_log_printf(SWITCH_CHANNEL_LOG, SWITCH_LOG_DEBUG, "processIncomingMessage - jsonData:%s\n", jsonData);
         cJSON* jsonMsgType = cJSON_GetObjectItem(jsonData, "message_type");
-        if (jsonMsgType == "FinalTranscript")
-        {
-           cJSON* jsonTranscription = cJSON_GetObjectItem(jsonData, "text");
-            switch_log_printf(SWITCH_CHANNEL_LOG, SWITCH_LOG_DEBUG, "processIncomingMessage - FinalTranscript:%s\n", jsonTranscription);
-           if (jsonTranscription && jsonTranscription->valuestring) 
-           {
-              char* jsonString = cJSON_PrintUnformatted(jsonTranscription);
-              switch_log_printf(SWITCH_CHANNEL_LOG, SWITCH_LOG_DEBUG, "processIncomingMessage - FinalTranscript - send transcripion:%s\n", jsonString);
-              tech_pvt->responseHandler(session, EVENT_TRANSCRIPTION, jsonString);
-              free(jsonString);
-           }
+        if (jsonMsgType && jsonMsgType->valuestring) {
+          if (jsonMsgType->valuestring == "FinalTranscript")
+          {
+            cJSON* jsonTranscription = cJSON_GetObjectItem(jsonData, "text");
+              switch_log_printf(SWITCH_CHANNEL_LOG, SWITCH_LOG_DEBUG, "processIncomingMessage - FinalTranscript:%s\n", jsonTranscription);
+            if (jsonTranscription && jsonTranscription->valuestring) 
+            {
+                char* jsonString = cJSON_PrintUnformatted(jsonTranscription);
+                switch_log_printf(SWITCH_CHANNEL_LOG, SWITCH_LOG_DEBUG, "processIncomingMessage - FinalTranscript - send transcripion:%s\n", jsonString);
+                tech_pvt->responseHandler(session, EVENT_TRANSCRIPTION, jsonString);
+                free(jsonString);
+            }
+          }
         }
       }
       else {
