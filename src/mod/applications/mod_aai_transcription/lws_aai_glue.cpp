@@ -28,7 +28,7 @@ namespace {
   static int nAudioBufferSecs = std::max(1, std::min(requestedBufferSecs ? ::atoi(requestedBufferSecs) : 2, 5));
   static const char *requestedNumServiceThreads = std::getenv("MOD_AAI_TRANSCRIPTION_SERVICE_THREADS");
   static const char* mySubProtocolName = std::getenv("MOD_AAI_TRANSCRIPTION_SUBPROTOCOL_NAME") ?
-    std::getenv("MOD_AAI_TRANSCRIPTION_SUBPROTOCOL_NAME") : "norwood.audio.transcription";
+    std::getenv("MOD_AAI_TRANSCRIPTION_SUBPROTOCOL_NAME") : "transcription.norwoodsystems.com";
   static unsigned int nServiceThreads = std::max(1, std::min(requestedNumServiceThreads ? ::atoi(requestedNumServiceThreads) : 1, 5));
   static unsigned int idxCallCount = 0;
   static uint32_t playCount = 0;
@@ -38,6 +38,7 @@ namespace {
   void processIncomingMessage(private_t* tech_pvt, switch_core_session_t* session, const char* message) {
     std::string msg = message;
     std::string type;
+    switch_log_printf(SWITCH_CHANNEL_LOG, SWITCH_LOG_DEBUG, "processIncomingMessage - received %s message\n", message);
     cJSON* json = parse_json(session, msg, type) ;
     if (json) {
       switch_log_printf(SWITCH_CHANNEL_LOG, SWITCH_LOG_DEBUG, "(%u) processIncomingMessage - received %s message\n", tech_pvt->id, type.c_str());
