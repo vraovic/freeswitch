@@ -148,7 +148,7 @@ namespace {
       }
       else if (0 == type.compare("json")) {
         cJSON* jsonMsgType = cJSON_GetObjectItem(json, "message_type");
-        switch_log_printf(SWITCH_CHANNEL_LOG, SWITCH_LOG_DEBUG, "processIncomingMessage - jsonMsgType:%s\n", jsonMsgType);
+        switch_log_printf(SWITCH_CHANNEL_LOG, SWITCH_LOG_DEBUG, "processIncomingMessage - jsonMsgType:%s\n", jsonMsgType->valuestring);
         if (jsonMsgType && jsonMsgType->valuestring) {
           if (jsonMsgType->valuestring == "FinalTranscript")
           {
