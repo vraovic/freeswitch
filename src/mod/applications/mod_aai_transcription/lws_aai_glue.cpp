@@ -152,7 +152,7 @@ namespace {
         if (jsonMsgType && jsonMsgType->valuestring) {
           if (0 == strcmp(jsonMsgType->valuestring, "FinalTranscript")) 
           {
-            cJSON* jsonTranscription = cJSON_GetObjectItem(jsonData, "text");
+            cJSON* jsonTranscription = cJSON_GetObjectItem(json, "text");
               switch_log_printf(SWITCH_CHANNEL_LOG, SWITCH_LOG_DEBUG, "processIncomingMessage - FinalTranscript - text:%s\n", jsonTranscription->valuestring);
             if (jsonTranscription && jsonTranscription->valuestring) 
             {
