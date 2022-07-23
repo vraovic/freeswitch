@@ -150,10 +150,10 @@ namespace {
         cJSON* jsonMsgType = cJSON_GetObjectItem(json, "message_type");
         switch_log_printf(SWITCH_CHANNEL_LOG, SWITCH_LOG_DEBUG, "processIncomingMessage - jsonMsgType:%s\n", jsonMsgType->valuestring);
         if (jsonMsgType && jsonMsgType->valuestring) {
-          if (jsonMsgType->valuestring == "FinalTranscript")
+          if (0 == strcmp(jsonMsgType->valuestring, "FinalTranscript")) 
           {
             cJSON* jsonTranscription = cJSON_GetObjectItem(jsonData, "text");
-              switch_log_printf(SWITCH_CHANNEL_LOG, SWITCH_LOG_DEBUG, "processIncomingMessage - FinalTranscript:%s\n", jsonTranscription);
+              switch_log_printf(SWITCH_CHANNEL_LOG, SWITCH_LOG_DEBUG, "processIncomingMessage - FinalTranscript - text:%s\n", jsonTranscription->valuestring);
             if (jsonTranscription && jsonTranscription->valuestring) 
             {
                 char* jsonString = cJSON_PrintUnformatted(jsonTranscription);
@@ -161,8 +161,8 @@ namespace {
                 tech_pvt->responseHandler(session, EVENT_TRANSCRIPTION, jsonString);
                 free(jsonString);
             }
-          }
-        }
+          } else switch_log_printf(SWITCH_CHANNEL_LOG, SWITCH_LOG_DEBUG, "processIncomingMessage - message_type is not FinalTranscript\n");
+        } else switch_log_printf(SWITCH_CHANNEL_LOG, SWITCH_LOG_DEBUG, "processIncomingMessage - message_type is not string\n");
       }
       else {
         switch_log_printf(SWITCH_CHANNEL_LOG, SWITCH_LOG_ERROR, "(%u) processIncomingMessage - unsupported msg type %s\n", tech_pvt->id, type.c_str());  
