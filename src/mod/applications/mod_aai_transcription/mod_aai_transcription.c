@@ -28,7 +28,15 @@ static void responseHandler(switch_core_session_t* session, const char * eventNa
 	}
 	switch_event_create_subclass(&event, SWITCH_EVENT_CUSTOM, eventName);
 	switch_channel_event_set_data(channel, event);
-	if (json) switch_event_add_body(event, "%s", json);
+	if (json) 
+	{
+		switch_log_printf(SWITCH_CHANNEL_SESSION_LOG(session), SWITCH_LOG_DEBUG, "responseHandler: generate SWITCH_EVENT_CUSTOM eventName:%s - json: %s\n",eventName, json);
+		switch_event_add_body(event, "%s", json);
+	}
+	else {
+		switch_log_printf(SWITCH_CHANNEL_SESSION_LOG(session), SWITCH_LOG_DEBUG, "responseHandler: generate SWITCH_EVENT_CUSTOM eventName:%s\n",eventName);
+
+	}
 	switch_event_fire(&event);
 }
 
