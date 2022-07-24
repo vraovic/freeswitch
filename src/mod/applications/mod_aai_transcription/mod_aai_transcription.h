@@ -49,7 +49,7 @@ struct private_data {
   int buffer_overrun_notified:1;
   int audio_paused:1;
   int graceful_shutdown:1;
-  char initialMetadata[8192];
+  char initialMetadata[8533];
 };
 
 typedef struct private_data private_t;
