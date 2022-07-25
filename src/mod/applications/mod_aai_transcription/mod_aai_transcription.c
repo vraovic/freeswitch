@@ -345,7 +345,7 @@ SWITCH_STANDARD_API(aai_transcription_function)
         		}
         		else 
 				{
-					// Extract sampling rate from path
+					// Extract sampling rate from the path
 					char *token =NULL;
     				char *next_token =NULL;
 					strcpy(path1, path);
