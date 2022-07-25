@@ -244,7 +244,7 @@ SWITCH_DECLARE(switch_status_t) switch_core_media_bug_read(switch_media_bug_t *b
 	switch_core_session_get_read_impl(bug->session, &read_impl);
 
 	bytes = read_impl.decoded_bytes_per_packet;
-	switch_log_printf(SWITCH_CHANNEL_SESSION_LOG(bug->session), SWITCH_LOG_ERROR, "bytes_per_packet: %ld\n", bytes);
+	// switch_log_printf(SWITCH_CHANNEL_SESSION_LOG(bug->session), SWITCH_LOG_ERROR, "bytes_per_packet: %ld\n", bytes);
 
 	if (frame->buflen < bytes) {
 		switch_log_printf(SWITCH_CHANNEL_SESSION_LOG(switch_core_media_bug_get_session(bug)), SWITCH_LOG_ERROR, "%s frame buffer too small!\n",
@@ -269,7 +269,7 @@ SWITCH_DECLARE(switch_status_t) switch_core_media_bug_read(switch_media_bug_t *b
 		has_read = 1;
 		switch_mutex_lock(bug->read_mutex);
 		do_read = switch_buffer_inuse(bug->raw_read_buffer);
-		switch_log_printf(SWITCH_CHANNEL_SESSION_LOG(bug->session), SWITCH_LOG_ERROR, "do_read: %ld\n", do_read);
+		// switch_log_printf(SWITCH_CHANNEL_SESSION_LOG(bug->session), SWITCH_LOG_ERROR, "do_read: %ld\n", do_read);
 		switch_mutex_unlock(bug->read_mutex);
 	}
 
@@ -304,7 +304,7 @@ SWITCH_DECLARE(switch_status_t) switch_core_media_bug_read(switch_media_bug_t *b
 
 	if ((has_read && !do_read)) {
 		fill_read = 1;
-		switch_log_printf(SWITCH_CHANNEL_SESSION_LOG(bug->session), SWITCH_LOG_ERROR, "fill_read = 1\n");
+		// switch_log_printf(SWITCH_CHANNEL_SESSION_LOG(bug->session), SWITCH_LOG_ERROR, "fill_read = 1\n");
 	}
 
 	if ((has_write && !do_write)) {
@@ -327,7 +327,7 @@ SWITCH_DECLARE(switch_status_t) switch_core_media_bug_read(switch_media_bug_t *b
 	}
 
 	if ((fill_read && fill_write) || (fill && (fill_read || fill_write))) {
-		switch_log_printf(SWITCH_CHANNEL_SESSION_LOG(bug->session), SWITCH_LOG_ERROR, "media_bug_read - NO AUDIO - return FALSE\n");
+		// switch_log_printf(SWITCH_CHANNEL_SESSION_LOG(bug->session), SWITCH_LOG_ERROR, "media_bug_read - NO AUDIO - return FALSE\n");
 		return SWITCH_STATUS_FALSE;
 	}
 
@@ -342,7 +342,7 @@ SWITCH_DECLARE(switch_status_t) switch_core_media_bug_read(switch_media_bug_t *b
 	if (do_read) {
 		switch_mutex_lock(bug->read_mutex);
 		frame->datalen = (uint32_t) switch_buffer_read(bug->raw_read_buffer, frame->data, do_read);
-		switch_log_printf(SWITCH_CHANNEL_SESSION_LOG(bug->session), SWITCH_LOG_ERROR, "do_read:%ld - datalen:%d\n",do_read, frame->datalen);
+		// switch_log_printf(SWITCH_CHANNEL_SESSION_LOG(bug->session), SWITCH_LOG_ERROR, "do_read:%ld - datalen:%d\n",do_read, frame->datalen);
 		if (frame->datalen != do_read) {
 			switch_log_printf(SWITCH_CHANNEL_SESSION_LOG(switch_core_media_bug_get_session(bug)), SWITCH_LOG_ERROR, "Framing Error Reading!\n");
 			switch_core_media_bug_flush(bug);
@@ -443,7 +443,7 @@ SWITCH_DECLARE(switch_status_t) switch_core_media_bug_read(switch_media_bug_t *b
 		frame->channels = read_impl.number_of_channels;
 	}
 
-	switch_log_printf(SWITCH_CHANNEL_SESSION_LOG(bug->session), SWITCH_LOG_ERROR, "switch_core_media_bug_read - datalen: %d, samples:%d, rate:%d\n", frame->datalen, frame->samples,frame->rate);
+	// switch_log_printf(SWITCH_CHANNEL_SESSION_LOG(bug->session), SWITCH_LOG_ERROR, "switch_core_media_bug_read - datalen: %d, samples:%d, rate:%d\n", frame->datalen, frame->samples,frame->rate);
 	return SWITCH_STATUS_SUCCESS;
 }
 

@@ -38,27 +38,29 @@ namespace {
   void processIncomingMessage(private_t* tech_pvt, switch_core_session_t* session, const char* message) {
     std::string msg = message;
     std::string type;
-    switch_log_printf(SWITCH_CHANNEL_LOG, SWITCH_LOG_DEBUG, "processIncomingMessage - received %s message\n", message);
+    // switch_log_printf(SWITCH_CHANNEL_LOG, SWITCH_LOG_DEBUG, "processIncomingMessage - received %s message\n", message);
     cJSON* json = parse_json(session, msg, type) ;
     if (json) {
-      switch_log_printf(SWITCH_CHANNEL_LOG, SWITCH_LOG_DEBUG, "(%u) processIncomingMessage - received %s message\n", tech_pvt->id, type.c_str());
+      // switch_log_printf(SWITCH_CHANNEL_LOG, SWITCH_LOG_DEBUG, "(%u) processIncomingMessage - received %s message\n", tech_pvt->id, type.c_str());
       if (0 == type.compare("json")) {
         cJSON* jsonMsgType = cJSON_GetObjectItem(json, "message_type");
-        switch_log_printf(SWITCH_CHANNEL_LOG, SWITCH_LOG_DEBUG, "processIncomingMessage - jsonMsgType:%s\n", jsonMsgType->valuestring);
+        // switch_log_printf(SWITCH_CHANNEL_LOG, SWITCH_LOG_DEBUG, "processIncomingMessage - jsonMsgType:%s\n", jsonMsgType->valuestring);
         if (jsonMsgType && jsonMsgType->valuestring) {
           if (0 == strcmp(jsonMsgType->valuestring, "FinalTranscript")) 
           {
             cJSON* jsonTranscription = cJSON_GetObjectItem(json, "text");
-              switch_log_printf(SWITCH_CHANNEL_LOG, SWITCH_LOG_DEBUG, "processIncomingMessage - FinalTranscript - text:%s\n", jsonTranscription->valuestring);
+              // switch_log_printf(SWITCH_CHANNEL_LOG, SWITCH_LOG_DEBUG, "processIncomingMessage - FinalTranscript - text:%s\n", jsonTranscription->valuestring);
             if (jsonTranscription && jsonTranscription->valuestring) 
             {
                 char* jsonString = cJSON_PrintUnformatted(jsonTranscription);
-                switch_log_printf(SWITCH_CHANNEL_LOG, SWITCH_LOG_DEBUG, "processIncomingMessage - FinalTranscript - send transcripion:%s\n", jsonString);
+                switch_log_printf(SWITCH_CHANNEL_LOG, SWITCH_LOG_DEBUG, "processIncomingMessage - FinalTranscript - transcripion:%s\n", jsonString);
                 tech_pvt->responseHandler(session, EVENT_TRANSCRIPTION, jsonString);
                 free(jsonString);
             }
-          } else switch_log_printf(SWITCH_CHANNEL_LOG, SWITCH_LOG_DEBUG, "processIncomingMessage -  message_type:%s\n",jsonMsgType->valuestring);
-        } else switch_log_printf(SWITCH_CHANNEL_LOG, SWITCH_LOG_DEBUG, "processIncomingMessage - message_type is not string\n");
+          } 
+          // else switch_log_printf(SWITCH_CHANNEL_LOG, SWITCH_LOG_DEBUG, "processIncomingMessage -  message_type:%s\n",jsonMsgType->valuestring);
+        } 
+        // else switch_log_printf(SWITCH_CHANNEL_LOG, SWITCH_LOG_DEBUG, "processIncomingMessage - message_type is not string\n");
       }
       else if (0 == type.compare("transcription")) {
         cJSON* jsonData = cJSON_GetObjectItem(json, "data");
@@ -161,7 +163,7 @@ namespace {
     
     size_t buflen = (FRAME_SIZE_8000 * desiredSampling / 8000 * channels * 1000 / RTP_PACKETIZATION_PERIOD * nAudioBufferSecs);
 
-    switch_log_printf(SWITCH_CHANNEL_SESSION_LOG(session), SWITCH_LOG_DEBUG, "aai_data_init -desiredSampling:%d,nAudioBufferSecs:%u decoded_bytes_per_packet:%u, buflen: %u \n",desiredSampling,nAudioBufferSecs,read_impl.decoded_bytes_per_packet, buflen);
+    // switch_log_printf(SWITCH_CHANNEL_SESSION_LOG(session), SWITCH_LOG_DEBUG, "aai_data_init -desiredSampling:%d,nAudioBufferSecs:%u decoded_bytes_per_packet:%u, buflen: %u \n",desiredSampling,nAudioBufferSecs,read_impl.decoded_bytes_per_packet, buflen);
 
     AudioPipe* ap = new AudioPipe(tech_pvt->sessionId, host, port, path, sslFlags, 
       buflen, read_impl.decoded_bytes_per_packet, eventCallback);
@@ -451,9 +453,6 @@ extern "C" {
     size_t inuse = 0;
     bool dirty = false;
 
-    char *p = (char *) "{\"msg\": \"buffer overrun\"}";
-                      //  "{\"audio_data\": \"UklGRtjIAABXQVZFZ...\"}";
-
     if (!tech_pvt || tech_pvt->audio_paused || tech_pvt->graceful_shutdown) {
       switch_log_printf(SWITCH_CHANNEL_SESSION_LOG(session), SWITCH_LOG_NOTICE, "aai_frame - return - audio paused or shutdown\n");
       return SWITCH_TRUE;
@@ -461,12 +460,12 @@ extern "C" {
     if (switch_mutex_trylock(tech_pvt->mutex) == SWITCH_STATUS_SUCCESS) {
       if (!tech_pvt->pAudioPipe) {
         switch_mutex_unlock(tech_pvt->mutex);
-        switch_log_printf(SWITCH_CHANNEL_SESSION_LOG(session), SWITCH_LOG_NOTICE, "aai_frame - return - no pAudioPipe\n");
+        // switch_log_printf(SWITCH_CHANNEL_SESSION_LOG(session), SWITCH_LOG_NOTICE, "aai_frame - return - no pAudioPipe\n");
         return SWITCH_TRUE;
       }
       AudioPipe *pAudioPipe = static_cast<AudioPipe *>(tech_pvt->pAudioPipe);
       if (pAudioPipe->getLwsState() != AudioPipe::LWS_CLIENT_CONNECTED) {
-        switch_log_printf(SWITCH_CHANNEL_SESSION_LOG(session), SWITCH_LOG_NOTICE, "aai_frame - return - pAudioPipe is not CONNECTED\n");
+        // switch_log_printf(SWITCH_CHANNEL_SESSION_LOG(session), SWITCH_LOG_NOTICE, "aai_frame - return - pAudioPipe is not CONNECTED\n");
         switch_mutex_unlock(tech_pvt->mutex);
         return SWITCH_TRUE;
       }
@@ -498,7 +497,7 @@ extern "C" {
           switch_status_t rv = switch_core_media_bug_read(bug, &frame, SWITCH_TRUE);
           if (rv != SWITCH_STATUS_SUCCESS) break;
           if (frame.datalen) {
-            switch_log_printf(SWITCH_CHANNEL_SESSION_LOG(session), SWITCH_LOG_NOTICE, "8000 samling rate - READING frame.datalen: %u\n",frame.datalen); 
+            // switch_log_printf(SWITCH_CHANNEL_SESSION_LOG(session), SWITCH_LOG_NOTICE, "8000 samling rate - READING frame.datalen: %u\n",frame.datalen); 
             pAudioPipe->audioWritePtrAdd(frame.datalen);
             frame.buflen = available = pAudioPipe->audioSpaceAvailable();
             frame.data = pAudioPipe->audioWritePtr();
@@ -511,7 +510,7 @@ extern "C" {
               // strcat(textToSend, pAudioPipe->base64EncodedAudio(transcription_size).c_str());
               strcat(textToSend, pAudioPipe->b64AudioEncoding(transcription_size));
               strcat(textToSend, "\"}");
-              switch_log_printf(SWITCH_CHANNEL_SESSION_LOG(session), SWITCH_LOG_NOTICE, "aai_frame - base64_encode audio - textToSend:%s, len:%u\n", textToSend, strlen(textToSend));
+              // switch_log_printf(SWITCH_CHANNEL_SESSION_LOG(session), SWITCH_LOG_NOTICE, "aai_frame - base64_encode audio - textToSend:%s, len:%u\n", textToSend, strlen(textToSend));
               pAudioPipe->audioWritePtrSubtract(transcription_size);
 
               pAudioPipe->bufferForSending(textToSend, strlen(textToSend));
@@ -520,7 +519,7 @@ extern "C" {
               break; 
             }
             else {
-              switch_log_printf(SWITCH_CHANNEL_SESSION_LOG(session), SWITCH_LOG_DEBUG, "Not enough data to send - audioSpaceSize: %u\n", pAudioPipe->audioSpaceSize());
+              // switch_log_printf(SWITCH_CHANNEL_SESSION_LOG(session), SWITCH_LOG_DEBUG, "Not enough data to send - audioSpaceSize: %u\n", pAudioPipe->audioSpaceSize());
             }
 
           }
@@ -548,7 +547,7 @@ extern "C" {
               (spx_uint32_t *) &in_len, 
               (spx_int16_t *) ((char *) pAudioPipe->audioWritePtr()),
               &out_len);
-            switch_log_printf(SWITCH_CHANNEL_SESSION_LOG(session), SWITCH_LOG_NOTICE, "aai_frame - datalen:%u, in_len: %u, new value out_len:%u channels:%u\n",frame.datalen,in_len, out_len, tech_pvt->channels);
+            // switch_log_printf(SWITCH_CHANNEL_SESSION_LOG(session), SWITCH_LOG_NOTICE, "aai_frame - datalen:%u, in_len: %u, new value out_len:%u channels:%u\n",frame.datalen,in_len, out_len, tech_pvt->channels);
 
             if (out_len > 0) {
               // bytes written = num channels * 2 * num channels
@@ -556,7 +555,7 @@ extern "C" {
               pAudioPipe->audioWritePtrAdd(bytes_written);
               available = pAudioPipe->audioSpaceAvailable();
               dirty = true;
-              switch_log_printf(SWITCH_CHANNEL_SESSION_LOG(session), SWITCH_LOG_NOTICE, "aai_frame - bytes_written:%u, available:%u, audioBufferSize: %u\n", bytes_written, available, pAudioPipe->audioSpaceSize());
+              // switch_log_printf(SWITCH_CHANNEL_SESSION_LOG(session), SWITCH_LOG_NOTICE, "aai_frame - bytes_written:%u, available:%u, audioBufferSize: %u\n", bytes_written, available, pAudioPipe->audioSpaceSize());
 
               if (pAudioPipe->audioSpaceSize() >= transcription_size) {
 
@@ -566,7 +565,7 @@ extern "C" {
                 // strcat(textToSend, pAudioPipe->base64EncodedAudio(transcription_size).c_str());
                 strcat(textToSend, pAudioPipe->b64AudioEncoding(transcription_size));
                 strcat(textToSend, "\"}");
-                switch_log_printf(SWITCH_CHANNEL_SESSION_LOG(session), SWITCH_LOG_NOTICE, "aai_frame - base64_encode audio - textToSend:%s, len:%u\n", textToSend, strlen(textToSend));
+                // switch_log_printf(SWITCH_CHANNEL_SESSION_LOG(session), SWITCH_LOG_NOTICE, "aai_frame - base64_encode audio - textToSend:%s, len:%u\n", textToSend, strlen(textToSend));
                 pAudioPipe->audioWritePtrSubtract(transcription_size);
 
                 pAudioPipe->bufferForSending(textToSend, strlen(textToSend));
@@ -575,7 +574,7 @@ extern "C" {
                 break; 
               }
               else {
-                switch_log_printf(SWITCH_CHANNEL_SESSION_LOG(session), SWITCH_LOG_DEBUG, "Not enough data to send - audioSpaceSize: %u\n", pAudioPipe->audioSpaceSize());
+                // switch_log_printf(SWITCH_CHANNEL_SESSION_LOG(session), SWITCH_LOG_DEBUG, "Not enough data to send - audioSpaceSize: %u\n", pAudioPipe->audioSpaceSize());
               }
 
             }
