@@ -526,7 +526,6 @@ extern "C" {
         }
       }
       else {
-
         uint8_t data[FRAME_SIZE_8000];
         // uint8_t data[AAI_TRANSCRIPTION_FRAME_SIZE]; // 100 msec of audio
         switch_frame_t frame = { 0 };
@@ -594,7 +593,7 @@ extern "C" {
       pAudioPipe->unlockAudioBuffer();
       switch_mutex_unlock(tech_pvt->mutex);
     }
-    switch_log_printf(SWITCH_CHANNEL_SESSION_LOG(session), SWITCH_LOG_DEBUG, "EXIT aai_frame \n");
+    // switch_log_printf(SWITCH_CHANNEL_SESSION_LOG(session), SWITCH_LOG_DEBUG, "EXIT aai_frame \n");
 
     return SWITCH_TRUE;
   }
