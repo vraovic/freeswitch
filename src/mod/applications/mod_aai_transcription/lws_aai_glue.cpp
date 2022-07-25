@@ -42,111 +42,7 @@ namespace {
     cJSON* json = parse_json(session, msg, type) ;
     if (json) {
       switch_log_printf(SWITCH_CHANNEL_LOG, SWITCH_LOG_DEBUG, "(%u) processIncomingMessage - received %s message\n", tech_pvt->id, type.c_str());
-      cJSON* jsonData = cJSON_GetObjectItem(json, "data");
-      if (0 == type.compare("playAudio")) {
-        if (jsonData) {
-          // dont send actual audio bytes in event message
-          cJSON* jsonFile = NULL;
-          cJSON* jsonAudio = cJSON_DetachItemFromObject(jsonData, "audioContent");
-          int validAudio = (jsonAudio && NULL != jsonAudio->valuestring);
-
-          const char* szAudioContentType = cJSON_GetObjectCstr(jsonData, "audioContentType");
-          char fileType[6];
-          int sampleRate = 16000;
-          if (0 == strcmp(szAudioContentType, "raw")) {
-            cJSON* jsonSR = cJSON_GetObjectItem(jsonData, "sampleRate");
-            sampleRate = jsonSR && jsonSR->valueint ? jsonSR->valueint : 0;
-
-            switch(sampleRate) {
-              case 8000:
-                strcpy(fileType, ".r8");
-                break;
-              case 16000:
-                strcpy(fileType, ".r16");
-                break;
-              case 24000:
-                strcpy(fileType, ".r24");
-                break;
-              case 32000:
-                strcpy(fileType, ".r32");
-                break;
-              case 48000:
-                strcpy(fileType, ".r48");
-                break;
-              case 64000:
-                strcpy(fileType, ".r64");
-                break;
-              default:
-                strcpy(fileType, ".r16");
-                break;
-            }
-          }
-          else if (0 == strcmp(szAudioContentType, "wave") || 0 == strcmp(szAudioContentType, "wav")) {
-            strcpy(fileType, ".wav");
-          }
-          else {
-            validAudio = 0;
-            switch_log_printf(SWITCH_CHANNEL_LOG, SWITCH_LOG_DEBUG, "(%u) processIncomingMessage - unsupported audioContentType: %s\n", tech_pvt->id, szAudioContentType);
-          }
-
-          if (validAudio) {
-            char szFilePath[256];
-
-            std::string rawAudio = norwood::base64_decode(jsonAudio->valuestring);
-            switch_snprintf(szFilePath, 256, "%s%s%s_%d.tmp%s", SWITCH_GLOBAL_dirs.temp_dir, 
-              SWITCH_PATH_SEPARATOR, tech_pvt->sessionId, playCount++, fileType);
-            std::ofstream f(szFilePath, std::ofstream::binary);
-            f << rawAudio;
-            f.close();
-
-            // add the file to the list of files played for this session, we'll delete when session closes
-            struct playout* playout = (struct playout *) malloc(sizeof(struct playout));
-            playout->file = (char *) malloc(strlen(szFilePath) + 1);
-            strcpy(playout->file, szFilePath);
-            playout->next = tech_pvt->playout;
-            tech_pvt->playout = playout;
-
-            jsonFile = cJSON_CreateString(szFilePath);
-            cJSON_AddItemToObject(jsonData, "file", jsonFile);
-          }
-
-          char* jsonString = cJSON_PrintUnformatted(jsonData);
-          tech_pvt->responseHandler(session, EVENT_PLAY_AUDIO, jsonString);
-          free(jsonString);
-          if (jsonAudio) cJSON_Delete(jsonAudio);
-        }
-        else {
-          switch_log_printf(SWITCH_CHANNEL_LOG, SWITCH_LOG_ERROR, "(%u) processIncomingMessage - missing data payload in playAudio request\n", tech_pvt->id); 
-        }
-      }
-      else if (0 == type.compare("killAudio")) {
-        tech_pvt->responseHandler(session, EVENT_KILL_AUDIO, NULL);
-
-        // kill any current playback on the channel
-        switch_channel_t *channel = switch_core_session_get_channel(session);
-        switch_channel_set_flag_value(channel, CF_BREAK, 2);
-      }
-      else if (0 == type.compare("transcription")) {
-        char* jsonString = cJSON_PrintUnformatted(jsonData);
-        tech_pvt->responseHandler(session, EVENT_TRANSCRIPTION, jsonString);
-        free(jsonString);        
-      }
-      else if (0 == type.compare("transfer")) {
-        char* jsonString = cJSON_PrintUnformatted(jsonData);
-        tech_pvt->responseHandler(session, EVENT_TRANSFER, jsonString);
-        free(jsonString);                
-      }
-      else if (0 == type.compare("disconnect")) {
-        char* jsonString = cJSON_PrintUnformatted(jsonData);
-        tech_pvt->responseHandler(session, EVENT_DISCONNECT, jsonString);
-        free(jsonString);        
-      }
-      else if (0 == type.compare("error")) {
-        char* jsonString = cJSON_PrintUnformatted(jsonData);
-        tech_pvt->responseHandler(session, EVENT_ERROR, jsonString);
-        free(jsonString);        
-      }
-      else if (0 == type.compare("json")) {
+      if (0 == type.compare("json")) {
         cJSON* jsonMsgType = cJSON_GetObjectItem(json, "message_type");
         switch_log_printf(SWITCH_CHANNEL_LOG, SWITCH_LOG_DEBUG, "processIncomingMessage - jsonMsgType:%s\n", jsonMsgType->valuestring);
         if (jsonMsgType && jsonMsgType->valuestring) {
@@ -163,6 +59,18 @@ namespace {
             }
           } else switch_log_printf(SWITCH_CHANNEL_LOG, SWITCH_LOG_DEBUG, "processIncomingMessage -  message_type:%s\n",jsonMsgType->valuestring);
         } else switch_log_printf(SWITCH_CHANNEL_LOG, SWITCH_LOG_DEBUG, "processIncomingMessage - message_type is not string\n");
+      }
+      else if (0 == type.compare("transcription")) {
+        cJSON* jsonData = cJSON_GetObjectItem(json, "data");
+        char* jsonString = cJSON_PrintUnformatted(jsonData);
+        tech_pvt->responseHandler(session, EVENT_TRANSCRIPTION, jsonString);
+        free(jsonString);        
+      }
+      else if (0 == type.compare("error")) {
+        cJSON* jsonData = cJSON_GetObjectItem(json, "data");
+        char* jsonString = cJSON_PrintUnformatted(jsonData);
+        tech_pvt->responseHandler(session, EVENT_ERROR, jsonString);
+        free(jsonString);        
       }
       else {
         switch_log_printf(SWITCH_CHANNEL_LOG, SWITCH_LOG_ERROR, "(%u) processIncomingMessage - unsupported msg type %s\n", tech_pvt->id, type.c_str());  

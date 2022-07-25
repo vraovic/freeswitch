@@ -1,6 +1,6 @@
 /* 
  *
- * mod_aai_transcription.c -- Freeswitch module for streaming audio to AAI server over websockets
+ * mod_aai_transcription.c -- Freeswitch module for streaming audio to AssemblyAI server over websockets
  *
  */
 #include "mod_aai_transcription.h"
@@ -384,9 +384,6 @@ SWITCH_MODULE_LOAD_FUNCTION(mod_aai_transcription_load)
 
 	/* create/register custom event message types */
 	if (switch_event_reserve_subclass(EVENT_TRANSCRIPTION) != SWITCH_STATUS_SUCCESS ||
-    switch_event_reserve_subclass(EVENT_TRANSFER) != SWITCH_STATUS_SUCCESS ||
-    switch_event_reserve_subclass(EVENT_PLAY_AUDIO) != SWITCH_STATUS_SUCCESS ||
-    switch_event_reserve_subclass(EVENT_KILL_AUDIO) != SWITCH_STATUS_SUCCESS ||
     switch_event_reserve_subclass(EVENT_ERROR) != SWITCH_STATUS_SUCCESS ||
     switch_event_reserve_subclass(EVENT_DISCONNECT) != SWITCH_STATUS_SUCCESS) {
 
@@ -416,10 +413,6 @@ SWITCH_MODULE_SHUTDOWN_FUNCTION(mod_aai_transcription_shutdown)
 	aai_cleanup();
   //mod_running = 0;
 	switch_event_free_subclass(EVENT_TRANSCRIPTION);
-	switch_event_free_subclass(EVENT_TRANSFER);
-	switch_event_free_subclass(EVENT_PLAY_AUDIO);
-	switch_event_free_subclass(EVENT_KILL_AUDIO);
-	switch_event_free_subclass(EVENT_DISCONNECT);
 	switch_event_free_subclass(EVENT_ERROR);
 
 	return SWITCH_STATUS_SUCCESS;
