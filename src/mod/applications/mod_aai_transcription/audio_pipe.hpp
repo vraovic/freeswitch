@@ -7,6 +7,10 @@
 
 #include <libwebsockets.h>
 
+#define RTP_PACKETIZATION_PERIOD 20
+#define FRAME_SIZE_8000  320 /*which means each 20ms frame as 320 bytes at 8 khz (1 channel only)*/
+#define AAI_TRANSCRIPTION_FRAME_SIZE  FRAME_SIZE_8000  * 15 /*which means each 150ms*/
+
 class AudioPipe {
 public:
   enum LwsState_t {
@@ -39,39 +43,44 @@ public:
 
   // constructor
   AudioPipe(const char* uuid, const char* host, unsigned int port, const char* path, int sslFlags, 
-    size_t bufLen, size_t minFreespace, const char* username, const char* password, notifyHandler_t callback);
+    size_t bufLen, size_t minFreespace, notifyHandler_t callback);
   ~AudioPipe();  
 
   LwsState_t getLwsState(void) { return m_state; }
   void connect(void);
-  void bufferForSending(const char* text);
-  size_t binarySpaceAvailable(void) {
+  void bufferForSending(const char* text, size_t len);
+  size_t audioSpaceAvailable(void) {
     return m_audio_buffer_max_len - m_audio_buffer_write_offset;
   }
-  size_t binaryMinSpace(void) {
+  size_t audioSpaceSize(void) {
+    return m_audio_buffer_write_offset;
+  }
+  size_t audioMinSpace(void) {
     return m_audio_buffer_min_freespace;
   }
-  char * binaryWritePtr(void) { 
+  char * audioWritePtr(void) { 
     return (char *) m_audio_buffer + m_audio_buffer_write_offset;
   }
-  void binaryWritePtrAdd(size_t len) {
+  char * audioReadPtr(void) { 
+    return (char *) m_audio_buffer;
+  }
+  void audioWritePtrAdd(size_t len) {
     m_audio_buffer_write_offset += len;
   }
-  void binaryWritePtrResetToZero(void) {
+  void audioWritePtrSubtract(size_t len);
+  
+  void audioWritePtrResetToZero(void) {
     m_audio_buffer_write_offset = 0;
   }
+
   void lockAudioBuffer(void) {
     m_audio_mutex.lock();
   }
-  void unlockAudioBuffer(void) ;
-  bool hasBasicAuth(void) {
-    return !m_username.empty() && !m_password.empty();
-  }
+  std::string base64EncodedAudio(size_t len);
 
-  void getBasicAuth(std::string& username, std::string& password) {
-    username = m_username;
-    password = m_password;
-  }
+  char* b64AudioEncoding(size_t len);
+
+  void unlockAudioBuffer(void) ;
 
   void do_graceful_shutdown();
   bool isGracefulShutdown(void) {
@@ -133,8 +142,7 @@ private:
   struct lws_per_vhost_data* m_vhd;
   notifyHandler_t m_callback;
   log_emit_function m_logger;
-  std::string m_username;
-  std::string m_password;
+  std::string m_api_token;
   bool m_gracefulShutdown;
 };
 

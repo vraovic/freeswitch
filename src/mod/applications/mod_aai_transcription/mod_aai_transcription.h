@@ -13,9 +13,6 @@
 #define MAX_PATH_LEN (4096)
 
 #define EVENT_TRANSCRIPTION   "mod_aai_transcription::transcription"
-#define EVENT_TRANSFER        "mod_aai_transcription::transfer"
-#define EVENT_PLAY_AUDIO      "mod_aai_transcription::play_audio"
-#define EVENT_KILL_AUDIO      "mod_aai_transcription::kill_audio"
 #define EVENT_DISCONNECT      "mod_aai_transcription::disconnect"
 #define EVENT_ERROR           "mod_aai_transcription::error"
 #define EVENT_CONNECT_SUCCESS "mod_aai_transcription::connect"
@@ -49,7 +46,7 @@ struct private_data {
   int buffer_overrun_notified:1;
   int audio_paused:1;
   int graceful_shutdown:1;
-  char initialMetadata[8192];
+  char initialMetadata[8533];
 };
 
 typedef struct private_data private_t;

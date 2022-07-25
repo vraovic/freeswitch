@@ -1,6 +1,6 @@
 /* 
  *
- * mod_aai_transcription.c -- Freeswitch module for forking audio to remote server over websockets
+ * mod_aai_transcription.c -- Freeswitch module for streaming audio to AssemblyAI server over websockets
  *
  */
 #include "mod_aai_transcription.h"
@@ -18,16 +18,32 @@ static void responseHandler(switch_core_session_t* session, const char * eventNa
 	switch_event_t *event;
 
 	switch_channel_t *channel = switch_core_session_get_channel(session);
-	if (json) switch_log_printf(SWITCH_CHANNEL_SESSION_LOG(session), SWITCH_LOG_DEBUG, "responseHandler: sending event payload: %s.\n", json);
+	if (json) 
+	{
+		switch_log_printf(SWITCH_CHANNEL_SESSION_LOG(session), SWITCH_LOG_DEBUG, "responseHandler: ready to send eventName:%s - json: %s.\n",eventName, json);
+	}
+	else {
+		switch_log_printf(SWITCH_CHANNEL_SESSION_LOG(session), SWITCH_LOG_DEBUG, "responseHandler: ready to send eventName:%s - no json\n",eventName);
+
+	}
 	switch_event_create_subclass(&event, SWITCH_EVENT_CUSTOM, eventName);
 	switch_channel_event_set_data(channel, event);
-	if (json) switch_event_add_body(event, "%s", json);
+	if (json) 
+	{
+		switch_log_printf(SWITCH_CHANNEL_SESSION_LOG(session), SWITCH_LOG_DEBUG, "responseHandler: generate SWITCH_EVENT_CUSTOM eventName:%s - json: %s\n",eventName, json);
+		switch_event_add_body(event, "%s", json);
+	}
+	else {
+		switch_log_printf(SWITCH_CHANNEL_SESSION_LOG(session), SWITCH_LOG_DEBUG, "responseHandler: generate SWITCH_EVENT_CUSTOM eventName:%s\n",eventName);
+
+	}
 	switch_event_fire(&event);
 }
 
 static switch_bool_t capture_callback(switch_media_bug_t *bug, void *user_data, switch_abc_type_t type)
 {
 	switch_core_session_t *session = switch_core_media_bug_get_session(bug);
+	static int count = 0;
 
 	switch (type) {
 	case SWITCH_ABC_TYPE_INIT:
@@ -59,7 +75,6 @@ static switch_status_t start_capture(switch_core_session_t *session,
         char* path,
         int sampling,
         int sslFlags,
-	      char* metadata, 
         const char* base)
 {
 	switch_channel_t *channel = switch_core_session_get_channel(session);
@@ -68,7 +83,8 @@ static switch_status_t start_capture(switch_core_session_t *session,
 	switch_codec_t* read_codec;
 
 	void *pUserData = NULL;
-  int channels = (flags & SMBF_STEREO) ? 2 : 1;
+//   int channels = (flags & SMBF_STEREO) ? 2 : 1;
+  	int channels = 1;
 
 	switch_log_printf(SWITCH_CHANNEL_SESSION_LOG(session), SWITCH_LOG_INFO, 
     "mod_aai_transcription: streaming %d sampling to %s path %s port %d tls: %s.\n", 
@@ -88,7 +104,7 @@ static switch_status_t start_capture(switch_core_session_t *session,
 
 	switch_log_printf(SWITCH_CHANNEL_SESSION_LOG(session), SWITCH_LOG_DEBUG, "calling aai_session_init.\n");
 	if (SWITCH_STATUS_FALSE == aai_session_init(session, responseHandler, read_codec->implementation->actual_samples_per_second, 
-		host, port, path, sampling, sslFlags, channels, metadata, &pUserData)) {
+		host, port, path, sampling, sslFlags, channels, &pUserData)) {
 		switch_log_printf(SWITCH_CHANNEL_SESSION_LOG(session), SWITCH_LOG_ERROR, "Error initializing mod_aai_transcription session.\n");
 		return SWITCH_STATUS_FALSE;
 	}
@@ -153,10 +169,10 @@ static switch_status_t send_text(switch_core_session_t *session, char* text) {
   return status;
 }
 
-#define AAI_API_SYNTAX "<uuid> [start | stop | send_text | pause | resume | graceful-shutdown ] [wss-url | path] [mono | mixed | stereo] [8000 | 16000 | 24000 | 32000 | 64000] [metadata]"
+#define AAI_API_SYNTAX "<uuid> [start | stop ] [aai-url | path]"
 SWITCH_STANDARD_API(aai_transcription_function)
 {
-	char *mycmd = NULL, *argv[6] = { 0 };
+	char *mycmd = NULL, *argv[4] = { 0 };
 	int argc = 0;
 	switch_status_t status = SWITCH_STATUS_FALSE;
 
@@ -164,84 +180,82 @@ SWITCH_STANDARD_API(aai_transcription_function)
 		argc = switch_separate_string(mycmd, ' ', argv, (sizeof(argv) / sizeof(argv[0])));
 	}
 	assert(cmd);
-	switch_log_printf(SWITCH_CHANNEL_SESSION_LOG(session), SWITCH_LOG_DEBUG, "mod_aai_transcription cmd: %s\n", cmd);
+	switch_log_printf(SWITCH_CHANNEL_SESSION_LOG(session), SWITCH_LOG_DEBUG, "mod_aai_transcription cmd: %s argc:%u\n", cmd, argc);
 
 
-	if (zstr(cmd) || argc < 2 ||
-		(0 == strcmp(argv[1], "start") && argc < 4)) {
+	// if (zstr(cmd) || argc < 2 ||
+	// 	(0 == strcmp(argv[1], "start") && argc < 5)) {
 
-		switch_log_printf(SWITCH_CHANNEL_SESSION_LOG(session), SWITCH_LOG_ERROR, "Error with command %s %s %s.\n", cmd, argv[0], argv[1]);
-		stream->write_function(stream, "-USAGE: %s\n", AAI_API_SYNTAX);
-		goto done;
-	} else {
+	// 	switch_log_printf(SWITCH_CHANNEL_SESSION_LOG(session), SWITCH_LOG_ERROR, "Error with command %s %s %s.\n", cmd, argv[0], argv[1]);
+	// 	stream->write_function(stream, "-USAGE: %s\n", AAI_API_SYNTAX);
+	// 	goto done;
+	// } 
+	// else 
+	{
 		switch_core_session_t *lsession = NULL;
 
-		if ((lsession = switch_core_session_locate(argv[0]))) {
-			if (!strcasecmp(argv[1], "stop")) {
+		if ((lsession = switch_core_session_locate(argv[0]))) 
+		{
+			if (!strcasecmp(argv[1], "stop")) 
+			{
 				status = do_stop(lsession, argc > 2 ? argv[2] : NULL);
-      }
-			else if (!strcasecmp(argv[1], "pause")) {
+      		} 
+			else if (!strcasecmp(argv[1], "pause")) 
+			{
 				status = do_pauseresume(lsession, 1);
-      }
-			else if (!strcasecmp(argv[1], "resume")) {
+      		}
+			else if (!strcasecmp(argv[1], "resume")) 
+			{
 				status = do_pauseresume(lsession, 0);
-      }
-			else if (!strcasecmp(argv[1], "graceful-shutdown")) {
+      		}
+			else if (!strcasecmp(argv[1], "graceful-shutdown")) 
+			{
 				status = do_graceful_shutdown(lsession);
-      }
-      else if (!strcasecmp(argv[1], "send_text")) {
-        if (argc < 3) {
-          switch_log_printf(SWITCH_CHANNEL_SESSION_LOG(session), SWITCH_LOG_ERROR, "send_text requires an argument specifying text to send\n");
-          switch_core_session_rwunlock(lsession);
-          goto done;
-        }
-        status = send_text(lsession, argv[2]);
-      }
-      else if (!strcasecmp(argv[1], "start")) {
+      		}
+      		else if (!strcasecmp(argv[1], "send_text")) 
+			{
+        		if (argc < 3) 
+				{
+          			switch_log_printf(SWITCH_CHANNEL_SESSION_LOG(session), SWITCH_LOG_ERROR, "send_text requires an argument specifying text to send\n");
+          			switch_core_session_rwunlock(lsession);
+          			goto done;
+        		}
+        		status = send_text(lsession, argv[2]);
+      		}
+      		else if (!strcasecmp(argv[1], "start")) 
+			{
 				switch_channel_t *channel = switch_core_session_get_channel(lsession);
-        char host[MAX_WS_URL_LEN], path[MAX_PATH_LEN];
-        unsigned int port;
-        int sslFlags;
-        int sampling = 8000;
-      	switch_media_bug_flag_t flags = SMBF_READ_STREAM ;
-        char *metadata = argc > 5 ? argv[5] : NULL ;
-        if (0 == strcmp(argv[3], "mixed")) {
-          flags |= SMBF_WRITE_STREAM ;
-        }
-        else if (0 == strcmp(argv[3], "stereo")) {
-          flags |= SMBF_WRITE_STREAM ;
-          flags |= SMBF_STEREO;
-        }
-        else if(0 != strcmp(argv[3], "mono")) {
-          switch_log_printf(SWITCH_CHANNEL_SESSION_LOG(session), SWITCH_LOG_ERROR, "invalid mix type: %s, must be mono, mixed, or stereo\n", argv[3]);
-          switch_core_session_rwunlock(lsession);
-          goto done;
-        }
-        if (0 == strcmp(argv[4], "16k")) {
-          sampling = 16000;
-        }
-        else if (0 == strcmp(argv[4], "8k")) {
-          sampling = 8000;
-        }
-				else {
-					sampling = atoi(argv[4]);
-				}
-        if (!parse_ws_uri(channel, argv[2], &host[0], &path[0], &port, &sslFlags)) {
-          switch_log_printf(SWITCH_CHANNEL_SESSION_LOG(session), SWITCH_LOG_ERROR, "invalid websocket uri: %s\n", argv[2]);
-        }
-				else if (sampling % 8000 != 0) {
-          switch_log_printf(SWITCH_CHANNEL_SESSION_LOG(session), SWITCH_LOG_ERROR, "invalid sample rate: %s\n", argv[4]);					
-				}
-        else {
-          status = start_capture(lsession, flags, host, port, path, sampling, sslFlags, metadata, "mod_aai_transcription");
-        }
+        		char host[MAX_WS_URL_LEN], path[MAX_PATH_LEN], path1[MAX_PATH_LEN];
+        		unsigned int port;
+        		int sslFlags;
+        		int sampling = 16000;
+      			switch_media_bug_flag_t flags = SMBF_READ_STREAM ;
+        		if (!parse_ws_uri(channel, argv[2], &host[0], &path[0], &port, &sslFlags)) 
+				{
+          			switch_log_printf(SWITCH_CHANNEL_SESSION_LOG(session), SWITCH_LOG_ERROR, "invalid websocket uri: %s\n", argv[2]);
+        		}
+        		else 
+				{
+					// Extract sampling rate from the path
+					char *token =NULL;
+    				char *next_token =NULL;
+					strcpy(path1, path);
+					token = strtok(path1, "=");
+        			next_token = strtok(NULL, "=");
+					sampling = atoi(next_token);
+          			switch_log_printf(SWITCH_CHANNEL_SESSION_LOG(session), SWITCH_LOG_NOTICE, "TOKEN:%s, NEXT_TOKEN:%s, sampling:%d\n",token, next_token, sampling);
+
+          			status = start_capture(lsession, flags, host, port, path, sampling, sslFlags, "mod_aai_transcription");
+        		}
 			}
-      else {
-        switch_log_printf(SWITCH_CHANNEL_SESSION_LOG(session), SWITCH_LOG_ERROR, "unsupported mod_aai_transcription cmd: %s\n", argv[1]);
-      }
+      		else 
+			{
+        		switch_log_printf(SWITCH_CHANNEL_SESSION_LOG(session), SWITCH_LOG_ERROR, "unsupported mod_aai_transcription cmd: %s\n", argv[1]);
+      		}
 			switch_core_session_rwunlock(lsession);
 		}
-		else {
+		else 
+		{
 			switch_log_printf(SWITCH_CHANNEL_SESSION_LOG(session), SWITCH_LOG_ERROR, "Error locating session %s\n", argv[0]);
 		}
 	}
@@ -270,9 +284,6 @@ SWITCH_MODULE_LOAD_FUNCTION(mod_aai_transcription_load)
 
 	/* create/register custom event message types */
 	if (switch_event_reserve_subclass(EVENT_TRANSCRIPTION) != SWITCH_STATUS_SUCCESS ||
-    switch_event_reserve_subclass(EVENT_TRANSFER) != SWITCH_STATUS_SUCCESS ||
-    switch_event_reserve_subclass(EVENT_PLAY_AUDIO) != SWITCH_STATUS_SUCCESS ||
-    switch_event_reserve_subclass(EVENT_KILL_AUDIO) != SWITCH_STATUS_SUCCESS ||
     switch_event_reserve_subclass(EVENT_ERROR) != SWITCH_STATUS_SUCCESS ||
     switch_event_reserve_subclass(EVENT_DISCONNECT) != SWITCH_STATUS_SUCCESS) {
 
@@ -302,10 +313,6 @@ SWITCH_MODULE_SHUTDOWN_FUNCTION(mod_aai_transcription_shutdown)
 	aai_cleanup();
   //mod_running = 0;
 	switch_event_free_subclass(EVENT_TRANSCRIPTION);
-	switch_event_free_subclass(EVENT_TRANSFER);
-	switch_event_free_subclass(EVENT_PLAY_AUDIO);
-	switch_event_free_subclass(EVENT_KILL_AUDIO);
-	switch_event_free_subclass(EVENT_DISCONNECT);
 	switch_event_free_subclass(EVENT_ERROR);
 
 	return SWITCH_STATUS_SUCCESS;
