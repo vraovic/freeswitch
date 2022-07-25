@@ -334,7 +334,7 @@ SWITCH_STANDARD_API(aai_transcription_function)
       		else if (!strcasecmp(argv[1], "start")) 
 			{
 				switch_channel_t *channel = switch_core_session_get_channel(lsession);
-        		char host[MAX_WS_URL_LEN], path[MAX_PATH_LEN];
+        		char host[MAX_WS_URL_LEN], path[MAX_PATH_LEN]; temp[MAX_PATH_LEN];
         		unsigned int port;
         		int sslFlags;
         		int sampling = 16000;
@@ -348,7 +348,8 @@ SWITCH_STANDARD_API(aai_transcription_function)
 					// Extract sampling rate from path
 					char *token =NULL;
     				char *next_token =NULL;
-					token = strtok(path, "=");
+					memcpy(temp, path);
+					token = strtok(temp, "=");
         			next_token = strtok(NULL, "=");
 					sampling = atoi(next_token);
           			switch_log_printf(SWITCH_CHANNEL_SESSION_LOG(session), SWITCH_LOG_NOTICE, "TOKEN:%s, NEXT_TOKEN:%s, sampling:%d\n",token, next_token, sampling);
