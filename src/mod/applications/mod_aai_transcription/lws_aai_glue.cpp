@@ -505,7 +505,7 @@ extern "C" {
             dirty = true;
             if (pAudioPipe->audioSpaceSize() >= transcription_size) {
 
-              char textToSend[(base64AudioSize  + 20)];
+              char textToSend[(base64AudioSize/2  + 20)];
               memset(textToSend, '\0', sizeof(textToSend));
               strcat(textToSend, "{\"audio_data\":\"");
               // strcat(textToSend, pAudioPipe->base64EncodedAudio(transcription_size).c_str());
