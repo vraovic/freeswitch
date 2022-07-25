@@ -13,6 +13,7 @@
 #define MAX_PATH_LEN (4096)
 
 #define EVENT_TRANSCRIPTION   "mod_aai_transcription::transcription"
+#define EVENT_DISCONNECT      "mod_aai_transcription::disconnect"
 #define EVENT_ERROR           "mod_aai_transcription::error"
 #define EVENT_CONNECT_SUCCESS "mod_aai_transcription::connect"
 #define EVENT_CONNECT_FAIL    "mod_aai_transcription::connect_failed"
