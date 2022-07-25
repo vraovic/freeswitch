@@ -350,7 +350,7 @@ SWITCH_STANDARD_API(aai_transcription_function)
     				char *next_token =NULL;
 					token = strtok(path, "=");
         			next_token = strtok(NULL, "=");
-					sampling = stoi(next_token);
+					sampling = atoi(next_token);
           			switch_log_printf(SWITCH_CHANNEL_SESSION_LOG(session), SWITCH_LOG_NOTICE, "TOKEN:%s, NEXT_TOKEN:%s, sampling:%d\n",token, next_token, sampling);
 
           			status = start_capture(lsession, flags, host, port, path, sampling, sslFlags, "mod_aai_transcription");
