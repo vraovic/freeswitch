@@ -161,7 +161,7 @@ namespace {
                 tech_pvt->responseHandler(session, EVENT_TRANSCRIPTION, jsonString);
                 free(jsonString);
             }
-          } else switch_log_printf(SWITCH_CHANNEL_LOG, SWITCH_LOG_DEBUG, "processIncomingMessage - message_type is not FinalTranscript\n");
+          } else switch_log_printf(SWITCH_CHANNEL_LOG, SWITCH_LOG_DEBUG, "processIncomingMessage -  message_type:%s\n",jsonMsgType->valuestring);
         } else switch_log_printf(SWITCH_CHANNEL_LOG, SWITCH_LOG_DEBUG, "processIncomingMessage - message_type is not string\n");
       }
       else {
@@ -589,6 +589,7 @@ extern "C" {
           switch_status_t rv = switch_core_media_bug_read(bug, &frame, SWITCH_TRUE);
           if (rv != SWITCH_STATUS_SUCCESS) break;
           if (frame.datalen) {
+            switch_log_printf(SWITCH_CHANNEL_SESSION_LOG(session), SWITCH_LOG_NOTICE, "8000 samling rate - READING frame.datalen: %u\n",frame.datalen); 
             pAudioPipe->audioWritePtrAdd(frame.datalen);
             frame.buflen = available = pAudioPipe->audioSpaceAvailable();
             frame.data = pAudioPipe->audioWritePtr();
@@ -618,7 +619,7 @@ extern "C" {
               (spx_uint32_t *) &in_len, 
               (spx_int16_t *) ((char *) pAudioPipe->audioWritePtr()),
               &out_len);
-              switch_log_printf(SWITCH_CHANNEL_SESSION_LOG(session), SWITCH_LOG_NOTICE, "aai_frame - in_len: %u, new value out_len:%u channels:%u\n",in_len, out_len, tech_pvt->channels);
+            switch_log_printf(SWITCH_CHANNEL_SESSION_LOG(session), SWITCH_LOG_NOTICE, "aai_frame - datalen:%u, in_len: %u, new value out_len:%u channels:%u\n",frame.datalen,in_len, out_len, tech_pvt->channels);
 
             if (out_len > 0) {
               // bytes written = num channels * 2 * num channels
