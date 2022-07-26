@@ -72,6 +72,9 @@ public:
   void audioWritePtrResetToZero(void) {
     m_audio_buffer_write_offset = 0;
   }
+  void clearMetadata(void) {
+    m_metadata.clear();
+  }
 
   void lockAudioBuffer(void) {
     m_audio_mutex.lock();
