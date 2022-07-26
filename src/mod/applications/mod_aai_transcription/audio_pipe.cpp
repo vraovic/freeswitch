@@ -100,7 +100,7 @@ int AudioPipe::lws_callback(struct lws *wsi,
           *ppAp = ap;
           ap->m_vhd = vhd;
           ap->m_state = LWS_CLIENT_CONNECTED;
-          // lwsl_notice("AudioPipe::lws_callback LWS_CALLBACK_CLIENT_ESTABLISHED - %s - calling a-->m_callback\n"); 
+          lwsl_debug("AudioPipe::lws_callback LWS_CALLBACK_CLIENT_ESTABLISHED - %s - calling a-->m_callback\n"); 
           ap->m_callback(ap->m_uuid.c_str(), AudioPipe::CONNECT_SUCCESS, NULL);
         }
         else {
@@ -188,7 +188,7 @@ int AudioPipe::lws_callback(struct lws *wsi,
             // lwsl_notice("AudioPipe::lws_callback LWS_CALLBACK_CLIENT_RECEIVE - lws_is_final_fragment - yes\n");
             if (nullptr != ap->m_recv_buf) {
               std::string msg((char *)ap->m_recv_buf, ap->m_recv_buf_ptr - ap->m_recv_buf);
-            // lwsl_notice("AudioPipe::lws_callback LWS_CALLBACK_CLIENT_RECEIVE - MSG: %s\n", msg.c_str());
+              lwsl_debug("AudioPipe::lws_callback LWS_CALLBACK_CLIENT_RECEIVE - MSG: %s\n", msg.c_str());
               ap->m_callback(ap->m_uuid.c_str(), AudioPipe::MESSAGE, msg.c_str());
               if (nullptr != ap->m_recv_buf) free(ap->m_recv_buf);
             }
@@ -225,7 +225,7 @@ int AudioPipe::lws_callback(struct lws *wsi,
             // uint8_t buf[8553 + LWS_PRE];
             // memcpy(buf + LWS_PRE, ap->m_metadata.c_str(), 8553);
             int n = ap->m_metadata.length();
-            // lwsl_notice("AudioPipe::lws_write - send audio to AAI: %ld\n",n); 
+            lwsl_debug("AudioPipe::lws_write - send audio to AAI: %ld\n",n); 
             // lwsl_notice("AudioPipe::lws_write - send to AAI:%s\n",buf + LWS_PRE); 
             int m = lws_write(wsi, buf + LWS_PRE, n, LWS_WRITE_TEXT);
             ap->m_metadata.clear();
