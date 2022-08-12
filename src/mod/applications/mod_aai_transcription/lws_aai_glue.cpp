@@ -52,10 +52,13 @@ namespace {
               switch_log_printf(SWITCH_CHANNEL_LOG, SWITCH_LOG_DEBUG, "processIncomingMessage - FinalTranscript - text:%s\n", jsonTranscription->valuestring);
             if (jsonTranscription && jsonTranscription->valuestring) 
             {
-                char* jsonString = cJSON_PrintUnformatted(jsonTranscription);
-                switch_log_printf(SWITCH_CHANNEL_LOG, SWITCH_LOG_DEBUG, "processIncomingMessage - FinalTranscript - transcripion:%s\n", jsonString);
-                tech_pvt->responseHandler(session, EVENT_TRANSCRIPTION, jsonString);
-                free(jsonString);
+                // char* jsonString = cJSON_PrintUnformatted(jsonTranscription);
+                // switch_log_printf(SWITCH_CHANNEL_LOG, SWITCH_LOG_DEBUG, "processIncomingMessage - FinalTranscript - transcripion:%s\n", jsonString);
+                if ( strlen(jsonTranscription->valuestring) > 0) 
+                {
+                  tech_pvt->responseHandler(session, EVENT_TRANSCRIPTION, jsonTranscription->valuestring);
+                }
+                // free(jsonString);
             }
           } 
           else switch_log_printf(SWITCH_CHANNEL_LOG, SWITCH_LOG_DEBUG, "processIncomingMessage -  message_type:%s\n",jsonMsgType->valuestring);
