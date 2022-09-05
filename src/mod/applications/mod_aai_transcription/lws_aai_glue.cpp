@@ -101,7 +101,7 @@ namespace {
               tech_pvt->responseHandler(session, EVENT_CONNECT_SUCCESS, NULL);
               
               //We are connected and ready for transcription; let's flush audio buffer
-              switch_core_media_bug_flush(bug);
+              // switch_core_media_bug_flush(bug);
               // AudioPipe *pAudioPipe = static_cast<AudioPipe *>(tech_pvt->pAudioPipe);
               // if(pAudioPipe) {
               //   pAudioPipe->audioWritePtrResetToZero();
