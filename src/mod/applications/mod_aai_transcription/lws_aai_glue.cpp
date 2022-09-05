@@ -97,7 +97,8 @@ namespace {
         if (tech_pvt) {
           switch (event) {
             case AudioPipe::CONNECT_SUCCESS:
-              switch_log_printf(SWITCH_CHANNEL_SESSION_LOG(session), SWITCH_LOG_INFO, "connection successful - flush media_bug_buffer\n");
+              // switch_log_printf(SWITCH_CHANNEL_SESSION_LOG(session), SWITCH_LOG_INFO, "connection successful - flush media_bug_buffer\n");
+              switch_log_printf(SWITCH_CHANNEL_SESSION_LOG(session), SWITCH_LOG_INFO, "connection successful - DON'T flush media_bug_buffer\n");
               tech_pvt->responseHandler(session, EVENT_CONNECT_SUCCESS, NULL);
               
               //We are connected and ready for transcription; let's flush audio buffer
