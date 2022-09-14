@@ -49,7 +49,8 @@ namespace {
           if (0 == strcmp(jsonMsgType->valuestring, "FinalTranscript")) 
           {
             cJSON* jsonTranscription = cJSON_GetObjectItem(json, "text");
-              switch_log_printf(SWITCH_CHANNEL_LOG, SWITCH_LOG_DEBUG, "processIncomingMessage - FinalTranscript - text:%s\n", jsonTranscription->valuestring);
+            cJSON* jsonSessionId = cJSON_GetObjectItem(json, "session_id");
+            switch_log_printf(SWITCH_CHANNEL_LOG, SWITCH_LOG_DEBUG, "processIncomingMessage - FinalTranscript - text:%s aai_session_id:%s\n", jsonTranscription->valuestring, jsonSessionId->valuestring);
             if (jsonTranscription && jsonTranscription->valuestring) 
             {
                 // char* jsonString = cJSON_PrintUnformatted(jsonTranscription);
