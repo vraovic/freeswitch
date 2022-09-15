@@ -1703,9 +1703,7 @@ SWITCH_DECLARE(switch_status_t) switch_ivr_record_file(switch_core_session_t *se
 SWITCH_DECLARE(switch_status_t) switch_ivr_record_file_and_stream(switch_core_session_t *session,
 													   switch_file_handle_t *fh, const char *file, switch_input_args_t *args, uint32_t limit)
 {
-	// return switch_ivr_record_file_event_and_stream(session, fh, file, args, limit, NULL);
-	return switch_ivr_record_file_event(session, fh, file, args, limit, NULL);
-
+	return switch_ivr_record_file_event_and_stream(session, fh, file, args, limit, NULL);
 }
 
 static int teletone_handler(teletone_generation_session_t *ts, teletone_tone_map_t *map)
