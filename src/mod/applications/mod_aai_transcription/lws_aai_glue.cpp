@@ -50,7 +50,11 @@ namespace {
           {
             cJSON* jsonTranscription = cJSON_GetObjectItem(json, "text");
             cJSON* jsonSessionId = cJSON_GetObjectItem(json, "session_id");
-            switch_log_printf(SWITCH_CHANNEL_LOG, SWITCH_LOG_DEBUG, "processIncomingMessage - FinalTranscript - text:%s aai_session_id:%s\n", jsonTranscription->valuestring, jsonSessionId->valuestring);
+            if(jsonSessionId && jsonSessionId->valuestring) {
+              switch_log_printf(SWITCH_CHANNEL_LOG, SWITCH_LOG_DEBUG, "processIncomingMessage - FinalTranscript - text:%s aai_session_id:%s\n", jsonTranscription->valuestring, jsonSessionId->valuestring);
+            } else {
+              switch_log_printf(SWITCH_CHANNEL_LOG, SWITCH_LOG_DEBUG, "processIncomingMessage - FinalTranscript (NO session_id) - text:%s\n", jsonTranscription->valuestring);
+            }
             if (jsonTranscription && jsonTranscription->valuestring) 
             {
                 // char* jsonString = cJSON_PrintUnformatted(jsonTranscription);
