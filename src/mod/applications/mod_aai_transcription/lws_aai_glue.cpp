@@ -38,7 +38,7 @@ namespace {
   void processIncomingMessage(private_t* tech_pvt, switch_core_session_t* session, const char* message) {
     std::string msg = message;
     std::string type;
-    switch_log_printf(SWITCH_CHANNEL_LOG, SWITCH_LOG_DEBUG, "processIncomingMessage - received %s message\n", message);
+    // switch_log_printf(SWITCH_CHANNEL_LOG, SWITCH_LOG_DEBUG, "processIncomingMessage - received %s message\n", message);
     cJSON* json = parse_json(session, msg, type) ;
     if (json) {
       // switch_log_printf(SWITCH_CHANNEL_LOG, SWITCH_LOG_DEBUG, "(%u) processIncomingMessage - received %s message\n", tech_pvt->id, type.c_str());
@@ -49,12 +49,7 @@ namespace {
           if (0 == strcmp(jsonMsgType->valuestring, "FinalTranscript")) 
           {
             cJSON* jsonTranscription = cJSON_GetObjectItem(json, "text");
-            cJSON* jsonSessionId = cJSON_GetObjectItem(json, "session_id");
-            if(jsonSessionId && jsonSessionId->valuestring) {
-              switch_log_printf(SWITCH_CHANNEL_LOG, SWITCH_LOG_DEBUG, "processIncomingMessage - FinalTranscript - text:%s aai_session_id:%s\n", jsonTranscription->valuestring, jsonSessionId->valuestring);
-            } else {
-              switch_log_printf(SWITCH_CHANNEL_LOG, SWITCH_LOG_DEBUG, "processIncomingMessage - FinalTranscript (NO session_id) - text:%s\n", jsonTranscription->valuestring);
-            }
+            switch_log_printf(SWITCH_CHANNEL_LOG, SWITCH_LOG_DEBUG, "processIncomingMessage - FinalTranscript - text:%s\n", jsonTranscription->valuestring);
             if (jsonTranscription && jsonTranscription->valuestring) 
             {
                 // char* jsonString = cJSON_PrintUnformatted(jsonTranscription);
