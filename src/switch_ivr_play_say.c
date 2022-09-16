@@ -1397,7 +1397,7 @@ SWITCH_DECLARE(switch_status_t) switch_ivr_record_file_event_and_stream(switch_c
 				fh->silence_hits = fh->samplerate * fh->silence_hits / read_impl.samples_per_packet;
 			} else {
 				fh->silence_hits = fh->samplerate * 3 / read_impl.samples_per_packet;
-				switch_log_printf(SWITCH_CHANNEL_SESSION_LOG(session), SWITCH_LOG_WARNING, "Calculate silence_hits:%d, samplerate:%s, read_impl.samples_per_packet:%d\n",fh->silence_hits,fh->samplerate,read_impl.samples_per_packet);
+				switch_log_printf(SWITCH_CHANNEL_SESSION_LOG(session), SWITCH_LOG_WARNING, "Calculate silence_hits:%d, samplerate:%d, read_impl.samples_per_packet:%d\n",fh->silence_hits,fh->samplerate,read_impl.samples_per_packet);
 			}
 			org_silence_hits = fh->silence_hits;
 		}
