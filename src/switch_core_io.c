@@ -739,6 +739,8 @@ SWITCH_DECLARE(switch_status_t) switch_core_session_read_frame(switch_core_sessi
 					}
 
 					if (bp->callback) {
+
+						switch_log_printf(SWITCH_CHANNEL_SESSION_LOG(session), SWITCH_LOG_DEBUG, "callback - Read Frame!!!!\n");
 						ok = bp->callback(bp, bp->user_data, SWITCH_ABC_TYPE_READ);
 					}
 					switch_mutex_unlock(bp->read_mutex);
