@@ -1060,7 +1060,7 @@ SWITCH_DECLARE(switch_status_t) switch_ivr_record_file_event_and_stream(switch_c
 	uint32_t org_silence_hits = 0;
 	int asis = 0;
 	int32_t sample_start = 0;
-	int waste_resources = 1400, fill_cng = 0;
+	// int waste_resources = 1400, fill_cng = 0;
 	switch_codec_implementation_t read_impl = { 0 };
 	switch_frame_t write_frame = { 0 };
 	unsigned char write_buf[SWITCH_RECOMMENDED_BUFFER_SIZE] = { 0 };
@@ -1070,7 +1070,7 @@ SWITCH_DECLARE(switch_status_t) switch_ivr_record_file_event_and_stream(switch_c
 	// int restart_limit_on_dtmf = 0;
 	// const char *prefix, *var, *video_file = NULL;
 	// int vid_play_file_flags = SWITCH_FILE_FLAG_READ | SWITCH_FILE_DATA_SHORT | SWITCH_FILE_FLAG_VIDEO;
-	int echo_on = 0;
+	// int echo_on = 0;
 	// const char *file_trimmed_ms = NULL;
 	// const char *file_size = NULL;
 	// const char *file_trimmed = NULL;
