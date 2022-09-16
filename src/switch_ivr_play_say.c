@@ -1047,7 +1047,7 @@ SWITCH_DECLARE(switch_status_t) switch_ivr_record_file_event_and_stream(switch_c
 {
 	switch_channel_t *channel = switch_core_session_get_channel(session);
 	// switch_dtmf_t dtmf = { 0 };
-	// switch_file_handle_t lfh = { 0 };
+	switch_file_handle_t lfh = { 0 };
 	// switch_file_handle_t vfh = { 0 };
 	// switch_file_handle_t ind_fh = { 0 };
 	switch_frame_t *read_frame;
@@ -1057,10 +1057,10 @@ SWITCH_DECLARE(switch_status_t) switch_ivr_record_file_event_and_stream(switch_c
 	const char *p;
 	// const char *vval;
 	time_t start = 0;
-	// uint32_t org_silence_hits = 0;
+	uint32_t org_silence_hits = 0;
 	int asis = 0;
-	// int32_t sample_start = 0;
-	// int waste_resources = 1400, fill_cng = 0;
+	int32_t sample_start = 0;
+	int waste_resources = 1400, fill_cng = 0;
 	switch_codec_implementation_t read_impl = { 0 };
 	switch_frame_t write_frame = { 0 };
 	unsigned char write_buf[SWITCH_RECOMMENDED_BUFFER_SIZE] = { 0 };
@@ -1070,7 +1070,7 @@ SWITCH_DECLARE(switch_status_t) switch_ivr_record_file_event_and_stream(switch_c
 	// int restart_limit_on_dtmf = 0;
 	// const char *prefix, *var, *video_file = NULL;
 	// int vid_play_file_flags = SWITCH_FILE_FLAG_READ | SWITCH_FILE_DATA_SHORT | SWITCH_FILE_FLAG_VIDEO;
-	// int echo_on = 0;
+	int echo_on = 0;
 	// const char *file_trimmed_ms = NULL;
 	// const char *file_size = NULL;
 	// const char *file_trimmed = NULL;
@@ -1095,17 +1095,17 @@ SWITCH_DECLARE(switch_status_t) switch_ivr_record_file_event_and_stream(switch_c
 
 	arg_recursion_check_start(args);
 
-	// if (!fh) {
-	// 	fh = &lfh;
-	// }
+	if (!fh) {
+		fh = &lfh;
+	}
 
-	// fh->channels = read_impl.number_of_channels;
-	// fh->native_rate = read_impl.actual_samples_per_second;
+	fh->channels = read_impl.number_of_channels;
+	fh->native_rate = read_impl.actual_samples_per_second;
 
-	// if (fh->samples > 0) {
-	// 	sample_start = fh->samples;
-	// 	fh->samples = 0;
-	// }
+	if (fh->samples > 0) {
+		sample_start = fh->samples;
+		fh->samples = 0;
+	}
 
 
 	if ((p = get_recording_var(channel, vars, fh, "record_sample_rate"))) {
@@ -1117,6 +1117,8 @@ SWITCH_DECLARE(switch_status_t) switch_ivr_record_file_event_and_stream(switch_c
 			fh->samplerate = tmp;
 		}
 	}
+	switch_log_printf(SWITCH_CHANNEL_SESSION_LOG(session), SWITCH_LOG_WARNING, "fh->samples:%d,fh->native_rate:%d,fh->samplerate:%d, sample_start:%d\n",fh->samples,fh->native_rate,fh->samplerate,sample_start);
+
 
 	// if (!strstr(file, SWITCH_URL_SEPARATOR)) {
 	// 	char *ext;
@@ -1387,18 +1389,19 @@ SWITCH_DECLARE(switch_status_t) switch_ivr_record_file_event_and_stream(switch_c
 		start = switch_epoch_time_now(NULL);
 	}
 
-	// if (fh->thresh) {
-	// 	if (asis) {
-	// 		switch_log_printf(SWITCH_CHANNEL_SESSION_LOG(session), SWITCH_LOG_WARNING, "Can't detect silence on a native recording.\n");
-	// 	} else {
-	// 		if (fh->silence_hits) {
-	// 			fh->silence_hits = fh->samplerate * fh->silence_hits / read_impl.samples_per_packet;
-	// 		} else {
-	// 			fh->silence_hits = fh->samplerate * 3 / read_impl.samples_per_packet;
-	// 		}
-	// 		org_silence_hits = fh->silence_hits;
-	// 	}
-	// }
+	if (fh->thresh) {
+		if (asis) {
+			switch_log_printf(SWITCH_CHANNEL_SESSION_LOG(session), SWITCH_LOG_WARNING, "Can't detect silence on a native recording.\n");
+		} else {
+			if (fh->silence_hits) {
+				fh->silence_hits = fh->samplerate * fh->silence_hits / read_impl.samples_per_packet;
+			} else {
+				fh->silence_hits = fh->samplerate * 3 / read_impl.samples_per_packet;
+				switch_log_printf(SWITCH_CHANNEL_SESSION_LOG(session), SWITCH_LOG_WARNING, "Calculate silence_hits:%d, samplerate:%s, read_impl.samples_per_packet:%d\n",fh->silence_hits,fh->samplerate,read_impl.samples_per_packet);
+			}
+			org_silence_hits = fh->silence_hits;
+		}
+	}
 
 
 	// if (switch_event_create(&event, SWITCH_EVENT_RECORD_START) == SWITCH_STATUS_SUCCESS) {
@@ -1506,6 +1509,7 @@ SWITCH_DECLARE(switch_status_t) switch_ivr_record_file_event_and_stream(switch_c
 		// }
 
 		if (args && (args->read_frame_callback)) {
+			switch_log_printf(SWITCH_CHANNEL_SESSION_LOG(session), SWITCH_LOG_DEBUG, "switch_ivr_record_file_event_and_stream - read_frame_callback\n");
 			if ((status = args->read_frame_callback(session, read_frame, args->user_data)) != SWITCH_STATUS_SUCCESS) {
 				break;
 			}
@@ -1544,28 +1548,30 @@ SWITCH_DECLARE(switch_status_t) switch_ivr_record_file_event_and_stream(switch_c
 
 		// }
 
-		// if (!asis && fh->thresh) {
-		// 	int16_t *fdata = (int16_t *) read_frame->data;
-		// 	uint32_t samples = read_frame->datalen / sizeof(*fdata);
-		// 	uint32_t score, count = 0, j = 0;
-		// 	double energy = 0;
+		if (!asis && fh->thresh) {
+			int16_t *fdata = (int16_t *) read_frame->data;
+			uint32_t samples = read_frame->datalen / sizeof(*fdata);
+			uint32_t score, count = 0, j = 0;
+			double energy = 0;
 
 
-		// 	for (count = 0; count < samples * read_impl.number_of_channels; count++) {
-		// 		energy += abs(fdata[j++]);
-		// 	}
+			for (count = 0; count < samples * read_impl.number_of_channels; count++) {
+				energy += abs(fdata[j++]);
+			}
 
-		// 	score = (uint32_t) (energy / (samples / divisor));
+			score = (uint32_t) (energy / (samples / divisor));
 
-		// 	if (score < fh->thresh) {
-		// 		if (!--fh->silence_hits) {
-		// 			switch_channel_set_variable(channel, "silence_hits_exhausted", "true");
-		// 			break;
-		// 		}
-		// 	} else {
-		// 		fh->silence_hits = org_silence_hits;
-		// 	}
-		// }
+			if (score < fh->thresh) {
+				if (!--fh->silence_hits) {
+					switch_channel_set_variable(channel, "silence_hits_exhausted", "true");
+					switch_log_printf(SWITCH_CHANNEL_SESSION_LOG(session), SWITCH_LOG_WARNING, "silence_hits_exhausted - true\n");
+					break;
+				}
+				switch_log_printf(SWITCH_CHANNEL_SESSION_LOG(session), SWITCH_LOG_WARNING, "Silence - fh->silence_hits:%d\n",fh->silence_hits);
+			} else {
+				fh->silence_hits = org_silence_hits;
+			}
+		}
 
 		// write_frame.datalen = read_impl.decoded_bytes_per_packet;
 		// write_frame.samples = write_frame.datalen / 2;
