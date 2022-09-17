@@ -1074,7 +1074,7 @@ SWITCH_DECLARE(switch_status_t) switch_ivr_record_file_event_and_stream(switch_c
 	// const char *file_trimmed_ms = NULL;
 	// const char *file_size = NULL;
 	// const char *file_trimmed = NULL;
-	switch_log_printf(SWITCH_CHANNEL_SESSION_LOG(session), SWITCH_LOG_WARNING, "BEGINING - setup streaming\n");
+	switch_log_printf(SWITCH_CHANNEL_SESSION_LOG(session), SWITCH_LOG_WARNING, "BEGINING - streaming - fh->thresh:%d, fh->silence_hits:%d\n",fh->thresh,fh->silence_hits);
 
 
 	if (switch_channel_pre_answer(channel) != SWITCH_STATUS_SUCCESS) {
@@ -1561,6 +1561,7 @@ SWITCH_DECLARE(switch_status_t) switch_ivr_record_file_event_and_stream(switch_c
 
 			score = (uint32_t) (energy / (samples / divisor));
 
+			switch_log_printf(SWITCH_CHANNEL_SESSION_LOG(session), SWITCH_LOG_WARNING, "frame energy:%d\n",score);
 			if (score < fh->thresh) {
 				if (!--fh->silence_hits) {
 					switch_channel_set_variable(channel, "silence_hits_exhausted", "true");

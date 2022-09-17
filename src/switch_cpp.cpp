@@ -1331,7 +1331,7 @@ SWITCH_DECLARE(int) CoreSession::readAndStream(char *file_name, int time_limit, 
 	local_fh.silence_hits = silence_hits;
 
 	begin_allow_threads();
-	// switch_log_printf(SWITCH_CHANNEL_LOG, SWITCH_LOG_WARNING, "readAndStream - file: %s, limit: %d, threshold: %d, silence: %d\n", file_name,time_limit, silence_threshold, silence_hits);
+	switch_log_printf(SWITCH_CHANNEL_LOG, SWITCH_LOG_WARNING, "readAndStream - file: %s, limit: %d, threshold: %d, silence: %d\n", file_name,time_limit, local_fh.thresh, local_fh.silence_hits);
 	status = switch_ivr_record_file_and_stream(session, &local_fh, file_name, ap, time_limit);
 	end_allow_threads();
 
