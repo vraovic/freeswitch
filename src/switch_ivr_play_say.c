@@ -1561,17 +1561,17 @@ SWITCH_DECLARE(switch_status_t) switch_ivr_record_file_event_and_stream(switch_c
 
 			score = (uint32_t) (energy / (samples / divisor));
 
-			switch_log_printf(SWITCH_CHANNEL_SESSION_LOG(session), SWITCH_LOG_WARNING, "frame energy:%d\n",score);
-			if (score < fh->thresh) {
-				if (!--fh->silence_hits) {
-					switch_channel_set_variable(channel, "silence_hits_exhausted", "true");
-					switch_log_printf(SWITCH_CHANNEL_SESSION_LOG(session), SWITCH_LOG_WARNING, "silence_hits_exhausted - true\n");
-					break;
-				}
-				switch_log_printf(SWITCH_CHANNEL_SESSION_LOG(session), SWITCH_LOG_WARNING, "Silence - fh->silence_hits:%d\n",fh->silence_hits);
-			} else {
-				fh->silence_hits = org_silence_hits;
-			}
+			switch_log_printf(SWITCH_CHANNEL_SESSION_LOG(session), SWITCH_LOG_WARNING, "frame energy:%d, samples:%d, divisor:%d, org_silence_hits:%d\n",score, samples, divisor,org_silence_hits);
+			// if (score < fh->thresh) {
+			// 	if (!--fh->silence_hits) {
+			// 		switch_channel_set_variable(channel, "silence_hits_exhausted", "true");
+			// 		switch_log_printf(SWITCH_CHANNEL_SESSION_LOG(session), SWITCH_LOG_WARNING, "silence_hits_exhausted - true\n");
+			// 		break;
+			// 	}
+			// 	switch_log_printf(SWITCH_CHANNEL_SESSION_LOG(session), SWITCH_LOG_WARNING, "Silence - fh->silence_hits:%d\n",fh->silence_hits);
+			// } else {
+			// 	fh->silence_hits = org_silence_hits;
+			// }
 		}
 
 		// write_frame.datalen = read_impl.decoded_bytes_per_packet;
