@@ -1561,7 +1561,7 @@ SWITCH_DECLARE(switch_status_t) switch_ivr_record_file_event_and_stream(switch_c
 
 			score = (uint32_t) (energy / (samples / divisor));
 
-			switch_log_printf(SWITCH_CHANNEL_SESSION_LOG(session), SWITCH_LOG_WARNING, "frame energy:%d, samples:%d\n",score, samples);
+			switch_log_printf(SWITCH_CHANNEL_SESSION_LOG(session), SWITCH_LOG_WARNING, "frame energy:%d, samples:%d, org_silence_hits:%d\n",score, samples, org_silence_hits);
 
 			// uint8_t *fdata1 = (uint8_t *) read_frame->data;
 			// uint32_t samples1 = read_frame->datalen / sizeof(*fdata1);
