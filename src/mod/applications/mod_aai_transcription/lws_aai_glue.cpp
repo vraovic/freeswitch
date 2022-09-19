@@ -529,7 +529,7 @@ extern "C" {
 
               switch_log_printf(SWITCH_CHANNEL_SESSION_LOG(session), SWITCH_LOG_WARNING, "TRANSCRIPTION FRAME ENERGY:%d, samples:%d\n",score, samples);
 
-         			uint8_t *fdata1 = (unit8_t *) pAudioPipe->audioReadPtr();
+         			uint8_t *fdata1 = (uint8_t *) pAudioPipe->audioReadPtr();
               uint32_t samples1 =  transcription_size/ sizeof(*fdata1);
               uint32_t score1, count1 = 0, j1 = 0;
               double energy1 = 0;
