@@ -521,7 +521,7 @@ extern "C" {
               double energy = 0;
 
 
-              for (count = 0; count < samples * read_impl.number_of_channels; count++) {
+              for (count = 0; count < samples ; count++) {
                 energy += abs(fdata[j++]);
               }
 
@@ -533,7 +533,7 @@ extern "C" {
               uint32_t samples1 =  transcription_size/ sizeof(*fdata1);
               uint32_t score1, count1 = 0, j1 = 0;
               double energy1 = 0;
-              for (count1 = 0; count1 < samples1 * read_impl.number_of_channels; count1++) {
+              for (count1 = 0; count1 < samples1; count1++) {
                 energy1 += abs(fdata[j1++]);
               }
               score1 = (uint32_t) (energy1 / samples1);
