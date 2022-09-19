@@ -1057,7 +1057,7 @@ SWITCH_DECLARE(switch_status_t) switch_ivr_record_file_event_and_stream(switch_c
 	const char *p;
 	// const char *vval;
 	time_t start = 0;
-	uint32_t org_silence_hits = 0;
+	// uint32_t org_silence_hits = 0;
 	int asis = 0;
 	int32_t sample_start = 0;
 	// int waste_resources = 1400, fill_cng = 0;
