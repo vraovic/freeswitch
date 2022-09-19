@@ -1549,19 +1549,19 @@ SWITCH_DECLARE(switch_status_t) switch_ivr_record_file_event_and_stream(switch_c
 		// }
 
 		if (!asis && fh->thresh) {
-			int16_t *fdata = (int16_t *) read_frame->data;
-			uint32_t samples = read_frame->datalen / sizeof(*fdata);
-			uint32_t score, count = 0, j = 0;
-			double energy = 0;
+			// int16_t *fdata = (int16_t *) read_frame->data;
+			// uint32_t samples = read_frame->datalen / sizeof(*fdata);
+			// uint32_t score, count = 0, j = 0;
+			// double energy = 0;
 
 
-			for (count = 0; count < samples * read_impl.number_of_channels; count++) {
-				energy += abs(fdata[j++]);
-			}
+			// for (count = 0; count < samples * read_impl.number_of_channels; count++) {
+			// 	energy += abs(fdata[j++]);
+			// }
 
-			score = (uint32_t) (energy / (samples / divisor));
+			// score = (uint32_t) (energy / (samples / divisor));
 
-			switch_log_printf(SWITCH_CHANNEL_SESSION_LOG(session), SWITCH_LOG_WARNING, "frame energy:%d, samples:%d, org_silence_hits:%d\n",score, samples, org_silence_hits);
+			// switch_log_printf(SWITCH_CHANNEL_SESSION_LOG(session), SWITCH_LOG_WARNING, "frame energy:%d, samples:%d, org_silence_hits:%d\n",score, samples, org_silence_hits);
 
 			// uint8_t *fdata1 = (uint8_t *) read_frame->data;
 			// uint32_t samples1 = read_frame->datalen / sizeof(*fdata1);

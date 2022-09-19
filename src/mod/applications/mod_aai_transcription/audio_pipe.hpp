@@ -105,12 +105,12 @@ public:
 
   void close() ;
 
-  time_t getSilenceStartTime(void)
+  switch_time_t getSilenceStartTime(void)
   {
     return m_silence_start_time;
   }
 
-  void storeSilenceStartTime(time_t time)
+  void storeSilenceStartTime(switch_time_t time)
   {
     m_silence_start_time = time;
   }
@@ -170,7 +170,7 @@ private:
   log_emit_function m_logger;
   std::string m_api_token;
   bool m_gracefulShutdown;
- 	time_t m_silence_start_time;
+ 	switch_time_t m_silence_start_time;
   bool m_silence_detected;
   bool m_audio_detected;
 };

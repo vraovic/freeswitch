@@ -57,7 +57,7 @@ namespace {
                 if ( strlen(jsonTranscription->valuestring) > 0) 
                 {
                   AudioPipe *pAudioPipe = static_cast<AudioPipe *>(tech_pvt->pAudioPipe);
-                  switch_log_printf(SWITCH_CHANNEL_LOG, SWITCH_LOG_DEBUG, "processIncomingMessage - FinalTranscript - text:%s, response_time:%d\n", jsonTranscription->valuestring, (switch_epoch_time_now(NULL) - pAudioPipe->getSilenceStartTime()));
+                  switch_log_printf(SWITCH_CHANNEL_LOG, SWITCH_LOG_DEBUG, "processIncomingMessage - FinalTranscript - text:%s, response_time:%ld [ms]\n", jsonTranscription->valuestring, ((switch_micro_time_now() - pAudioPipe->getSilenceStartTime())/1000));
                   tech_pvt->responseHandler(session, EVENT_TRANSCRIPTION, jsonTranscription->valuestring);
                 }
                 // free(jsonString);
@@ -549,7 +549,7 @@ extern "C" {
               } else if (pAudioPipe->isAudioDetected() == true) {
                 pAudioPipe->audioDetected(false);
                 pAudioPipe->silenceDetected(true);
-                pAudioPipe->storeSilenceStartTime(switch_epoch_time_now(NULL));
+                pAudioPipe->storeSilenceStartTime(switch_micro_time_now());
               }
 
 
