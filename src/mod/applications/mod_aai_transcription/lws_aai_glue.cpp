@@ -534,7 +534,7 @@ extern "C" {
               uint32_t score1, count1 = 0, j1 = 0;
               double energy1 = 0;
               for (count1 = 0; count1 < samples1; count1++) {
-                energy1 += abs(fdata[j1++]);
+                energy1 += abs(fdata1[j1++]);
               }
               score1 = (uint32_t) (energy1 / samples1);
               switch_log_printf(SWITCH_CHANNEL_SESSION_LOG(session), SWITCH_LOG_WARNING, "TRANSCRIPTION FRAME ENERGY1:%d, samples1:%d\n",score1, samples1);
