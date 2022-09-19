@@ -515,19 +515,19 @@ extern "C" {
             dirty = true;
             if (pAudioPipe->audioSpaceSize() >= transcription_size) {
 
-         			int16_t *fdata = (int16_t *) pAudioPipe->audioReadPtr();
-              uint32_t samples = transcription_size / sizeof(*fdata);
-              uint32_t score, count = 0, j = 0;
-              double energy = 0;
+         			// int16_t *fdata = (int16_t *) pAudioPipe->audioReadPtr();
+              // uint32_t samples = transcription_size / sizeof(*fdata);
+              // uint32_t score, count = 0, j = 0;
+              // double energy = 0;
 
 
-              for (count = 0; count < samples ; count++) {
-                energy += abs(fdata[j++]);
-              }
+              // for (count = 0; count < samples ; count++) {
+              //   energy += abs(fdata[j++]);
+              // }
 
-              score = (uint32_t) (energy / samples);
+              // score = (uint32_t) (energy / samples);
 
-              switch_log_printf(SWITCH_CHANNEL_SESSION_LOG(session), SWITCH_LOG_WARNING, "TRANSCRIPTION FRAME ENERGY:%d, samples:%d\n",score, samples);
+              // switch_log_printf(SWITCH_CHANNEL_SESSION_LOG(session), SWITCH_LOG_WARNING, "TRANSCRIPTION FRAME ENERGY:%d, samples:%d\n",score, samples);
 
          			uint8_t *fdata1 = (uint8_t *) pAudioPipe->audioReadPtr();
               uint32_t samples1 =  transcription_size/ sizeof(*fdata1);
@@ -538,6 +538,17 @@ extern "C" {
               }
               score1 = (uint32_t) (energy1 / samples1);
               switch_log_printf(SWITCH_CHANNEL_SESSION_LOG(session), SWITCH_LOG_WARNING, "TRANSCRIPTION FRAME ENERGY1:%d, samples1:%d\n",score1, samples1);
+
+              if (score1 > 100) {
+                if (audio_detected == false) {
+                  audio_detected = true;
+                  silence_detected = false;
+                }
+              } else if (audio_detected == true) {
+                silence_detected = true;
+                audio_detected = false;
+                pAudioPipe->storeSilenceStartTime(switch_epoch_time_now(NULL));
+              }
 
 
               char textToSend[(base64AudioSize/2  + 20)];

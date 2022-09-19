@@ -92,6 +92,16 @@ public:
 
   void close() ;
 
+  time_t getSilenceStartTime(void)
+  {
+    return m_silence_start_time;
+  }
+
+  void storeSilenceStartTime(time_t time)
+  {
+    m_silence_start_time = time;
+  }
+
   // no default constructor or copying
   AudioPipe() = delete;
   AudioPipe(const AudioPipe&) = delete;
@@ -147,6 +157,7 @@ private:
   log_emit_function m_logger;
   std::string m_api_token;
   bool m_gracefulShutdown;
+ 	time_t m_silence_start_time;
 };
 
 #endif
