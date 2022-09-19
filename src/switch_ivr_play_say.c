@@ -1563,15 +1563,15 @@ SWITCH_DECLARE(switch_status_t) switch_ivr_record_file_event_and_stream(switch_c
 
 			switch_log_printf(SWITCH_CHANNEL_SESSION_LOG(session), SWITCH_LOG_WARNING, "frame energy:%d, samples:%d\n",score, samples);
 
-			uint8_t *fdata1 = (uint8_t *) read_frame->data;
-			uint32_t samples1 = read_frame->datalen / sizeof(*fdata1);
-			uint32_t score1, count1 = 0, j1 = 0;
-			double energy1 = 0;
-			for (count1 = 0; count1 < samples1 * read_impl.number_of_channels; count1++) {
-				energy1 += abs(fdata[j1++]);
-			}
-			score1 = (uint32_t) (energy1 / (samples1 / divisor));
-			switch_log_printf(SWITCH_CHANNEL_SESSION_LOG(session), SWITCH_LOG_WARNING, "frame energy1:%d, samples1:%d\n",score1, samples1);
+			// uint8_t *fdata1 = (uint8_t *) read_frame->data;
+			// uint32_t samples1 = read_frame->datalen / sizeof(*fdata1);
+			// uint32_t score1, count1 = 0, j1 = 0;
+			// double energy1 = 0;
+			// for (count1 = 0; count1 < samples1 * read_impl.number_of_channels; count1++) {
+			// 	energy1 += abs(fdata[j1++]);
+			// }
+			// score1 = (uint32_t) (energy1 / (samples1 / divisor));
+			// switch_log_printf(SWITCH_CHANNEL_SESSION_LOG(session), SWITCH_LOG_WARNING, "frame energy1:%d, samples1:%d\n",score1, samples1);
 
 
 			// if (score < fh->thresh) {
