@@ -90,6 +90,19 @@ public:
     return m_gracefulShutdown;
   }
 
+  bool isAudioDetected(void) {
+    return m_audio_detected;
+  }
+  bool isSilenceDetected(void) {
+    return m_silence_detected;
+  }
+  void audioDetected(bool value) {
+    m_audio_detected = value;
+  }
+  void silenceDetected(bool value) {
+    m_silence_detected = value;
+  }
+
   void close() ;
 
   time_t getSilenceStartTime(void)
@@ -158,6 +171,8 @@ private:
   std::string m_api_token;
   bool m_gracefulShutdown;
  	time_t m_silence_start_time;
+  bool m_silence_detected;
+  bool m_audio_detected;
 };
 
 #endif

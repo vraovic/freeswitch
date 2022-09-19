@@ -540,13 +540,13 @@ extern "C" {
               switch_log_printf(SWITCH_CHANNEL_SESSION_LOG(session), SWITCH_LOG_WARNING, "TRANSCRIPTION FRAME ENERGY1:%d, samples1:%d\n",score1, samples1);
 
               if (score1 > 100) {
-                if (audio_detected == false) {
-                  audio_detected = true;
-                  silence_detected = false;
+                if (pAudioPipe->isAudioDetected() == false) {
+                  pAudioPipe->audioDetected(true);
+                  pAudioPipe->silenceDetected(false);
                 }
-              } else if (audio_detected == true) {
-                silence_detected = true;
-                audio_detected = false;
+              } else if (pAudioPipe->isAudioDetected() == true) {
+                pAudioPipe->audioDetected(false);
+                pAudioPipe->silenceDetected(true);
                 pAudioPipe->storeSilenceStartTime(switch_epoch_time_now(NULL));
               }
 
