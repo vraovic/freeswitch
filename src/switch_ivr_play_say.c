@@ -1051,8 +1051,8 @@ SWITCH_DECLARE(switch_status_t) switch_ivr_record_file_event_and_stream(switch_c
 	// switch_file_handle_t vfh = { 0 };
 	// switch_file_handle_t ind_fh = { 0 };
 	switch_frame_t *read_frame;
-	switch_codec_t codec, write_codec = { 0 };
-	char *codec_name;
+	// switch_codec_t codec, write_codec = { 0 };
+	// char *codec_name;
 	switch_status_t status = SWITCH_STATUS_SUCCESS;
 	const char *p;
 	// const char *vval;
@@ -1062,8 +1062,8 @@ SWITCH_DECLARE(switch_status_t) switch_ivr_record_file_event_and_stream(switch_c
 	int32_t sample_start = 0;
 	// int waste_resources = 1400, fill_cng = 0;
 	switch_codec_implementation_t read_impl = { 0 };
-	switch_frame_t write_frame = { 0 };
-	unsigned char write_buf[SWITCH_RECOMMENDED_BUFFER_SIZE] = { 0 };
+	// switch_frame_t write_frame = { 0 };
+	// unsigned char write_buf[SWITCH_RECOMMENDED_BUFFER_SIZE] = { 0 };
 	// switch_event_t *event;
 	int divisor = 0;
 	// int file_flags = SWITCH_FILE_FLAG_WRITE | SWITCH_FILE_DATA_SHORT;
