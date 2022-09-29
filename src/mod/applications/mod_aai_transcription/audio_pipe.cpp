@@ -225,7 +225,7 @@ int AudioPipe::lws_callback(struct lws *wsi,
             // uint8_t buf[8553 + LWS_PRE];
             // memcpy(buf + LWS_PRE, ap->m_metadata.c_str(), 8553);
             int n = ap->m_metadata.length();
-            lwsl_notice("AudioPipe::lws_write - send audio to AAI: %ld\n",n); 
+            // lwsl_notice("AudioPipe::lws_write - send audio to AAI: %ld\n",n); 
             // lwsl_notice("AudioPipe::lws_write - send to AAI:%s\n",buf + LWS_PRE); 
             int m = lws_write(wsi, buf + LWS_PRE, n, LWS_WRITE_TEXT);
             ap->m_metadata.clear();
