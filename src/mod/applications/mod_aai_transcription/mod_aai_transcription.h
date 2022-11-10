@@ -9,7 +9,7 @@
 
 #define MY_BUG_NAME "audio_aai_transcription"
 #define MAX_SESSION_ID (256)
-#define MAX_WS_URL_LEN (512)
+#define MAX_WS_URL_LEN (512 + 2500)
 #define MAX_PATH_LEN (4096)
 
 #define EVENT_TRANSCRIPTION   "mod_aai_transcription::transcription"
