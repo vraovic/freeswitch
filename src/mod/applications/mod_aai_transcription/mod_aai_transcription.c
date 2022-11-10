@@ -239,7 +239,7 @@ SWITCH_STANDARD_API(aai_transcription_function)
 					char *token =NULL;
     				char *next_token =NULL;
 					char *token1 = NULL;
-    				char *next_token1 =NULL;
+    				// char *next_token1 =NULL;
 					strcpy(path1, path);
 					token = strtok(path1, ":");
         			next_token = strtok(NULL, ":");
