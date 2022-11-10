@@ -280,6 +280,7 @@ extern "C" {
     }
 
     std::string strHost(server + offset);
+    switch_log_printf(SWITCH_CHANNEL_LOG, SWITCH_LOG_NOTICE, "strHost: %s\n", strHost);
     std::regex re("^(.+?):?(\\d+)?(/.*)?$");
     std::smatch matches;
     if(std::regex_search(strHost, matches, re)) {
