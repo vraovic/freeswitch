@@ -238,11 +238,15 @@ SWITCH_STANDARD_API(aai_transcription_function)
 					// Extract sampling rate from the path
 					char *token =NULL;
     				char *next_token =NULL;
+					char *token1 = NULL
+    				char *next_token1 =NULL;
 					strcpy(path1, path);
-					token = strtok(path1, "=");
-        			next_token = strtok(NULL, "=");
-					sampling = atoi(next_token);
-          			switch_log_printf(SWITCH_CHANNEL_SESSION_LOG(session), SWITCH_LOG_NOTICE, "TOKEN:%s, NEXT_TOKEN:%s, sampling:%d\n",token, next_token, sampling);
+					token = strtok(path1, ":");
+        			next_token = strtok(NULL, ":");
+					token1 = strtok(next_token,",")
+					sampling = atoi(token1);
+          			switch_log_printf(SWITCH_CHANNEL_SESSION_LOG(session), SWITCH_LOG_NOTICE, "TOKEN:%s, NEXT_TOKEN:%s, token1: %s, sampling:%d\n",token, next_token,token1,sampling);
+          			switch_log_printf(SWITCH_CHANNEL_SESSION_LOG(session), SWITCH_LOG_NOTICE, "AAI start - host:%s, path:%s, sampling:%d\n",host, path, sampling);
 
           			status = start_capture(lsession, flags, host, port, path, sampling, sslFlags, "mod_aai_transcription");
         		}
