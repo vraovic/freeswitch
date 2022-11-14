@@ -255,6 +255,8 @@ extern "C" {
 
     // get the scheme
     strncpy(server, szServerUri, MAX_WS_URL_LEN + MAX_PATH_LEN);
+    switch_log_printf(SWITCH_CHANNEL_LOG, SWITCH_LOG_NOTICE, "server: %s\n", server);
+
     if (0 == strncmp(server, "https://", 8) || 0 == strncmp(server, "HTTPS://", 8)) {
       *pSslFlags = flags;
       offset = 8;
@@ -285,6 +287,7 @@ extern "C" {
     strncpy((char*)strHost.c_str(), (char*)(server+offset),MAX_PATH_LEN);
 
     switch_log_printf(SWITCH_CHANNEL_LOG, SWITCH_LOG_NOTICE, "strHost: %s\n", strHost.c_str());
+    switch_log_printf(SWITCH_CHANNEL_LOG, SWITCH_LOG_NOTICE, "server+offset: %s\n", (server+offset));
     std::regex re("^(.+?):?(\\d+)?(/.*)?$");
     std::smatch matches;
     if(std::regex_search(strHost, matches, re)) {
