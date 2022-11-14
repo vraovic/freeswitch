@@ -281,6 +281,7 @@ extern "C" {
     }
 
     std::string strHost;
+    strHost.reserve(MAX_PATH_LEN);
     strncpy((char*)strHost.c_str(), (char*)(server+offset),MAX_PATH_LEN);
 
     switch_log_printf(SWITCH_CHANNEL_LOG, SWITCH_LOG_NOTICE, "strHost: %s\n", strHost.c_str());
