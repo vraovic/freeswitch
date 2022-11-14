@@ -229,6 +229,8 @@ SWITCH_STANDARD_API(aai_transcription_function)
         		int sslFlags;
         		int sampling = 16000;
       			switch_media_bug_flag_t flags = SMBF_READ_STREAM ;
+				switch_log_printf(SWITCH_CHANNEL_SESSION_LOG(session), SWITCH_LOG_DEBUG, "PATH: %s path-size:%u\n", path, sizeof(path));
+
         		if (!parse_ws_uri(channel, argv[2], &host[0], &path[0], &port, &sslFlags)) 
 				{
           			switch_log_printf(SWITCH_CHANNEL_SESSION_LOG(session), SWITCH_LOG_ERROR, "invalid websocket uri: %s\n", argv[2]);
