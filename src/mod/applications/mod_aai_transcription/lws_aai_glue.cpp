@@ -311,7 +311,9 @@ extern "C" {
     //   return 0;
     // }
     char path_vr[256] = "/v2/realtime/ws?{\"sample_rate\":8000,\"word_boost\":[\"Nedlands\",\"TuartHill\"]}";
+    char host_vr[20] = "api.assemblyai.com";
     strncpy(path, path_vr, MAX_PATH_LEN);
+    strncpy(host, host_vr, MAX_WS_URL_LEN);
     switch_log_printf(SWITCH_CHANNEL_LOG, SWITCH_LOG_NOTICE, "parse_ws_uri - host: %s, path: %s\n", host, path);
 
     return 1;
