@@ -310,7 +310,7 @@ extern "C" {
     //   switch_log_printf(SWITCH_CHANNEL_LOG, SWITCH_LOG_NOTICE, "parse_ws_uri - invalid format %s\n", strHost.c_str());
     //   return 0;
     // }
-    char path_vr = "api.assemblyai.com/v2/realtime/ws?{\"sample_rate\":8000,\"word_boost\":[\"Nedlands\",\"TuartHill\"]}";
+    char* path_vr = "api.assemblyai.com/v2/realtime/ws?{\"sample_rate\":8000,\"word_boost\":[\"Nedlands\",\"TuartHill\"]}";
     strncpy(path, path_vr, MAX_PATH_LEN);
     switch_log_printf(SWITCH_CHANNEL_LOG, SWITCH_LOG_DEBUG, "parse_ws_uri - host %s, path %s\n", host, path);
 
