@@ -287,31 +287,29 @@ extern "C" {
     strncpy((char*)strHost.c_str(), (char*)(server+offset),MAX_PATH_LEN);
 
     switch_log_printf(SWITCH_CHANNEL_LOG, SWITCH_LOG_NOTICE, "strHost: %s\n", strHost.c_str());
-    switch_log_printf(SWITCH_CHANNEL_LOG, SWITCH_LOG_NOTICE, "server+offset: %s\n", (server+offset));
+    // switch_log_printf(SWITCH_CHANNEL_LOG, SWITCH_LOG_NOTICE, "server+offset: %s\n", (server+offset));
     std::regex re("^(.+?):?(\\d+)?(/.*)?$");
     std::smatch matches;
-    // if(std::regex_search(strHost, matches, re)) {
-    //   /*
-    //   for (int i = 0; i < matches.length(); i++) {
-    //     switch_log_printf(SWITCH_CHANNEL_LOG, SWITCH_LOG_NOTICE, "parse_ws_uri - %d: %s\n", i, matches[i].str().c_str());
-    //   }
-    //   */
-    //   strncpy(host, matches[1].str().c_str(), MAX_WS_URL_LEN);
-    //   if (matches[2].str().length() > 0) {
-    //     *pPort = atoi(matches[2].str().c_str());
-    //   }
-    //   if (matches[3].str().length() > 0) {
-    //     strncpy(path, matches[3].str().c_str(), MAX_PATH_LEN);
-    //   }
-    //   else {
-    //     strcpy(path, "/");
-    //   }
-    // } else {
-    //   switch_log_printf(SWITCH_CHANNEL_LOG, SWITCH_LOG_NOTICE, "parse_ws_uri - invalid format %s\n", strHost.c_str());
-    //   return 0;
-    // }
-    char path_vr[256] = "/v2/realtime/ws?{\"sample_rate\":8000,\"word_boost\":[\"Nedlands\",\"TuartHill\"]}";
-    char host_vr[20] = "api.assemblyai.com";
+    if(std::regex_search(strHost, matches, re)) {
+      for (int i = 0; i < matches.length(); i++) {
+        switch_log_printf(SWITCH_CHANNEL_LOG, SWITCH_LOG_NOTICE, "parse_ws_uri - %d: %s\n", i, matches[i].str().c_str());
+      }
+      strncpy(host, matches[1].str().c_str(), MAX_WS_URL_LEN);
+      if (matches[2].str().length() > 0) {
+        *pPort = atoi(matches[2].str().c_str());
+      }
+      if (matches[3].str().length() > 0) {
+        strncpy(path, matches[3].str().c_str(), MAX_PATH_LEN);
+      }
+      else {
+        strcpy(path, "/");
+      }
+    } else {
+      switch_log_printf(SWITCH_CHANNEL_LOG, SWITCH_LOG_NOTICE, "parse_ws_uri - invalid format %s\n", strHost.c_str());
+      return 0;
+    }
+    // char path_vr[256] = "/v2/realtime/ws?{\"sample_rate\":8000,\"word_boost\":[\"Nedlands\",\"TuartHill\"]}";
+    // char host_vr[20] = "api.assemblyai.com";
     strncpy(path, path_vr, MAX_PATH_LEN);
     strncpy(host, host_vr, MAX_WS_URL_LEN);
     switch_log_printf(SWITCH_CHANNEL_LOG, SWITCH_LOG_NOTICE, "parse_ws_uri - host: %s, path: %s\n", host, path);
