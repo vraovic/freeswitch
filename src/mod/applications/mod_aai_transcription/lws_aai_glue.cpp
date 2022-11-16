@@ -162,7 +162,9 @@ namespace {
     memset(tech_pvt, 0, sizeof(private_t));
   
     // VR- path - url encode here
-    char out[MAX_PATH_LEN] = "/v2/realtime/ws?sample_rate%3D16000%26word_boost%3D%5B%22Nedlands%22%2C%22TuartHill%22%5D";
+    // char out[MAX_PATH_LEN] = "/v2/realtime/ws?sample_rate%3D16000%26word_boost%3D%5B%22Nedlands%22%2C%22TuartHill%22%5D";  // AAI suggestions
+    char out[MAX_PATH_LEN] = "/v2/realtime/ws%3F%22sample_rate%22%3A16000%2C%22word_boost%22%3A%5B%22Nedlands%22%2C%22TuartHill%22%5D";
+    
     // switch_url_encode(path, out, sizeof(out));
     switch_log_printf(SWITCH_CHANNEL_SESSION_LOG(session), SWITCH_LOG_NOTICE, "aai_data_init - url_encode - in: %s, out:%s\n",path,out);
   
