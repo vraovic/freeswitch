@@ -169,9 +169,9 @@ namespace {
     char in[MAX_PATH_LEN] = "\"sample_rate\":16000, \"word_boost\":[\"Nedlands\", \"Tuart Hill\"]";
     char out1[MAX_PATH_LEN] = "";
     char out[MAX_PATH_LEN] = "/v2/realtime/ws?";
-    strcat(out, out1)
     
     switch_url_encode(in, out1, sizeof(out1));
+    strcat(out, out1);
 
     switch_log_printf(SWITCH_CHANNEL_SESSION_LOG(session), SWITCH_LOG_NOTICE, "aai_data_init - url_encode - in: %s, out1:%s, out:%s, host:%s\n",path,out1,out, host);
   
