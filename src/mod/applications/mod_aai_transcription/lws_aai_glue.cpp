@@ -292,7 +292,7 @@ extern "C" {
 
     switch_log_printf(SWITCH_CHANNEL_LOG, SWITCH_LOG_NOTICE, "strHost: %s\n", strHost.c_str());
     // switch_log_printf(SWITCH_CHANNEL_LOG, SWITCH_LOG_NOTICE, "server+offset: %s\n", (server+offset));
-    std::regex re("^(.+?):?(\\d+)?(\/.*)?$");
+    std::regex re("^(.+?):?(\\d+)?(/.*)?$");
     std::smatch matches;
     // if(std::regex_search(strHost, matches, re)) {
     //   for (int i = 0; i < matches.length(); i++) {
@@ -319,7 +319,7 @@ extern "C" {
     
     url = f"wss://api.assemblyai.com/v2/realtime/ws?{urlencode(params)}"
 */  
-    char path_vr[256] = "/v2/realtime/ws?{{%7B%22sample_rate%22%3A8000%2C%22word_boost%22%3A%5B%22Nedlands%22%2C%22Tuart+Hill%22%2C%22North+Perth%22%2C%22Como%22%5D%7D}}";
+    char path_vr[256] = "/v2/realtime/ws?{%7B%22sample_rate%22%3A8000%2C%22word_boost%22%3A%5B%22Nedlands%22%2C%22Tuart+Hill%22%2C%22North+Perth%22%2C%22Como%22%5D%7D}";
     char host_vr[20] = "api.assemblyai.com";
     
     // char path_vr[256] = "/v2/realtime/ws?{{\"sample_rate\":16000,\"word_boost\":[\"Nedlands\",\"TuartHill\"]}}";
