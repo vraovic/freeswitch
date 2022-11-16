@@ -527,7 +527,7 @@ bool AudioPipe::connect_client(struct lws_per_vhost_data *vhd) {
   m_vhd = vhd;
 
   m_wsi = lws_client_connect_via_info(&i);
-  lwsl_notice("%s attempting connection - port:%d, address:%s,path:%s,host:%s, origin:%s, protocol:%s\n",i.port,i.address,i.path,i.host,i.origin,i.protocol);
+  lwsl_notice("%s attempting connection - port:%d, address:%s,path:%s,host:%s, origin:%s, protocol:%s\n",m_port,m_host.c_str(),m_host.c_str(),m_host.c_str(),protocolName.c_str());
   lwsl_notice("%s attempting connection, wsi is %p\n", m_uuid.c_str(), m_wsi);
 
   return nullptr != m_wsi;
