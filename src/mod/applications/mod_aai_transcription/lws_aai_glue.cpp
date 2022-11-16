@@ -163,13 +163,13 @@ namespace {
   
     // VR- path - url encode here
     char out[MAX_PATH_LEN] = "";
-    // switch_url_encode(path, out, sizeof(out));
+    switch_url_encode(path, out, sizeof(out));
     switch_log_printf(SWITCH_CHANNEL_SESSION_LOG(session), SWITCH_LOG_NOTICE, "aai_data_init - url_encode - in: %s, out:%s\n",path,out);
   
     strncpy(tech_pvt->sessionId, switch_core_session_get_uuid(session), MAX_SESSION_ID);
     strncpy(tech_pvt->host, host, MAX_WS_URL_LEN);
     tech_pvt->port = port;
-    strncpy(tech_pvt->path, path, MAX_PATH_LEN);    
+    strncpy(tech_pvt->path, out, MAX_PATH_LEN);    
     tech_pvt->sampling = desiredSampling;
     tech_pvt->responseHandler = responseHandler;
     tech_pvt->playout = NULL;
@@ -323,7 +323,7 @@ extern "C" {
     // char path_vr[256] = "/v2/realtime/ws?{%7B%22sample_rate%22%3A8000%2C%22word_boost%22%3A%5B%22Nedlands%22%2C%22Tuart+Hill%22%2C%22North+Perth%22%2C%22Como%22%5D%7D}";
     // char host_vr[20] = "api.assemblyai.com";
     
-    char path_vr[256] = "/v2/realtime/ws?{{\"sample_rate\":16000,\"word_boost\":[\"Nedlands\",\"TuartHill\"]}}";
+    char path_vr[256] = "/v2/realtime/ws?\"sample_rate\":8000,\"word_boost\":[\"Nedlands\",\"TuartHill\"]";
     char host_vr[20] = "api.assemblyai.com";
 
     strncpy(path, path_vr, MAX_PATH_LEN);
