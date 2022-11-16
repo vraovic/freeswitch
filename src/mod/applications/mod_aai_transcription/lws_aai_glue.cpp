@@ -162,18 +162,18 @@ namespace {
     memset(tech_pvt, 0, sizeof(private_t));
   
     // VR- path - url encode here
-    // char out[MAX_PATH_LEN] = "/v2/realtime/ws?sample_rate%3D16000%26word_boost%3D%5B%22Nedlands%22%2C%22TuartHill%22%5D";  // AAI suggestions
+    char out[MAX_PATH_LEN] = "/v2/realtime/ws?sample_rate%3D16000%26word_boost%3D%5B%22Nedlands%22%2C%22TuartHill%22%5D";  // AAI suggestions
     // char out[MAX_PATH_LEN] = "/v2/realtime/ws%3F%22sample_rate%22%3A16000%2C%22word_boost%22%3A%5B%22Nedlands%22%2C%22TuartHill%22%5D";
     // char out[MAX_PATH_LEN] = "/v2/realtime/ws?sample_rate%3A16000%2Cword_boost%3A%5B%22Nedlands%22%2C%22TuartHill%22%5D";
     // char out[MAX_PATH_LEN] = "/v2/realtime/ws?sample_rate%3D16000%2Cword_boost%3A%5B%22Nedlands%22%2C%22TuartHill%22%5D";
-    char in[MAX_PATH_LEN] = "\"sample_rate\":16000, \"word_boost\":[\"Nedlands\", \"Tuart Hill\"]";
-    char out1[MAX_PATH_LEN] = "";
-    char out[MAX_PATH_LEN] = "/v2/realtime/ws?";
+    // char in[MAX_PATH_LEN] = "\"sample_rate\":16000, \"word_boost\":[\"Nedlands\", \"Tuart Hill\"]";
+    // char out1[MAX_PATH_LEN] = "";
+    // char out[MAX_PATH_LEN] = "/v2/realtime/ws?";
     
-    switch_url_encode(in, out1, sizeof(out1));
-    strcat(out, out1);
-    // char out2[MAX_PATH_LEN] = "/v2/realtime/ws?%22sample_rate%22%3A16000%2C%20%22word_boost%22%3A%5B%22Nedlands%22%2C%20%22Tuart%20Hill%22%5D";
-    char out2[MAX_PATH_LEN] = "/v2/realtime/ws?\"sample_rate\":16000,\"word_boost\":[\"Nedlands\", \"Tuart Hill\"]";
+    // switch_url_encode(in, out1, sizeof(out1));
+    // strcat(out, out1);
+    // // char out2[MAX_PATH_LEN] = "/v2/realtime/ws?%22sample_rate%22%3A16000%2C%20%22word_boost%22%3A%5B%22Nedlands%22%2C%20%22Tuart%20Hill%22%5D";
+    // char out2[MAX_PATH_LEN] = "/v2/realtime/ws?\"sample_rate\":16000,\"word_boost\":[\"Nedlands\", \"Tuart Hill\"]";
 
     // switch_log_printf(SWITCH_CHANNEL_SESSION_LOG(session), SWITCH_LOG_NOTICE, "aai_data_init - url_encode - in: %s, out1:%s, out:%s, host:%s\n",path,out1,out, host);
     switch_log_printf(SWITCH_CHANNEL_SESSION_LOG(session), SWITCH_LOG_NOTICE, "aai_data_init - path: %s\n",out2);
@@ -182,7 +182,7 @@ namespace {
     strncpy(tech_pvt->host, host, MAX_WS_URL_LEN);
     tech_pvt->port = port;
 
-    strncpy(tech_pvt->path, out2, MAX_PATH_LEN);    
+    strncpy(tech_pvt->path, out, MAX_PATH_LEN);    
     tech_pvt->sampling = desiredSampling;
     tech_pvt->responseHandler = responseHandler;
     tech_pvt->playout = NULL;
@@ -197,7 +197,7 @@ namespace {
     switch_log_printf(SWITCH_CHANNEL_SESSION_LOG(session), SWITCH_LOG_NOTICE, "aai_data_init -desiredSampling:%d,nAudioBufferSecs:%u decoded_bytes_per_packet:%u, buflen: %u \n",desiredSampling,nAudioBufferSecs,read_impl.decoded_bytes_per_packet, buflen);
     switch_log_printf(SWITCH_CHANNEL_SESSION_LOG(session), SWITCH_LOG_NOTICE, "aai_data_init - ech_pvt->sampling:%d,tech_pvt->path: %s\n",tech_pvt->sampling,tech_pvt->path);
 
-    AudioPipe* ap = new AudioPipe(tech_pvt->sessionId, host, port, path, sslFlags, 
+    AudioPipe* ap = new AudioPipe(tech_pvt->sessionId, host, port, out, sslFlags, 
       buflen, read_impl.decoded_bytes_per_packet, eventCallback);
     if (!ap) {
       switch_log_printf(SWITCH_CHANNEL_SESSION_LOG(session), SWITCH_LOG_ERROR, "Error allocating AudioPipe\n");
