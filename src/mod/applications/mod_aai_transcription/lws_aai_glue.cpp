@@ -176,7 +176,7 @@ namespace {
     // char out2[MAX_PATH_LEN] = "/v2/realtime/ws?\"sample_rate\":16000,\"word_boost\":[\"Nedlands\", \"Tuart Hill\"]";
 
     // switch_log_printf(SWITCH_CHANNEL_SESSION_LOG(session), SWITCH_LOG_NOTICE, "aai_data_init - url_encode - in: %s, out1:%s, out:%s, host:%s\n",path,out1,out, host);
-    switch_log_printf(SWITCH_CHANNEL_SESSION_LOG(session), SWITCH_LOG_NOTICE, "aai_data_init - path: %s\n",out2);
+    // switch_log_printf(SWITCH_CHANNEL_SESSION_LOG(session), SWITCH_LOG_NOTICE, "aai_data_init - path: %s\n",out2);
   
     strncpy(tech_pvt->sessionId, switch_core_session_get_uuid(session), MAX_SESSION_ID);
     strncpy(tech_pvt->host, host, MAX_WS_URL_LEN);
