@@ -312,10 +312,18 @@ extern "C" {
     //   switch_log_printf(SWITCH_CHANNEL_LOG, SWITCH_LOG_NOTICE, "parse_ws_uri - invalid format %s\n", strHost.c_str());
     //   return 0;
     // }
-    // char path_vr[256] = "/v2/realtime/ws?{%7B%22sample_rate%22%3A8000%2C%22word_boost%22%3A%5B%22Nedlands%22%2C%22Tuart+Hill%22%2C%22North+Perth%22%2C%22Como%22%5D%7D}";
-    // char host_vr[20] = "api.assemblyai.com";
-    char path_vr[256] = "/v2/realtime/ws?{\"sample_rate\":16000,\"word_boost\":[\"Nedlands\",\"TuartHill\"]}";
+/*    
+    sample_rate = 16000
+    word_boost = ["foo", "bar"]
+    params = {"sample_rate": sample_rate, "word_boost": json.dumps(word_boost)}
+    
+    url = f"wss://api.assemblyai.com/v2/realtime/ws?{urlencode(params)}"
+*/  
+    char path_vr[256] = "/v2/realtime/ws?{{%7B%22sample_rate%22%3A8000%2C%22word_boost%22%3A%5B%22Nedlands%22%2C%22Tuart+Hill%22%2C%22North+Perth%22%2C%22Como%22%5D%7D}}";
     char host_vr[20] = "api.assemblyai.com";
+    
+    // char path_vr[256] = "/v2/realtime/ws?{{\"sample_rate\":16000,\"word_boost\":[\"Nedlands\",\"TuartHill\"]}}";
+    // char host_vr[20] = "api.assemblyai.com";
 
     strncpy(path, path_vr, MAX_PATH_LEN);
     strncpy(host, host_vr, MAX_WS_URL_LEN);
