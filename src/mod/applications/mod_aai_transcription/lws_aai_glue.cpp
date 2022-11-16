@@ -163,13 +163,13 @@ namespace {
   
     // VR- path - url encode here
     char out[MAX_PATH_LEN] = "";
-    switch_url_encode(path, out, sizeof(out));
+    // switch_url_encode(path, out, sizeof(out));
     switch_log_printf(SWITCH_CHANNEL_SESSION_LOG(session), SWITCH_LOG_NOTICE, "aai_data_init - url_encode - in: %s, out:%s\n",path,out);
   
     strncpy(tech_pvt->sessionId, switch_core_session_get_uuid(session), MAX_SESSION_ID);
     strncpy(tech_pvt->host, host, MAX_WS_URL_LEN);
     tech_pvt->port = port;
-    strncpy(tech_pvt->path, out, MAX_PATH_LEN);    
+    strncpy(tech_pvt->path, path, MAX_PATH_LEN);    
     tech_pvt->sampling = desiredSampling;
     tech_pvt->responseHandler = responseHandler;
     tech_pvt->playout = NULL;
