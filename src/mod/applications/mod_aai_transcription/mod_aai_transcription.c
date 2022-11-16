@@ -247,8 +247,9 @@ SWITCH_STANDARD_API(aai_transcription_function)
         			next_token = strtok(NULL, ":");
 					token1 = strtok(next_token,",");
 					sampling = atoi(token1);
+          			switch_log_printf(SWITCH_CHANNEL_SESSION_LOG(session), SWITCH_LOG_NOTICE, "Make TOKENS from path:%s\n",path1);
           			switch_log_printf(SWITCH_CHANNEL_SESSION_LOG(session), SWITCH_LOG_NOTICE, "TOKEN:%s, NEXT_TOKEN:%s, token1: %s, sampling:%d\n",token, next_token,token1,sampling);
-          			switch_log_printf(SWITCH_CHANNEL_SESSION_LOG(session), SWITCH_LOG_NOTICE, "AAI start - host:%s,port:%d, path:%s, sampling:%d\n",host,port, path, sampling);
+          			switch_log_printf(SWITCH_CHANNEL_SESSION_LOG(session), SWITCH_LOG_NOTICE, "start_capture - host:%s,port:%d, path:%s, sampling:%d\n",host,port, path, sampling);
 
           			status = start_capture(lsession, flags, host, port, path, sampling, sslFlags, "mod_aai_transcription");
         		}
