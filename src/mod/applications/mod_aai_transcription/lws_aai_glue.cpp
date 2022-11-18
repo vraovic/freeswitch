@@ -307,15 +307,17 @@ extern "C" {
       return 0;
     }
 
-    std::string strHost;
-    strHost.reserve(MAX_PATH_LEN);
-    strncpy((char*)strHost.c_str(), (char*)(server+offset),MAX_PATH_LEN);
-    strncpy((char*)strHost.c_str(), "api.assemblyai.com/v2/realtime/ws?sample_rate=8000&word_boost=[]",MAX_PATH_LEN);
-    strncpy((char*)strHost.c_str(), "api.assemblyai.com/v2/realtime/ws?sample_rate=8000",MAX_PATH_LEN);
+    std::string strHost(server + offset);
+    std::regex re("^(.+?):?(\\d+)?(/.*)?$");
+    // std::string strHost;
+    // strHost.reserve(MAX_PATH_LEN);
+    // strncpy((char*)strHost.c_str(), (char*)(server+offset),MAX_PATH_LEN);
+    // strncpy((char*)strHost.c_str(), "api.assemblyai.com/v2/realtime/ws?sample_rate=8000&word_boost=[]",MAX_PATH_LEN);
+    // strncpy((char*)strHost.c_str(), "api.assemblyai.com/v2/realtime/ws?sample_rate=8000",MAX_PATH_LEN);
 
-    switch_log_printf(SWITCH_CHANNEL_LOG, SWITCH_LOG_NOTICE, "strHost: %s\n", strHost.c_str());
-    // switch_log_printf(SWITCH_CHANNEL_LOG, SWITCH_LOG_NOTICE, "server+offset: %s\n", (server+offset));
-    std::regex re("^(.+?)(\\d+)?(/.*)$");
+    // switch_log_printf(SWITCH_CHANNEL_LOG, SWITCH_LOG_NOTICE, "strHost: %s\n", strHost.c_str());
+    // // switch_log_printf(SWITCH_CHANNEL_LOG, SWITCH_LOG_NOTICE, "server+offset: %s\n", (server+offset));
+    // std::regex re("^(.+?)(\\d+)?(/.*)$");
     std::smatch matches;
     if(std::regex_search(strHost, matches, re)) {
       for (int i = 0; i < matches.length(); i++) {
