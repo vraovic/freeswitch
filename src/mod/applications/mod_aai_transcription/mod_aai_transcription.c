@@ -179,7 +179,7 @@ SWITCH_STANDARD_API(aai_transcription_function)
 		argc = switch_separate_string(mycmd, ' ', argv, (sizeof(argv) / sizeof(argv[0])));
 	}
 	assert(cmd);
-	switch_log_printf(SWITCH_CHANNEL_SESSION_LOG(session), SWITCH_LOG_DEBUG, "mod_aai_transcription cmd: %s argc:%u\n", cmd, argc);
+	switch_log_printf(SWITCH_CHANNEL_SESSION_LOG(session), SWITCH_LOG_NOTICE, "mod_aai_transcription VR-cmd: %s argc:%u\n", cmd, argc);
 
 
 	// if (zstr(cmd) || argc < 2 ||
@@ -229,7 +229,7 @@ SWITCH_STANDARD_API(aai_transcription_function)
         		int sslFlags;
         		int sampling = 16000;
       			switch_media_bug_flag_t flags = SMBF_READ_STREAM ;
-				switch_log_printf(SWITCH_CHANNEL_SESSION_LOG(session), SWITCH_LOG_DEBUG, "PATH: %s path-size:%lu\n", path, sizeof(path));
+				switch_log_printf(SWITCH_CHANNEL_SESSION_LOG(session), SWITCH_LOG_NOTICE, "PATH: %s path-size:%lu\n", path, sizeof(path));
 
         		if (!parse_ws_uri(channel, argv[2], &host[0], &path[0], &port, &sslFlags)) 
 				{
