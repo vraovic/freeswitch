@@ -229,7 +229,7 @@ SWITCH_STANDARD_API(aai_transcription_function)
         		int sslFlags;
         		int sampling = 16000;
       			switch_media_bug_flag_t flags = SMBF_READ_STREAM ;
-				switch_log_printf(SWITCH_CHANNEL_SESSION_LOG(session), SWITCH_LOG_NOTICE, "PATH: %s path-size:%lu\n", path, sizeof(path));
+				switch_log_printf(SWITCH_CHANNEL_SESSION_LOG(session), SWITCH_LOG_NOTICE, "PATH: %s path-size:%lu\n", argv[2], sizeof(path));
 
         		if (!parse_ws_uri(channel, argv[2], &host[0], &path[0], &port, &sslFlags)) 
 				{
