@@ -229,7 +229,7 @@ SWITCH_STANDARD_API(aai_transcription_function)
         		int sslFlags;
         		int sampling = 16000;
       			switch_media_bug_flag_t flags = SMBF_READ_STREAM ;
-				switch_log_printf(SWITCH_CHANNEL_SESSION_LOG(session), SWITCH_LOG_NOTICE, "PATH: %s path-size:%lu\n", argv[2], sizeof(path));
+				switch_log_printf(SWITCH_CHANNEL_SESSION_LOG(session), SWITCH_LOG_NOTICE, "argv[2]: %s path-size:%lu\n", argv[2], sizeof(path));
 
         		if (!parse_ws_uri(channel, argv[2], &host[0], &path[0], &port, &sslFlags)) 
 				{
@@ -243,11 +243,12 @@ SWITCH_STANDARD_API(aai_transcription_function)
 					char *token1 = NULL;
     				// char *next_token1 =NULL;
 					strcpy(path1, path);
-					token = strtok(path1, ":");
+          			switch_log_printf(SWITCH_CHANNEL_SESSION_LOG(session), SWITCH_LOG_NOTICE, "Make TOKENS - copy to path1:%s\n",path1);
+					token = strtok(path1, "&");
+					token1 = strtok(token,":");
         			next_token = strtok(NULL, ":");
-					token1 = strtok(next_token,",");
 					sampling = atoi(token1);
-          			switch_log_printf(SWITCH_CHANNEL_SESSION_LOG(session), SWITCH_LOG_NOTICE, "Make TOKENS from path:%s\n",path1);
+
           			switch_log_printf(SWITCH_CHANNEL_SESSION_LOG(session), SWITCH_LOG_NOTICE, "TOKEN:%s, NEXT_TOKEN:%s, token1: %s, sampling:%d\n",token, next_token,token1,sampling);
           			switch_log_printf(SWITCH_CHANNEL_SESSION_LOG(session), SWITCH_LOG_NOTICE, "start_capture - host:%s,port:%d, path:%s, sampling:%d\n",host,port, path, sampling);
 
