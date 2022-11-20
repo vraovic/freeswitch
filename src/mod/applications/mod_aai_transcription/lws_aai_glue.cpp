@@ -315,7 +315,7 @@ extern "C" {
     // strncpy((char*)strHost.c_str(), "api.assemblyai.com/v2/realtime/ws?sample_rate=8000&word_boost=[]",MAX_PATH_LEN);
     // strncpy((char*)strHost.c_str(), "api.assemblyai.com/v2/realtime/ws?sample_rate=8000",MAX_PATH_LEN);
 
-    // switch_log_printf(SWITCH_CHANNEL_LOG, SWITCH_LOG_NOTICE, "strHost: %s\n", strHost.c_str());
+    switch_log_printf(SWITCH_CHANNEL_LOG, SWITCH_LOG_NOTICE, "strHost: %s\n", strHost.c_str());
     // // switch_log_printf(SWITCH_CHANNEL_LOG, SWITCH_LOG_NOTICE, "server+offset: %s\n", (server+offset));
     // std::regex re("^(.+?)(\\d+)?(/.*)$");
     std::smatch matches;
