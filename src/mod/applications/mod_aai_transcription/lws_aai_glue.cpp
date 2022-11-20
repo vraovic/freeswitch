@@ -176,7 +176,7 @@ namespace {
     // char out[MAX_PATH_LEN] = "/v2/realtime/ws?%7B%22sample_rate%22%3A16000%2C%20%22word_boost%22%3A%5B%22Nedlands%22%2C%20%22Tuart%20Hill%22%5D%7D";
     // char out[MAX_PATH_LEN] = "/v2/realtime/ws?%7B%7B%22sample_rate%22%3A16000%2C%20%22word_boost%22%3A%5B%22Nedlands%22%2C%20%22Tuart%20Hill%22%5D%7D%7D";
     // char out[MAX_PATH_LEN] = "/v2/realtime/ws?sample_rate%3D16000%2Cword_boost%3A%5B%22Nedlands%22%2C%20%22Tuart%20Hill%22%5D";
-    char out[MAX_PATH_LEN] = "/v2/realtime/ws?sample_rate=8000&word_boost=%5B%22foo%22%2C+%22bar%22%5D";
+    // char out[MAX_PATH_LEN] = "/v2/realtime/ws?sample_rate=8000&word_boost=%5B%22foo%22%2C+%22bar%22%5D";
     // wss://api.assemblyai.com/v2/realtime/ws?sample_rate=16000&word_boost=%5B%22foo%22%2C+%22bar%22%5D //Iran's request example
 
 
@@ -189,7 +189,7 @@ namespace {
     strncpy(tech_pvt->host, host, MAX_WS_URL_LEN);
     tech_pvt->port = port;
 
-    strncpy(tech_pvt->path, out, MAX_PATH_LEN);    
+    strncpy(tech_pvt->path, path, MAX_PATH_LEN);    
     tech_pvt->sampling = desiredSampling;
     tech_pvt->responseHandler = responseHandler;
     tech_pvt->playout = NULL;
@@ -204,7 +204,7 @@ namespace {
     switch_log_printf(SWITCH_CHANNEL_SESSION_LOG(session), SWITCH_LOG_NOTICE, "aai_data_init -desiredSampling:%d,nAudioBufferSecs:%u decoded_bytes_per_packet:%u, buflen: %u \n",desiredSampling,nAudioBufferSecs,read_impl.decoded_bytes_per_packet, buflen);
     switch_log_printf(SWITCH_CHANNEL_SESSION_LOG(session), SWITCH_LOG_NOTICE, "aai_data_init - ech_pvt->sampling:%d,tech_pvt->path: %s\n",tech_pvt->sampling,tech_pvt->path);
 
-    AudioPipe* ap = new AudioPipe(tech_pvt->sessionId, host, port, out, sslFlags, 
+    AudioPipe* ap = new AudioPipe(tech_pvt->sessionId, host, port, path, sslFlags, 
       buflen, read_impl.decoded_bytes_per_packet, eventCallback);
     if (!ap) {
       switch_log_printf(SWITCH_CHANNEL_SESSION_LOG(session), SWITCH_LOG_ERROR, "Error allocating AudioPipe\n");
