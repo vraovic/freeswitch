@@ -320,9 +320,9 @@ extern "C" {
     // std::regex re("^(.+?)(\\d+)?(/.*)$");
     std::smatch matches;
     if(std::regex_search(strHost, matches, re)) {
-      for (int i = 0; i < matches.length(); i++) {
-        switch_log_printf(SWITCH_CHANNEL_LOG, SWITCH_LOG_NOTICE, "parse_ws_uri - %d: %s\n", i, matches[i].str().c_str());
-      }
+      // for (int i = 0; i < matches.length(); i++) {
+      //   switch_log_printf(SWITCH_CHANNEL_LOG, SWITCH_LOG_NOTICE, "parse_ws_uri - %d: %s\n", i, matches[i].str().c_str());
+      // }
       strncpy(host, matches[1].str().c_str(), MAX_WS_URL_LEN);
       if (matches[2].str().length() > 0) {
         *pPort = atoi(matches[2].str().c_str());
