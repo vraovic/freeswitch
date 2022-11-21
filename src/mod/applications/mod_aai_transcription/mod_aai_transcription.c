@@ -179,7 +179,7 @@ SWITCH_STANDARD_API(aai_transcription_function)
 		argc = switch_separate_string(mycmd, ' ', argv, (sizeof(argv) / sizeof(argv[0])));
 	}
 	assert(cmd);
-	switch_log_printf(SWITCH_CHANNEL_SESSION_LOG(session), SWITCH_LOG_DEBUG, "mod_aai_transcription cmd: %s argc:%u\n", cmd, argc);
+	switch_log_printf(SWITCH_CHANNEL_SESSION_LOG(session), SWITCH_LOG_NOTICE, "mod_aai_transcription VR-cmd: %s argc:%u\n", cmd, argc);
 
 
 	// if (zstr(cmd) || argc < 2 ||
@@ -229,6 +229,8 @@ SWITCH_STANDARD_API(aai_transcription_function)
         		int sslFlags;
         		int sampling = 16000;
       			switch_media_bug_flag_t flags = SMBF_READ_STREAM ;
+				switch_log_printf(SWITCH_CHANNEL_SESSION_LOG(session), SWITCH_LOG_NOTICE, "argv[2]: %s path-size:%lu\n", argv[2], sizeof(path));
+
         		if (!parse_ws_uri(channel, argv[2], &host[0], &path[0], &port, &sslFlags)) 
 				{
           			switch_log_printf(SWITCH_CHANNEL_SESSION_LOG(session), SWITCH_LOG_ERROR, "invalid websocket uri: %s\n", argv[2]);
@@ -238,11 +240,17 @@ SWITCH_STANDARD_API(aai_transcription_function)
 					// Extract sampling rate from the path
 					char *token =NULL;
     				char *next_token =NULL;
+					char *token1 = NULL;
+    				// char *next_token1 =NULL;
 					strcpy(path1, path);
-					token = strtok(path1, "=");
+          			switch_log_printf(SWITCH_CHANNEL_SESSION_LOG(session), SWITCH_LOG_NOTICE, "Make TOKENS - copy to path1:%s\n",path1);
+					token = strtok(path1, "&");
+					token1 = strtok(token,"=");
         			next_token = strtok(NULL, "=");
 					sampling = atoi(next_token);
-          			switch_log_printf(SWITCH_CHANNEL_SESSION_LOG(session), SWITCH_LOG_NOTICE, "TOKEN:%s, NEXT_TOKEN:%s, sampling:%d\n",token, next_token, sampling);
+
+          			switch_log_printf(SWITCH_CHANNEL_SESSION_LOG(session), SWITCH_LOG_NOTICE, "TOKEN:%s, NEXT_TOKEN:%s, token1: %s, sampling:%d\n",token, next_token,token1,sampling);
+          			switch_log_printf(SWITCH_CHANNEL_SESSION_LOG(session), SWITCH_LOG_NOTICE, "start_capture - host:%s,port:%d, path:%s, sampling:%d\n",host,port, path, sampling);
 
           			status = start_capture(lsession, flags, host, port, path, sampling, sslFlags, "mod_aai_transcription");
         		}

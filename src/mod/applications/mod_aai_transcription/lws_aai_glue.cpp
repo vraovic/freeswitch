@@ -176,7 +176,8 @@ namespace {
     
     size_t buflen = (FRAME_SIZE_8000 * desiredSampling / 8000 * channels * 1000 / RTP_PACKETIZATION_PERIOD * nAudioBufferSecs);
 
-    // switch_log_printf(SWITCH_CHANNEL_SESSION_LOG(session), SWITCH_LOG_DEBUG, "aai_data_init -desiredSampling:%d,nAudioBufferSecs:%u decoded_bytes_per_packet:%u, buflen: %u \n",desiredSampling,nAudioBufferSecs,read_impl.decoded_bytes_per_packet, buflen);
+    switch_log_printf(SWITCH_CHANNEL_SESSION_LOG(session), SWITCH_LOG_NOTICE, "aai_data_init -desiredSampling:%d,nAudioBufferSecs:%u decoded_bytes_per_packet:%u, buflen: %u \n",desiredSampling,nAudioBufferSecs,read_impl.decoded_bytes_per_packet, buflen);
+    switch_log_printf(SWITCH_CHANNEL_SESSION_LOG(session), SWITCH_LOG_NOTICE, "aai_data_init - ech_pvt->sampling:%d,tech_pvt->path: %s\n",tech_pvt->sampling,tech_pvt->path);
 
     AudioPipe* ap = new AudioPipe(tech_pvt->sessionId, host, port, path, sslFlags, 
       buflen, read_impl.decoded_bytes_per_packet, eventCallback);
@@ -198,10 +199,10 @@ namespace {
       }
     }
     else {
-      switch_log_printf(SWITCH_CHANNEL_SESSION_LOG(session), SWITCH_LOG_DEBUG, "(%u) no resampling needed for this call\n", tech_pvt->id);
+      switch_log_printf(SWITCH_CHANNEL_SESSION_LOG(session), SWITCH_LOG_NOTICE, "(%u) no resampling needed for this call\n", tech_pvt->id);
     }
 
-    switch_log_printf(SWITCH_CHANNEL_SESSION_LOG(session), SWITCH_LOG_DEBUG, "(%u) aai_data_init\n", tech_pvt->id);
+    switch_log_printf(SWITCH_CHANNEL_SESSION_LOG(session), SWITCH_LOG_NOTICE, "(%u) aai_data_init\n", tech_pvt->id);
 
     return SWITCH_STATUS_SUCCESS;
   }
@@ -281,6 +282,7 @@ extern "C" {
 
     std::string strHost(server + offset);
     std::regex re("^(.+?):?(\\d+)?(/.*)?$");
+    switch_log_printf(SWITCH_CHANNEL_LOG, SWITCH_LOG_NOTICE, "strHost: %s\n", strHost.c_str());
     std::smatch matches;
     if(std::regex_search(strHost, matches, re)) {
       /*
@@ -302,7 +304,7 @@ extern "C" {
       switch_log_printf(SWITCH_CHANNEL_LOG, SWITCH_LOG_NOTICE, "parse_ws_uri - invalid format %s\n", strHost.c_str());
       return 0;
     }
-    switch_log_printf(SWITCH_CHANNEL_LOG, SWITCH_LOG_DEBUG, "parse_ws_uri - host %s, path %s\n", host, path);
+    switch_log_printf(SWITCH_CHANNEL_LOG, SWITCH_LOG_NOTICE, "parse_ws_uri - host: %s, path: %s\n", host, path);
 
     return 1;
   }
@@ -347,7 +349,7 @@ extern "C" {
       return SWITCH_STATUS_FALSE;
     }
 
-    switch_log_printf(SWITCH_CHANNEL_SESSION_LOG(session), SWITCH_LOG_DEBUG, "aai_session_init - samples_per_second:%u,sampling:%d,channels:%d \n", samples_per_second,sampling, channels);
+    switch_log_printf(SWITCH_CHANNEL_SESSION_LOG(session), SWITCH_LOG_NOTICE, "aai_session_init - samples_per_second:%u,sampling:%d,channels:%d \n", samples_per_second,sampling, channels);
 
     if (SWITCH_STATUS_SUCCESS != aai_data_init(tech_pvt, session, host, port, path, sslFlags, samples_per_second, sampling, channels, responseHandler)) {
       destroy_tech_pvt(tech_pvt);
