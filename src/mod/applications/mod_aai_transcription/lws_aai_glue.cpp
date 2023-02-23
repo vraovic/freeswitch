@@ -572,11 +572,13 @@ extern "C" {
                 if (pAudioPipe->isAudioDetected() == false) {
                   pAudioPipe->audioDetected(true);
                   pAudioPipe->silenceDetected(false);
+                  switch_log_printf(SWITCH_CHANNEL_SESSION_LOG(session), SWITCH_LOG_WARNING, "AUDIO - START:%d, samples:%d\n",score, samples);
                 }
               } else if (pAudioPipe->isAudioDetected() == true) {
                 pAudioPipe->audioDetected(false);
                 pAudioPipe->silenceDetected(true);
                 pAudioPipe->storeSilenceStartTime(switch_micro_time_now());
+                switch_log_printf(SWITCH_CHANNEL_SESSION_LOG(session), SWITCH_LOG_WARNING, "AUDIO - STOP:%d, samples:%d\n",score, samples);
               }
 
 
