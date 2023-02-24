@@ -548,12 +548,18 @@ extern "C" {
                   pAudioPipe->audioDetected(true);
                   pAudioPipe->silenceDetected(false);
                   switch_log_printf(SWITCH_CHANNEL_SESSION_LOG(session), SWITCH_LOG_WARNING, "AUDIO - START:%d, samples:%d\n",score, samples);
+                  //session - get channel and set variable - speaking_state = 1
+                  channel = switch_core_session_get_channel(session);
+                  switch_channel_set_variable(channel, "speaking_state", 1);
                 }
               } else if (pAudioPipe->isAudioDetected() == true) {
                 pAudioPipe->audioDetected(false);
                 pAudioPipe->silenceDetected(true);
                 pAudioPipe->storeSilenceStartTime(switch_micro_time_now());
                 switch_log_printf(SWITCH_CHANNEL_SESSION_LOG(session), SWITCH_LOG_WARNING, "AUDIO - STOP:%d, samples:%d\n",score, samples);
+                //session - get channel and set variable - speaking_state = 0
+                channel = switch_core_session_get_channel(session);
+                switch_channel_set_variable(channel, "speaking_state", 0);
               }
 
 
