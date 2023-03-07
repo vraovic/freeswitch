@@ -128,10 +128,10 @@ WORKDIR $HOME
 
 #This part bellow is added to support AWS deployment
 
-ADD ./freeswitch_configuration/conf /usr/local/freeswitch/conf
-ADD ./freeswitch_configuration/scripts  /usr/local/freeswitch/scripts
-ADD ./freeswitch_configuration/sounds/Blip.wav /usr/local/freeswitch/sounds/Blip.wav
-ADD ./freeswitch-api-7867f30c80d7.json  /usr/local/freeswitch/freeswitch-api-7867f30c80d7.json
+ADD ./docker-build/freeswitch_configuration/conf /usr/local/freeswitch/conf
+ADD ./docker-build/freeswitch_configuration/scripts  /usr/local/freeswitch/scripts
+ADD ./docker-build/freeswitch_configuration/sounds/Blip.wav /usr/local/freeswitch/sounds/Blip.wav
+ADD ./docker-build/freeswitch-api-7867f30c80d7.json  /usr/local/freeswitch/freeswitch-api-7867f30c80d7.json
 
 
 CMD ["/usr/local/freeswitch/bin/freeswitch"]
