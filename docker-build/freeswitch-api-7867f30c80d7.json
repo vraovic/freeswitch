@@ -1,0 +1,12 @@
+{
+  "type": "service_account",
+  "project_id": "freeswitch-api",
+  "private_key_id": "74a2303ca9780a0f86fc23efb26964253887bad8",
+  "private_key": "-----BEGIN PRIVATE KEY-----\nMIIEvAIBADANBgkqhkiG9w0BAQEFAASCBKYwggSiAgEAAoIBAQCun0y3N5dOhEAe\n+H6ODzBesNH2kSHwrbMf3XxTx8ZXir42VdWvbgIXq6yzkYuQtYAyLPIAKVcaB+BO\nvV5V9YCF9dTie2dFh9fs+Y4D9TLpIsRPVLglZSCo/QIe1uxvbYLdfpEh0NPL64P/\naOpm1unun7Nya+fYsC2AZbNU+1nTWtVdf2pqUbwsjxxcGpb+BaE3wLux2ePUXA98\ngzaRm37cq4hVDhx7b81bZdSrXKqchV5OHADaI72AWB6nZBvOUtUtePC/gebsyYY+\nNhEOGJRVBg6X/T/HYWcs/TVMFrtHju48V6C0s0lr8U0E+vIMwPVIyFsnKHp9B/Yy\n4DYVvQiHAgMBAAECggEAA7mvJXDsBrmBj4woLLyJ7qIT7TTXJhhQ2dQuPh4uPKJx\n0vhbPoq4siKUwDLRsiFYkF4Kh6Tsa8gsqZg7NkTS99HMXCf/z5buLQ+h4Y5OT5mH\n2cH8ggMnS6XrTGBGSQP9yyguzVAGe47L/tJ+42cOD/4uNpUgvmLXPIXcoNg2w6de\n+1XovzXFbEkBdaV9ulV9U+X3zSr5IKrY32yJiFBnGrU8s2bX5aVUwzeShVjPjz4r\nmMMoJ3Z0R/hqeMsewxDIOciZWVe3M7zp2QvisEGZ/Ml8lZ9+8HjuWx2wrP7yNBjX\nHEVnTLsDG1E8tTLO70SK6pfvkB/sGZeJ4bvQtj9nYQKBgQDWp/tjcWXqzJ+PwvFV\nruwCmqQEZQkix0EcUZWgyuGGp9iNcyBwxebYB3t0XBDMxicVaCPOEovIPXkkbrNT\nq/CiBY0rf6MQRxktCZrB6aCfX9Iywo4IQ7l+gSV0lhOv+iRDUUgPjjyKpOuMRLeL\nDCvWhQLzaPNybJvaxRLWyVLuVwKBgQDQQV8u0GMpYhtUqNabxCpywXFPlpf9xoMC\nPKPNwO5xUd/hDZb1GFCemE6179crpSNAVMOV4VoDNCXO+LTWzPWYJlTRyhliD2vJ\ntvhswKbxWv9zQ3Z9fY8Qmsem5ihwQtdWuV9sxGwM9ACLBeCpMSxuhOPm6HDJHUeB\nSY00ppv5UQKBgEycO25sZHF+glwuuS9ZdMYhJvSikrYk4yoWPA7dGcyTTwh81FEr\ncI4dbYRD74MGHaDYQB8mI1leB0Rndf0g2osY7B9gOHRwy511VhRrK3Z2HnEbWtG8\nShHKSfHoNjKSVirocY2LuDPLVH4FcHRh7atsYXc6N9jYxm838tdRlxWVAoGAWvu0\ncedo6zOJbTs2R2c0hF4u+u54CM8pfViw17tqcOesP86IHRw6XI9+E85s2wySkhB2\nQozpnmyx9/KATzfMNGTKubzpygWiucXOUvT3+oofAGSA5+JrFn4Iq8nx8NnC6oii\nQAqwihgwBIzU0hZBqyczyjXS0IqSKtHPdykzC4ECgYBnda+zA5+GDrnQ+4Q7o0Pj\nKm5HSGlC6J1YeR8Fxnj8DMtPn2TisWkw9lBRoXEpqdWPhnRhP0vXIDP79WZLwlFq\nPtbh873rNQsSFy39J2pr0dZcEFQu9OhjqR7rxQOo957b7lXa4z5JfmuCXID4Pk4O\nqyZY08dr/eHm2rV6GSEi8g==\n-----END PRIVATE KEY-----\n",
+  "client_email": "aida-789@freeswitch-api.iam.gserviceaccount.com",
+  "client_id": "100644785792673754838",
+  "auth_uri": "https://accounts.google.com/o/oauth2/auth",
+  "token_uri": "https://oauth2.googleapis.com/token",
+  "auth_provider_x509_cert_url": "https://www.googleapis.com/oauth2/v1/certs",
+  "client_x509_cert_url": "https://www.googleapis.com/robot/v1/metadata/x509/aida-789%40freeswitch-api.iam.gserviceaccount.com"
+}
