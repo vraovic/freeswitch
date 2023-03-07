@@ -25,7 +25,7 @@ apt-get update && \
 apt-get -y build-dep freeswitch && \
 # then let's get the source. Use the -b flag to get a specific branch
 cd /usr/local/src && \
-git clone https://github.com/norwoodsystems/freeswitch.org -bv1.10.14 freeswitch && \
+git clone https://github.com/norwoodsystems/freeswitch.org -bdevelopment freeswitch && \
 \
 #
 # Get additional libraries compile and install libwebsockets and googleapis
