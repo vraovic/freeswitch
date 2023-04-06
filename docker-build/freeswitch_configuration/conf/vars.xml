@@ -19,9 +19,9 @@
 
   <!-- https://freeswitch.org/confluence/display/FREESWITCH/Understanding+the+Configuration+Files#UnderstandingtheConfigurationFiles-set -->
   <X-PRE-PROCESS cmd="exec-set" data="api_server=echo $FREESWITCH" />
-  <X-PRE-PROCESS cmd="exec-set" data="aida_server=curl -s http://169.254.169.254/latest/meta-data/local-ipv4" />
   <X-PRE-PROCESS cmd="exec-set" data="domain_ip=curl -s http://169.254.169.254/latest/meta-data/local-ipv4" />
   <X-PRE-PROCESS cmd="exec-set" data="fs_public_ip=curl -s http://169.254.169.254/latest/meta-data/public-ipv4" />
+  <X-PRE-PROCESS cmd="exec-set" data="aida_server= echo http://$${domain_ip}:8085" />
 
   <!--
       This setting is what sets the default domain FreeSWITCH will use if all else fails.
