@@ -131,7 +131,9 @@ WORKDIR $HOME
 ADD ./docker-build/freeswitch_configuration/conf /usr/local/freeswitch/conf
 ADD ./docker-build/freeswitch_configuration/scripts  /usr/local/freeswitch/scripts
 ADD ./docker-build/freeswitch_configuration/sounds/Blip.wav /usr/local/freeswitch/sounds/Blip.wav
-ADD ./docker-build/freeswitch-api-7867f30c80d7.json  /usr/local/freeswitch/freeswitch-api-7867f30c80d7.json
+#ADD ./docker-build/freeswitch-api-7867f30c80d7.json  /usr/local/freeswitch/freeswitch-api-7867f30c80d7.json
+ADD ./docker-build/entrypoint.sh /usr/local/freeswitch
 
+ENTRYPOINT ["./entrypoint.sh"]
 
 CMD ["/usr/local/freeswitch/bin/freeswitch"]
