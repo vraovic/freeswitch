@@ -83,6 +83,7 @@ uuid1 = session:get_uuid()
 
 session_token = ""
 aida_greeting = ""
+given_name = ""
 aida_server = session:getVariable('aida_server')
 
 -- Try to bridge call
@@ -118,28 +119,23 @@ freeswitch.consoleLog("debug","destination_number:" .. destination_number .. " c
 local suburbs_list = '['
 local point_file = io.open("/usr/local/freeswitch/scripts/suburbs.txt", "r")
 for line in point_file:lines() do
-    freeswitch.consoleLog("WARNING", line .. "\n")
     suburbs_list = suburbs_list .. '"' ..  line .. '",' 
-    --  table.insert(line_data, player_data)
 end
 suburbs_list = suburbs_list:sub(1, -2)
 suburbs_list = suburbs_list .. ']'
 freeswitch.consoleLog("WARNING","suburbs_list:" .. suburbs_list .. "\n") 
--- json_list = JSON:encode(suburbs_list)
--- suburbs_list_decoded = JSON:decode(json_list)
--- freeswitch.consoleLog("WARNING","suburbs_list_decoded:" .. suburbs_list_decoded .. "\n") 
 
-urlencoded_suburb_list = urlencode(suburbs_list)
-freeswitch.consoleLog("WARNING","urlencoded_suburb_list:" .. urlencoded_suburb_list .. ",length:" .. #urlencoded_suburb_list .. "\n") 
+-- urlencoded_suburb_list = urlencode(suburbs_list)
+-- freeswitch.consoleLog("WARNING","urlencoded_suburb_list:" .. urlencoded_suburb_list .. ",length:" .. #urlencoded_suburb_list .. "\n") 
 
--- url = "wss://api.assemblyai.com/v2/realtime/ws?sample_rate=8000"
-url = "wss://api.assemblyai.com/v2/realtime/ws?sample_rate=8000&word_boost=" .. urlencoded_suburb_list
-freeswitch.consoleLog("WARNING","URL:" .. url .. "\n") 
-reply = api:executeString("bgapi uuid_aai_transcription " .. uuid .. " start " .. url) 
+-- -- url = "wss://api.assemblyai.com/v2/realtime/ws?sample_rate=8000"
+-- url = "wss://api.assemblyai.com/v2/realtime/ws?sample_rate=8000&word_boost=" .. urlencoded_suburb_list
+-- freeswitch.consoleLog("WARNING","URL:" .. url .. "\n") 
+-- reply = api:executeString("bgapi uuid_aai_transcription " .. uuid .. " start " .. url) 
 
 
-freeswitch.consoleLog("WARNING","uuid_aai_transcription START - reply: " .. reply .."\n") 
-aai_transcription = freeswitch.EventConsumer("CUSTOM","mod_aai_transcription::transcription")
+-- freeswitch.consoleLog("WARNING","uuid_aai_transcription START - reply: " .. reply .."\n") 
+-- aai_transcription = freeswitch.EventConsumer("CUSTOM","mod_aai_transcription::transcription")
 
 -- We need to set zombie exec flag to execute curl command while the channel is hanging up
 -- session:execute("set_zombie_exec")
@@ -160,14 +156,24 @@ if (session_token == "") then
         freeswitch.consoleLog("info","curl_response:" .. curl_response .. "\n") 
         -- Extract token from response
         a,b = curl_response:match("(.+)&(.+)")
-        freeswitch.consoleLog("debug","curl_response -a:" .. a .. " curl_response -b:" .. b .. "\n") 
-        aida_greeting = b
+        freeswitch.consoleLog("info","curl_response -a:" .. a .. " curl_response -b:" .. b .. "\n") 
+        given_name = b
+        if (given_name ~= nil and (#given_name) > 1) then
+            local position = 2 -- The position where we want to insert the new string
+            freeswitch.consoleLog("debug","suburbs_list - BEFORE:" .. suburbs_list .. "\n") 
+            local new_list = string.sub(suburbs_list, 1, position - 1) .. "\"" .. given_name .. "\"," .. string.sub(suburbs_list, position)
+            suburbs_list = new_list
+            freeswitch.consoleLog("debug","suburbs_list - AFTER:" .. suburbs_list .. "\n") 
+        end
         c,d = a:match("(.+)&(.+)")
-        freeswitch.consoleLog("debug","curl_response -c:" .. c .. " curl_response -b:" .. d .. "\n") 
-        voice = d
+        freeswitch.consoleLog("debug","curl_response -c:" .. c .. " curl_response -d(aida_greeting):" .. d .. "\n") 
+        aida_greeting = d
         e,f = c:match("(.+)&(.+)")
-        session_token = f:gsub("%s+", "")
-        freeswitch.consoleLog("debug","TOKEN:" .. session_token .. " greeting:" .. aida_greeting .. " voice:" .. voice .. "\n") 
+        freeswitch.consoleLog("debug","curl_response -e:" .. e .. " curl_response -f(voice):" .. f .. "\n") 
+        voice = f
+        g,h = e:match("(.+)&(.+)")
+        session_token = h:gsub("%s+", "")
+        freeswitch.consoleLog("info","TOKEN:" .. session_token .. " greeting:" .. aida_greeting .. " voice:" .. voice .. " given_name:" .. given_name .."\n") 
     else
         freeswitch.consoleLog("WARNING","NO RESPONSE for createSession\n") 
         if curl_response_code then
@@ -182,6 +188,19 @@ if (session_token == "") then
         session:hangup()
     end 
 end
+
+-- Make transcription connection
+
+urlencoded_suburb_list = urlencode(suburbs_list)
+freeswitch.consoleLog("debug","urlencoded_suburb_list:" .. urlencoded_suburb_list .. ",length:" .. #urlencoded_suburb_list .. "\n") 
+
+-- url = "wss://api.assemblyai.com/v2/realtime/ws?sample_rate=8000"
+url = "wss://api.assemblyai.com/v2/realtime/ws?sample_rate=8000&word_boost=" .. urlencoded_suburb_list
+freeswitch.consoleLog("debug","URL:" .. url .. "\n") 
+reply = api:executeString("bgapi uuid_aai_transcription " .. uuid .. " start " .. url) 
+
+freeswitch.consoleLog("debug","uuid_aai_transcription START - reply: " .. reply .."\n") 
+aai_transcription = freeswitch.EventConsumer("CUSTOM","mod_aai_transcription::transcription")
 
 -- set termination_reason variable: 0 - transfer Ok ; 1 - the system hangup;  2 - caller hangup
 session:setVariable("termination_reason", "2") 
