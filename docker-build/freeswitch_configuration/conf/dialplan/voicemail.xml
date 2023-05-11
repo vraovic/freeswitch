@@ -58,7 +58,7 @@
     </extension> -->
     <extension name="External Transfering">
       <!-- <condition field="destination_number" expression="^(.447\d{8,}|.614\d{8}|.1(?!.*(4422))\d*)$"> -->
-      <condition field="destination_number" expression="^T(.447\d{8,}|.614\d{8}|.1\d{10,})$">
+      <condition field="destination_number" expression="^T(.447\d{8,}|.614\d{8}|.1\d{10,}|.3538\d{8,})$">
         <action application="bridge" data="sofia/gateway/byrds/$1"/>
       </condition>
     </extension>
