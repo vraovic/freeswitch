@@ -14,6 +14,7 @@ SWITCH_MODULE_DEFINITION(mod_azure_tts, mod_azure_tts_load, mod_azure_tts_shutdo
 
 static void responseHandler(switch_speech_handle_t *sh, const char* eventName, char* json) {
     azure_t *azure = (azure_t *) sh->private_info;
+	switch_channel_t *channel;
     assert(azure != NULL);
     if(azure->session_uuid_str != NULL) {
         switch_event_t *event;
@@ -21,7 +22,8 @@ static void responseHandler(switch_speech_handle_t *sh, const char* eventName, c
         session = switch_core_session_locate(azure->session_uuid_str);
         if(!session)
             return;
-        switch_channel_t *channel = switch_core_session_get_channel(session);
+        // switch_channel_t *channel = switch_core_session_get_channel(session);
+        channel = switch_core_session_get_channel(session);
         if (json)
             switch_log_printf(SWITCH_CHANNEL_SESSION_LOG(session), SWITCH_LOG_DEBUG,
                               "responseHandler: sending event payload: %s.\n", json);
