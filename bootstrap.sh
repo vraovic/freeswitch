@@ -184,6 +184,7 @@ libbootstrap() {
   i=$1
   if [ -d ${LIBDIR}/${i} ]; then
     echo "Entering directory ${LIBDIR}/${i}"
+    echo "VR-- AM_CFLAGS:${AM_CFLAGS} AM_CXXFLAGS:${AM_CXXFLAGS}"
     ex cd ${LIBDIR}/${i}
     ex rm -f aclocal.m4
     CFFILE=
