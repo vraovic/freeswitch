@@ -60,4 +60,7 @@ Mailing list:
 
   * http://lists.freeswitch.org/mailman/listinfo/freeswitch-users
 
+## Update
+audio-docker branch - add new generic module to support websocket connection to a new audio-docker server which handles all STT/TTS interfaces 
+
 **Thank you for using FreeSWITCH!**
