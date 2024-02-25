@@ -363,17 +363,17 @@ extern "C" {
     return SWITCH_STATUS_SUCCESS;
   }
 
-  switch_status_t aai_session_cleanup(switch_core_session_t *session, char* text, int channelIsClosing) {
+  switch_status_t audio_docker_session_cleanup(switch_core_session_t *session, char* text, int channelIsClosing) {
     switch_channel_t *channel = switch_core_session_get_channel(session);
     switch_media_bug_t *bug = (switch_media_bug_t*) switch_channel_get_private(channel, MY_BUG_NAME);
     if (!bug) {
-      switch_log_printf(SWITCH_CHANNEL_SESSION_LOG(session), SWITCH_LOG_DEBUG, "aai_session_cleanup: no bug - websocket conection already closed\n");
+      switch_log_printf(SWITCH_CHANNEL_SESSION_LOG(session), SWITCH_LOG_DEBUG, "audio_docker_session_cleanup: no bug - websocket conection already closed\n");
       return SWITCH_STATUS_FALSE;
     }
     private_t* tech_pvt = (private_t*) switch_core_media_bug_get_user_data(bug);
     uint32_t id = tech_pvt->id;
 
-    switch_log_printf(SWITCH_CHANNEL_SESSION_LOG(session), SWITCH_LOG_DEBUG, "(%u) aai_session_cleanup\n", id);
+    switch_log_printf(SWITCH_CHANNEL_SESSION_LOG(session), SWITCH_LOG_DEBUG, "(%u) audio_docker_session_cleanup\n", id);
 
     if (!tech_pvt) return SWITCH_STATUS_FALSE;
     AudioPipe *pAudioPipe = static_cast<AudioPipe *>(tech_pvt->pAudioPipe);
@@ -405,7 +405,7 @@ extern "C" {
     if (pAudioPipe) pAudioPipe->close();
 
     destroy_tech_pvt(tech_pvt);
-    switch_log_printf(SWITCH_CHANNEL_SESSION_LOG(session), SWITCH_LOG_INFO, "(%u) aai_session_cleanup: connection closed\n", id);
+    switch_log_printf(SWITCH_CHANNEL_SESSION_LOG(session), SWITCH_LOG_INFO, "(%u) audio_docker_session_cleanup: connection closed\n", id);
     return SWITCH_STATUS_SUCCESS;
   }
 
