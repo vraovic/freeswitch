@@ -86,25 +86,25 @@ static switch_status_t start_capture(switch_core_session_t *session,
   	int channels = 1;
 
 	switch_log_printf(SWITCH_CHANNEL_SESSION_LOG(session), SWITCH_LOG_INFO, 
-    "mod_audio_docker_transcription: streaming %d sampling to %s path %s port %d tls: %s.\n", 
+    "mod_audio_docker: streaming %d sampling to %s path %s port %d tls: %s.\n", 
     sampling, host, path, port, sslFlags ? "yes" : "no");
 
 	if (switch_channel_get_private(channel, MY_BUG_NAME)) {
-		switch_log_printf(SWITCH_CHANNEL_SESSION_LOG(session), SWITCH_LOG_ERROR, "mod_audio_docker_transcription: bug already attached!\n");
+		switch_log_printf(SWITCH_CHANNEL_SESSION_LOG(session), SWITCH_LOG_ERROR, "mod_audio_docker: bug already attached!\n");
 		return SWITCH_STATUS_FALSE;
 	}
 
 	read_codec = switch_core_session_get_read_codec(session);
 
 	if (switch_channel_pre_answer(channel) != SWITCH_STATUS_SUCCESS) {
-		switch_log_printf(SWITCH_CHANNEL_SESSION_LOG(session), SWITCH_LOG_ERROR, "mod_audio_docker_transcription: channel must have reached pre-answer status before calling start!\n");
+		switch_log_printf(SWITCH_CHANNEL_SESSION_LOG(session), SWITCH_LOG_ERROR, "mod_audio_docker: channel must have reached pre-answer status before calling start!\n");
 		return SWITCH_STATUS_FALSE;
 	}
 
 	switch_log_printf(SWITCH_CHANNEL_SESSION_LOG(session), SWITCH_LOG_DEBUG, "calling audio_docker_session_init.\n");
 	if (SWITCH_STATUS_FALSE == audio_docker_session_init(session, responseHandler, read_codec->implementation->actual_samples_per_second, 
 		host, port, path, sampling, sslFlags, channels, &pUserData)) {
-		switch_log_printf(SWITCH_CHANNEL_SESSION_LOG(session), SWITCH_LOG_ERROR, "Error initializing mod_audio_docker_transcription session.\n");
+		switch_log_printf(SWITCH_CHANNEL_SESSION_LOG(session), SWITCH_LOG_ERROR, "Error initializing mod_audio_docker session.\n");
 		return SWITCH_STATUS_FALSE;
 	}
 	switch_log_printf(SWITCH_CHANNEL_SESSION_LOG(session), SWITCH_LOG_DEBUG, "adding bug.\n");
@@ -123,10 +123,10 @@ static switch_status_t do_stop(switch_core_session_t *session, char* text)
 	switch_status_t status = SWITCH_STATUS_SUCCESS;
 
 	if (text) {
-		switch_log_printf(SWITCH_CHANNEL_SESSION_LOG(session), SWITCH_LOG_INFO, "mod_audio_docker_transcription: stop w/ final text %s\n", text);
+		switch_log_printf(SWITCH_CHANNEL_SESSION_LOG(session), SWITCH_LOG_INFO, "mod_audio_docker: stop w/ final text %s\n", text);
 	}
 	else {
-		switch_log_printf(SWITCH_CHANNEL_SESSION_LOG(session), SWITCH_LOG_INFO, "mod_audio_docker_transcription: stop\n");
+		switch_log_printf(SWITCH_CHANNEL_SESSION_LOG(session), SWITCH_LOG_INFO, "mod_audio_docker: stop\n");
 	}
 	status = audio_docker_session_cleanup(session, text, 0);
 
@@ -137,7 +137,7 @@ static switch_status_t do_pauseresume(switch_core_session_t *session, int pause)
 {
 	switch_status_t status = SWITCH_STATUS_SUCCESS;
 
-	switch_log_printf(SWITCH_CHANNEL_SESSION_LOG(session), SWITCH_LOG_INFO, "mod_audio_docker_transcription: %s\n", pause ? "pause" : "resume");
+	switch_log_printf(SWITCH_CHANNEL_SESSION_LOG(session), SWITCH_LOG_INFO, "mod_audio_docker: %s\n", pause ? "pause" : "resume");
 	status = audio_docker_session_pauseresume(session, pause);
 
 	return status;
@@ -280,11 +280,11 @@ SWITCH_STANDARD_API(audio_docker_transcription_function)
 }
 
 
-SWITCH_MODULE_LOAD_FUNCTION(mod_audio_docker_transcription_load)
+SWITCH_MODULE_LOAD_FUNCTION(mod_audio_docker_load)
 {
 	switch_api_interface_t *api_interface;
 
-	switch_log_printf(SWITCH_CHANNEL_LOG, SWITCH_LOG_NOTICE, "mod_audio_docker_transcription API loading..\n");
+	switch_log_printf(SWITCH_CHANNEL_LOG, SWITCH_LOG_NOTICE, "mod_audio_docker API loading..\n");
 
 	/* connect my internal structure to the blank pointer passed to me */
 	*module_interface = switch_loadable_module_create_module_interface(pool, modname);
@@ -294,7 +294,7 @@ SWITCH_MODULE_LOAD_FUNCTION(mod_audio_docker_transcription_load)
     switch_event_reserve_subclass(EVENT_ERROR) != SWITCH_STATUS_SUCCESS ||
     switch_event_reserve_subclass(EVENT_DISCONNECT) != SWITCH_STATUS_SUCCESS) {
 
-		switch_log_printf(SWITCH_CHANNEL_LOG, SWITCH_LOG_ERROR, "Couldn't register an event subclass for mod_audio_docker_transcription API.\n");
+		switch_log_printf(SWITCH_CHANNEL_LOG, SWITCH_LOG_ERROR, "Couldn't register an event subclass for mod_audio_docker_load API.\n");
 		return SWITCH_STATUS_TERM;
 	}
 
@@ -305,7 +305,7 @@ SWITCH_MODULE_LOAD_FUNCTION(mod_audio_docker_transcription_load)
 
 	audio_docker_init();
 
-	switch_log_printf(SWITCH_CHANNEL_LOG, SWITCH_LOG_NOTICE, "mod_audio_docker_transcription API successfully loaded\n");
+	switch_log_printf(SWITCH_CHANNEL_LOG, SWITCH_LOG_NOTICE, "mod_audio_docker API successfully loaded\n");
 
 	/* indicate that the module should continue to be loaded */
   //mod_running = 1;
@@ -314,8 +314,8 @@ SWITCH_MODULE_LOAD_FUNCTION(mod_audio_docker_transcription_load)
 
 /*
   Called when the system shuts down
-  Macro expands to: switch_status_t mod_audio_docker_transcription_shutdown() */
-SWITCH_MODULE_SHUTDOWN_FUNCTION(mod_audio_docker_transcription_shutdown)
+  Macro expands to: switch_status_t mod_audio_docker_shutdown() */
+SWITCH_MODULE_SHUTDOWN_FUNCTION(mod_audio_docker_shutdown)
 {
 	audio_docker_cleanup();
   //mod_running = 0;
@@ -328,10 +328,10 @@ SWITCH_MODULE_SHUTDOWN_FUNCTION(mod_audio_docker_transcription_shutdown)
 /*
   If it exists, this is called in it's own thread when the module-load completes
   If it returns anything but SWITCH_STATUS_TERM it will be called again automatically
-  Macro expands to: switch_status_t mod_audio_docker_transcription_runtime()
+  Macro expands to: switch_status_t mod_audio_docker_runtime()
 */
 /*
-SWITCH_MODULE_RUNTIME_FUNCTION(mod_audio_docker_transcription_runtime)
+SWITCH_MODULE_RUNTIME_FUNCTION(mod_audio_docker_runtime)
 {
   fork_service_threads(&mod_running);
 	return SWITCH_STATUS_TERM;
