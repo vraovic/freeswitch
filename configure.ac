@@ -2080,16 +2080,11 @@ AC_CONFIG_FILES([Makefile
 		tests/unit/Makefile
 		src/Makefile
 		src/mod/Makefile
-    src/mod/applications/mod_audio_fork/Makefile
     src/mod/applications/mod_aai_transcription/Makefile
     src/mod/applications/mod_google_tts/Makefile
-    src/mod/applications/mod_google_transcribe/Makefile
     src/mod/applications/mod_azure_tts/Makefile
     src/mod/applications/mod_audio_docker/Makefile
-    src/mod/applications/mod_dialogflow/Makefile
 		src/mod/applications/mod_abstraction/Makefile
-		src/mod/applications/mod_avmd/Makefile
-		src/mod/applications/mod_bert/Makefile
 		src/mod/applications/mod_blacklist/Makefile
 		src/mod/applications/mod_callcenter/Makefile
 		src/mod/applications/mod_cidlookup/Makefile
@@ -2119,8 +2114,6 @@ AC_CONFIG_FILES([Makefile
 		src/mod/applications/mod_limit/Makefile
 		src/mod/applications/mod_memcache/Makefile
 		src/mod/applications/mod_mongo/Makefile
-		src/mod/applications/mod_mp4/Makefile
-		src/mod/applications/mod_mp4v2/Makefile
 		src/mod/applications/mod_nibblebill/Makefile
 		src/mod/applications/mod_oreka/Makefile
 		src/mod/applications/mod_osp/Makefile
@@ -2129,7 +2122,6 @@ AC_CONFIG_FILES([Makefile
 		src/mod/applications/mod_random/Makefile
 		src/mod/applications/mod_redis/Makefile
 		src/mod/applications/mod_rss/Makefile
-		src/mod/applications/mod_skel/Makefile
 		src/mod/applications/mod_signalwire/Makefile
 		src/mod/applications/mod_sms/Makefile
 		src/mod/applications/mod_sms_flowroute/Makefile
@@ -2140,10 +2132,8 @@ AC_CONFIG_FILES([Makefile
 		src/mod/applications/mod_spandsp/Makefile
 		src/mod/applications/mod_spy/Makefile
 		src/mod/applications/mod_stress/Makefile
-		src/mod/applications/mod_test/Makefile
 		src/mod/applications/mod_translate/Makefile
 		src/mod/applications/mod_valet_parking/Makefile
-		src/mod/applications/mod_vmd/Makefile
 		src/mod/applications/mod_voicemail/Makefile
 		src/mod/applications/mod_voicemail_ivr/Makefile
 		src/mod/asr_tts/mod_cepstral/Makefile
@@ -2259,7 +2249,6 @@ AC_CONFIG_FILES([Makefile
 		src/mod/timers/mod_posix_timer/Makefile
 		src/mod/timers/mod_timerfd/Makefile
 		src/mod/xml_int/mod_xml_cdr/Makefile
-		src/mod/xml_int/mod_xml_curl/Makefile
 		src/mod/xml_int/mod_xml_ldap/Makefile
 		src/mod/xml_int/mod_xml_radius/Makefile
 		src/mod/xml_int/mod_xml_rpc/Makefile
