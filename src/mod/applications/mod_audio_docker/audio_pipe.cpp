@@ -11,8 +11,6 @@
 
 
 namespace {
-  static const char* basicAuthUser = std::getenv("MOD_AUDIO_FORK_HTTP_AUTH_USER");
-  static const char* basicAuthPassword = std::getenv("MOD_AUDIO_FORK_HTTP_AUTH_PASSWORD");
 
   static const char *requestedTcpKeepaliveSecs = std::getenv("MOD_AUDIO_FORK_TCP_KEEPALIVE_SECS");
   static int nTcpKeepaliveSecs = requestedTcpKeepaliveSecs ? ::atoi(requestedTcpKeepaliveSecs) : 55;
@@ -66,10 +64,10 @@ int AudioPipe::lws_callback(struct lws *wsi,
           unsigned char **p = (unsigned char **)in, *end = (*p) + len;
           char b[128];
 
-          memcpy(b, apiToken,strlen(apiToken));
-          b[strlen(apiToken)] = '\0';
-          lwsl_notice("AudioPipe::lws_callback  HANDSHAKE_HEADER Authorization: %s\n",b);
-          if (lws_add_http_header_by_token(wsi, WSI_TOKEN_HTTP_AUTHORIZATION, (unsigned char *)b, strlen(b), p, end)) return -1;
+          // memcpy(b, apiToken,strlen(apiToken));
+          // b[strlen(apiToken)] = '\0';
+          // lwsl_notice("AudioPipe::lws_callback  HANDSHAKE_HEADER Authorization: %s\n",b);
+          // if (lws_add_http_header_by_token(wsi, WSI_TOKEN_HTTP_AUTHORIZATION, (unsigned char *)b, strlen(b), p, end)) return -1;
       }
       break;
 
