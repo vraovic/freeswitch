@@ -12,6 +12,16 @@ SWITCH_MODULE_SHUTDOWN_FUNCTION(mod_audio_docker_shutdown);
 SWITCH_MODULE_RUNTIME_FUNCTION(mod_audio_docker_runtime);
 SWITCH_MODULE_LOAD_FUNCTION(mod_audio_docker_load);
 
+// =============== Audio Docker API ==============================================================
+// 1. create_session
+// 2. play_audio
+// 3. command_received
+// 4. stream_audio
+// 5. stop_streaming
+// 6. end_session
+// ===============================================================================================
+
+
 SWITCH_MODULE_DEFINITION(mod_audio_docker, mod_audio_docker_load, mod_audio_docker_shutdown, NULL /*mod_audio_docker_runtime*/);
 
 static void responseHandler(switch_core_session_t* session, const char * eventName, char * json) {
@@ -168,8 +178,8 @@ static switch_status_t send_text(switch_core_session_t *session, char* text) {
   return status;
 }
 
-#define AUDIO_DOCKER_API_SYNTAX "<uuid> [start | stop ] [audio-docker-url | path]"
-SWITCH_STANDARD_API(audio_docker_transcription_function)
+#define AUDIO_DOCKER_API_SYNTAX "<uuid> [start | stop | send_text | pause | resume | graceful-shutdown ] [wss-url | path] [mono | mixed | stereo] [8000 | 16000 | 24000 | 32000 | 64000] [metadata]"
+SWITCH_STANDARD_API(audio_docker_function)
 {
 	char *mycmd = NULL, *argv[4] = { 0 };
 	int argc = 0;
@@ -298,14 +308,16 @@ SWITCH_MODULE_LOAD_FUNCTION(mod_audio_docker_load)
 		return SWITCH_STATUS_TERM;
 	}
 
-	SWITCH_ADD_API(api_interface, "uuid_audio_docker_transcription", "audio_docker_transcription API", audio_docker_transcription_function, AUDIO_DOCKER_API_SYNTAX);
-	switch_console_set_complete("add uuid_audio_docker_transcription start wss-url metadata");
-	switch_console_set_complete("add uuid_audio_docker_transcription start wss-url");
-	switch_console_set_complete("add uuid_audio_docker_transcription stop");
+	SWITCH_ADD_API(api_interface, "uuid_audio_docker", "audio_docker_transcription API", audio_docker_function, AUDIO_DOCKER_API_SYNTAX);
+	switch_console_set_complete("add uuid_audio_docker start wss-url metadata");
+	switch_console_set_complete("add uuid_audio_docker start wss-url");
+	switch_console_set_complete("add uuid_audio_docker stop");
+	switch_console_set_complete("add uuid_audio_docker send-text wss-url");
+	switch_console_set_complete("add uuid_audio_docker send-text wss-url metadata");
 
 	audio_docker_init();
 
-	switch_log_printf(SWITCH_CHANNEL_LOG, SWITCH_LOG_NOTICE, "mod_audio_docker API successfully loaded\n");
+	switch_log_printf(SWITCH_CHANNEL_LOG, SWITCH_LOG_NOTICE, "mod_audio_docker API successfully loaded - 5 APIs\n");
 
 	/* indicate that the module should continue to be loaded */
   //mod_running = 1;
