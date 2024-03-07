@@ -34,6 +34,7 @@ namespace {
   static uint32_t playCount = 0;
   static uint32_t base64AudioSize = norwood::b64_encoded_size(FRAME_SIZE_8000 * ::atoi(numberOfFramesForTranscription) * 2);
   // static char textToSend[(base64AudioSize  + 20) * 2];
+  static uint32_t skip_printing = 0;
 
   void processIncomingMessage(private_t* tech_pvt, switch_core_session_t* session, const char* message) {
     std::string msg = message;
@@ -468,7 +469,10 @@ extern "C" {
     bool dirty = false;
 
     if (!tech_pvt || tech_pvt->audio_paused || tech_pvt->graceful_shutdown) {
-      switch_log_printf(SWITCH_CHANNEL_SESSION_LOG(session), SWITCH_LOG_NOTICE, "audio_docker_frame - return - audio paused or shutdown\n");
+      if (skip_printing++ % 100 == 0) {
+        switch_log_printf(SWITCH_CHANNEL_SESSION_LOG(session), SWITCH_LOG_NOTICE, "audio_docker_frame - return - audio paused or shutdown\n");
+        if (skip_printing >= 100) skip_printing = 0;
+      }
       return SWITCH_TRUE;
     }
     if (switch_mutex_trylock(tech_pvt->mutex) == SWITCH_STATUS_SUCCESS) {
