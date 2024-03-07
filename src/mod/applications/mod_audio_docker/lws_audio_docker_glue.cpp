@@ -310,9 +310,9 @@ extern "C" {
   }
 
   switch_status_t audio_docker_init() {
-    switch_log_printf(SWITCH_CHANNEL_LOG, SWITCH_LOG_NOTICE, "mod_audio_docker_transcription: audio buffer (in secs):    %d secs\n", nAudioBufferSecs);
-    switch_log_printf(SWITCH_CHANNEL_LOG, SWITCH_LOG_NOTICE, "mod_audio_docker_transcription: sub-protocol:              %s\n", mySubProtocolName);
-    switch_log_printf(SWITCH_CHANNEL_LOG, SWITCH_LOG_NOTICE, "mod_audio_docker_transcription: lws service threads:       %d\n", nServiceThreads);
+    switch_log_printf(SWITCH_CHANNEL_LOG, SWITCH_LOG_NOTICE, "mod_audio_docker: audio buffer (in secs):    %d secs\n", nAudioBufferSecs);
+    switch_log_printf(SWITCH_CHANNEL_LOG, SWITCH_LOG_NOTICE, "mod_audio_docker: sub-protocol:              %s\n", mySubProtocolName);
+    switch_log_printf(SWITCH_CHANNEL_LOG, SWITCH_LOG_NOTICE, "mod_audio_docker: lws service threads:       %d\n", nServiceThreads);
  
     int logs = LLL_ERR | LLL_WARN | LLL_NOTICE ;
      //LLL_INFO | LLL_PARSER | LLL_HEADER | LLL_EXT | LLL_CLIENT  | LLL_LATENCY | LLL_DEBUG ;

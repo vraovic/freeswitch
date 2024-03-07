@@ -169,11 +169,11 @@ static switch_status_t send_text(switch_core_session_t *session, char* text) {
 	switch_media_bug_t *bug = switch_channel_get_private(channel, MY_BUG_NAME);
 
   if (bug) {
-		switch_log_printf(SWITCH_CHANNEL_SESSION_LOG(session), SWITCH_LOG_INFO, "mod_audio_docker_transcription: sending text: %s.\n", text);
+		switch_log_printf(SWITCH_CHANNEL_SESSION_LOG(session), SWITCH_LOG_INFO, "mod_audio_docker: sending text: %s.\n", text);
     status = audio_docker_session_send_text(session, text);
   }
   else {
-		switch_log_printf(SWITCH_CHANNEL_SESSION_LOG(session), SWITCH_LOG_ERROR, "mod_audio_docker_transcription: no bug, failed sending text: %s.\n", text);
+		switch_log_printf(SWITCH_CHANNEL_SESSION_LOG(session), SWITCH_LOG_ERROR, "mod_audio_docker: no bug, failed sending text: %s.\n", text);
   }
   return status;
 }
@@ -189,7 +189,7 @@ SWITCH_STANDARD_API(audio_docker_function)
 		argc = switch_separate_string(mycmd, ' ', argv, (sizeof(argv) / sizeof(argv[0])));
 	}
 	assert(cmd);
-	switch_log_printf(SWITCH_CHANNEL_SESSION_LOG(session), SWITCH_LOG_NOTICE, "mod_audio_docker_transcription VR-cmd: %s argc:%u\n", cmd, argc);
+	switch_log_printf(SWITCH_CHANNEL_SESSION_LOG(session), SWITCH_LOG_NOTICE, "mod_audio_docker - cmd: %s argc:%u\n", cmd, argc);
 
 
 	// if (zstr(cmd) || argc < 2 ||
@@ -262,12 +262,12 @@ SWITCH_STANDARD_API(audio_docker_function)
           			switch_log_printf(SWITCH_CHANNEL_SESSION_LOG(session), SWITCH_LOG_NOTICE, "TOKEN:%s, NEXT_TOKEN:%s, token1: %s, sampling:%d\n",token, next_token,token1,sampling);
           			switch_log_printf(SWITCH_CHANNEL_SESSION_LOG(session), SWITCH_LOG_NOTICE, "start_capture - host:%s,port:%d, path:%s, sampling:%d\n",host,port, path, sampling);
 
-          			status = start_capture(lsession, flags, host, port, path, sampling, sslFlags, "mod_audio_docker_transcription");
+          			status = start_capture(lsession, flags, host, port, path, sampling, sslFlags, "mod_audio_docker");
         		}
 			}
       		else 
 			{
-        		switch_log_printf(SWITCH_CHANNEL_SESSION_LOG(session), SWITCH_LOG_ERROR, "unsupported mod_audio_docker_transcription cmd: %s\n", argv[1]);
+        		switch_log_printf(SWITCH_CHANNEL_SESSION_LOG(session), SWITCH_LOG_ERROR, "unsupported mod_audio_docker cmd: %s\n", argv[1]);
       		}
 			switch_core_session_rwunlock(lsession);
 		}

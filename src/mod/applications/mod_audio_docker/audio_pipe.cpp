@@ -15,7 +15,7 @@ namespace {
   static const char *requestedTcpKeepaliveSecs = std::getenv("MOD_AUDIO_FORK_TCP_KEEPALIVE_SECS");
   static int nTcpKeepaliveSecs = requestedTcpKeepaliveSecs ? ::atoi(requestedTcpKeepaliveSecs) : 55;
 }
-  static const char* apiToken = std::getenv("MOD_AUDIO_DOCKER_TRANSCRIPTION_TOKEN");
+  static const char* apiToken = std::getenv("MOD_AUDIO_DOCKER_TOKEN");
 
 
 // remove once we update to lws with this helper
