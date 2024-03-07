@@ -24,24 +24,24 @@ SWITCH_MODULE_LOAD_FUNCTION(mod_audio_docker_load);
 
 SWITCH_MODULE_DEFINITION(mod_audio_docker, mod_audio_docker_load, mod_audio_docker_shutdown, NULL /*mod_audio_docker_runtime*/);
 
-static void responseHandler(switch_core_session_t* session, const char * eventName, char * json) {
+static void responseHandler(switch_core_session_t* session, const char * eventName, char * message) {
 	switch_event_t *event;
 
 	switch_channel_t *channel = switch_core_session_get_channel(session);
-	if (json) 
+	if (message) 
 	{
-		switch_log_printf(SWITCH_CHANNEL_SESSION_LOG(session), SWITCH_LOG_DEBUG, "responseHandler: ready to send eventName:%s - json: %s.\n",eventName, json);
+		switch_log_printf(SWITCH_CHANNEL_SESSION_LOG(session), SWITCH_LOG_DEBUG, "responseHandler: ready to send eventName:%s - message: %s.\n",eventName, message);
 	}
 	else {
-		switch_log_printf(SWITCH_CHANNEL_SESSION_LOG(session), SWITCH_LOG_DEBUG, "responseHandler: ready to send eventName:%s - no json\n",eventName);
+		switch_log_printf(SWITCH_CHANNEL_SESSION_LOG(session), SWITCH_LOG_DEBUG, "responseHandler: ready to send eventName:%s - no message\n",eventName);
 
 	}
 	switch_event_create_subclass(&event, SWITCH_EVENT_CUSTOM, eventName);
 	switch_channel_event_set_data(channel, event);
-	if (json) 
+	if (message) 
 	{
-		switch_log_printf(SWITCH_CHANNEL_SESSION_LOG(session), SWITCH_LOG_DEBUG, "responseHandler: generate SWITCH_EVENT_CUSTOM eventName:%s - json: %s\n",eventName, json);
-		switch_event_add_body(event, "%s", json);
+		switch_log_printf(SWITCH_CHANNEL_SESSION_LOG(session), SWITCH_LOG_DEBUG, "responseHandler: generate SWITCH_EVENT_CUSTOM eventName:%s - message: %s\n",eventName, message);
+		switch_event_add_body(event, "%s", message);
 	}
 	else {
 		switch_log_printf(SWITCH_CHANNEL_SESSION_LOG(session), SWITCH_LOG_DEBUG, "responseHandler: generate SWITCH_EVENT_CUSTOM eventName:%s\n",eventName);
@@ -169,11 +169,11 @@ static switch_status_t send_text(switch_core_session_t *session, char* text) {
 	switch_media_bug_t *bug = switch_channel_get_private(channel, MY_BUG_NAME);
 
   if (bug) {
-		switch_log_printf(SWITCH_CHANNEL_SESSION_LOG(session), SWITCH_LOG_INFO, "mod_audio_docker: sending text: %s.\n", text);
+		switch_log_printf(SWITCH_CHANNEL_SESSION_LOG(session), SWITCH_LOG_INFO, "mod_audio_docker: sending text: %s\n", text);
     status = audio_docker_session_send_text(session, text);
   }
   else {
-		switch_log_printf(SWITCH_CHANNEL_SESSION_LOG(session), SWITCH_LOG_ERROR, "mod_audio_docker: no bug, failed sending text: %s.\n", text);
+		switch_log_printf(SWITCH_CHANNEL_SESSION_LOG(session), SWITCH_LOG_ERROR, "mod_audio_docker: no bug, failed sending text: %s\n", text);
   }
   return status;
 }
@@ -220,7 +220,7 @@ SWITCH_STANDARD_API(audio_docker_function)
 			else if (!strcasecmp(argv[1], "graceful-shutdown")) 
 			{
 				status = do_graceful_shutdown(lsession);
-      		}
+      	}
       		else if (!strcasecmp(argv[1], "send_text")) 
 			{
         		if (argc < 3) 
@@ -231,7 +231,7 @@ SWITCH_STANDARD_API(audio_docker_function)
         		}
         		status = send_text(lsession, argv[2]);
       		}
-      		else if (!strcasecmp(argv[1], "start")) 
+      	else if (!strcasecmp(argv[1], "start")) 
 			{
 				switch_channel_t *channel = switch_core_session_get_channel(lsession);
         		char host[MAX_WS_URL_LEN], path[MAX_PATH_LEN], path1[MAX_PATH_LEN];
@@ -308,12 +308,12 @@ SWITCH_MODULE_LOAD_FUNCTION(mod_audio_docker_load)
 		return SWITCH_STATUS_TERM;
 	}
 
-	SWITCH_ADD_API(api_interface, "uuid_audio_docker", "audio_docker_transcription API", audio_docker_function, AUDIO_DOCKER_API_SYNTAX);
+	SWITCH_ADD_API(api_interface, "uuid_audio_docker", "audio_docker API", audio_docker_function, AUDIO_DOCKER_API_SYNTAX);
 	switch_console_set_complete("add uuid_audio_docker start wss-url metadata");
 	switch_console_set_complete("add uuid_audio_docker start wss-url");
 	switch_console_set_complete("add uuid_audio_docker stop");
-	switch_console_set_complete("add uuid_audio_docker send-text wss-url");
-	switch_console_set_complete("add uuid_audio_docker send-text wss-url metadata");
+	switch_console_set_complete("add uuid_audio_docker send_text wss-url");
+	switch_console_set_complete("add uuid_audio_docker send_text wss-url metadata");
 
 	audio_docker_init();
 

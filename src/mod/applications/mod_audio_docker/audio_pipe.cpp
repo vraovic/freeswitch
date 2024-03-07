@@ -66,13 +66,13 @@ int AudioPipe::lws_callback(struct lws *wsi,
 
           // memcpy(b, apiToken,strlen(apiToken));
           // b[strlen(apiToken)] = '\0';
-          // lwsl_notice("AudioPipe::lws_callback  HANDSHAKE_HEADER Authorization: %s\n",b);
+          lwsl_notice("AudioPipe::lws_callback  HANDSHAKE_HEADER Authorization: %s\n",b);
           // if (lws_add_http_header_by_token(wsi, WSI_TOKEN_HTTP_AUTHORIZATION, (unsigned char *)b, strlen(b), p, end)) return -1;
       }
       break;
 
     case LWS_CALLBACK_EVENT_WAIT_CANCELLED:
-      // lwsl_notice("AudioPipe::lws_callback - LWS_CALLBACK_EVENT_WAIT_CANCELLED - processPendingWrites\n");
+      lwsl_notice("AudioPipe::lws_callback - LWS_CALLBACK_EVENT_WAIT_CANCELLED - processPendingWrites\n");
       processPendingConnects(vhd);
       processPendingDisconnects(vhd);
       processPendingWrites();
@@ -492,6 +492,7 @@ AudioPipe::AudioPipe(const char* uuid, const char* host, unsigned int port, cons
   m_audio_buffer = new uint8_t[m_audio_buffer_max_len];
   if (apiToken) {
     m_api_token.assign(apiToken);
+    lwsl_notice("AudioPipe:: init - apiToken:%s\n", apiToken);
   }
 }
 AudioPipe::~AudioPipe() {
@@ -536,7 +537,7 @@ void AudioPipe::bufferForSending(const char* text, size_t len) {
   {
     std::lock_guard<std::mutex> lk(m_text_mutex);
     m_metadata.append(text);
-    // lwsl_notice("bufferForSending - ready to send to AAI - length: %u\n", m_metadata.length());
+    lwsl_notice("bufferForSending - send_text: %s - length: %u\n",text, m_metadata.length());
 
   }
   addPendingWrite(this);

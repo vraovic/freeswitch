@@ -28,7 +28,7 @@ namespace {
   static int nAudioBufferSecs = std::max(1, std::min(requestedBufferSecs ? ::atoi(requestedBufferSecs) : 2, 5));
   static const char *requestedNumServiceThreads = std::getenv("MOD_AUDIO_DOCKER_THREADS");
   static const char* mySubProtocolName = std::getenv("MOD_AUDIO_DOCKER_SUBPROTOCOL_NAME") ?
-    std::getenv("MOD_AUDIO_DOCKER_SUBPROTOCOL_NAME") : "audio.docker.streaming";
+    std::getenv("MOD_AUDIO_DOCKER_SUBPROTOCOL_NAME") : "streaming";
   static unsigned int nServiceThreads = std::max(1, std::min(requestedNumServiceThreads ? ::atoi(requestedNumServiceThreads) : 1, 5));
   static unsigned int idxCallCount = 0;
   static uint32_t playCount = 0;
@@ -38,55 +38,56 @@ namespace {
   void processIncomingMessage(private_t* tech_pvt, switch_core_session_t* session, const char* message) {
     std::string msg = message;
     std::string type;
-    // switch_log_printf(SWITCH_CHANNEL_LOG, SWITCH_LOG_DEBUG, "processIncomingMessage - received %s message\n", message);
-    cJSON* json = parse_json(session, msg, type) ;
-    if (json) {
-      // switch_log_printf(SWITCH_CHANNEL_LOG, SWITCH_LOG_DEBUG, "(%u) processIncomingMessage - received %s message\n", tech_pvt->id, type.c_str());
-      if (0 == type.compare("json")) {
-        cJSON* jsonMsgType = cJSON_GetObjectItem(json, "message_type");
-        // switch_log_printf(SWITCH_CHANNEL_LOG, SWITCH_LOG_DEBUG, "processIncomingMessage - jsonMsgType:%s\n", jsonMsgType->valuestring);
-        if (jsonMsgType && jsonMsgType->valuestring) {
-          if (0 == strcmp(jsonMsgType->valuestring, "FinalTranscript")) 
-          {
-            cJSON* jsonTranscription = cJSON_GetObjectItem(json, "text");
-            switch_log_printf(SWITCH_CHANNEL_LOG, SWITCH_LOG_DEBUG, "processIncomingMessage - FinalTranscript - text:%s\n", jsonTranscription->valuestring);
-            if (jsonTranscription && jsonTranscription->valuestring) 
-            {
-                // char* jsonString = cJSON_PrintUnformatted(jsonTranscription);
-                // switch_log_printf(SWITCH_CHANNEL_LOG, SWITCH_LOG_DEBUG, "processIncomingMessage - FinalTranscript - transcripion:%s\n", jsonString);
-                if ( strlen(jsonTranscription->valuestring) > 0) 
-                {
-                  AudioPipe *pAudioPipe = static_cast<AudioPipe *>(tech_pvt->pAudioPipe);
-                  switch_log_printf(SWITCH_CHANNEL_LOG, SWITCH_LOG_DEBUG, "processIncomingMessage - FinalTranscript - text:%s, response_time:%ld [ms]\n", jsonTranscription->valuestring, ((switch_micro_time_now() - pAudioPipe->getSilenceStartTime())/1000));
-                  tech_pvt->responseHandler(session, EVENT_TRANSCRIPTION, jsonTranscription->valuestring);
-                }
-                // free(jsonString);
-            }
-          } 
-          else switch_log_printf(SWITCH_CHANNEL_LOG, SWITCH_LOG_DEBUG, "processIncomingMessage -  message_type:%s\n",jsonMsgType->valuestring);
-        } 
-        // else switch_log_printf(SWITCH_CHANNEL_LOG, SWITCH_LOG_DEBUG, "processIncomingMessage - message_type is not string\n");
-      }
-      else if (0 == type.compare("transcription")) {
-        cJSON* jsonData = cJSON_GetObjectItem(json, "data");
-        char* jsonString = cJSON_PrintUnformatted(jsonData);
-        tech_pvt->responseHandler(session, EVENT_TRANSCRIPTION, jsonString);
-        free(jsonString);        
-      }
-      else if (0 == type.compare("error")) {
-        cJSON* jsonData = cJSON_GetObjectItem(json, "data");
-        char* jsonString = cJSON_PrintUnformatted(jsonData);
-        tech_pvt->responseHandler(session, EVENT_ERROR, jsonString);
-        free(jsonString);        
-      }
-      else {
-        switch_log_printf(SWITCH_CHANNEL_LOG, SWITCH_LOG_ERROR, "(%u) processIncomingMessage - unsupported msg type %s\n", tech_pvt->id, type.c_str());  
-      }
-      cJSON_Delete(json);
-    }
-    else {
-      switch_log_printf(SWITCH_CHANNEL_LOG, SWITCH_LOG_DEBUG, "(%u) processIncomingMessage - could not parse message: %s\n", tech_pvt->id, message);
-    }
+    switch_log_printf(SWITCH_CHANNEL_LOG, SWITCH_LOG_DEBUG, "processIncomingMessage - received: %s\n", message);
+    // cJSON* json = parse_json(session, msg, type) ;
+    // if (json) {
+    //   // switch_log_printf(SWITCH_CHANNEL_LOG, SWITCH_LOG_DEBUG, "(%u) processIncomingMessage - received %s message\n", tech_pvt->id, type.c_str());
+    //   if (0 == type.compare("json")) {
+    //     cJSON* jsonMsgType = cJSON_GetObjectItem(json, "message_type");
+    //     // switch_log_printf(SWITCH_CHANNEL_LOG, SWITCH_LOG_DEBUG, "processIncomingMessage - jsonMsgType:%s\n", jsonMsgType->valuestring);
+    //     if (jsonMsgType && jsonMsgType->valuestring) {
+    //       if (0 == strcmp(jsonMsgType->valuestring, "FinalTranscript")) 
+    //       {
+    //         cJSON* jsonTranscription = cJSON_GetObjectItem(json, "text");
+    //         switch_log_printf(SWITCH_CHANNEL_LOG, SWITCH_LOG_DEBUG, "processIncomingMessage - FinalTranscript - text:%s\n", jsonTranscription->valuestring);
+    //         if (jsonTranscription && jsonTranscription->valuestring) 
+    //         {
+    //             // char* jsonString = cJSON_PrintUnformatted(jsonTranscription);
+    //             // switch_log_printf(SWITCH_CHANNEL_LOG, SWITCH_LOG_DEBUG, "processIncomingMessage - FinalTranscript - transcripion:%s\n", jsonString);
+    //             if ( strlen(jsonTranscription->valuestring) > 0) 
+    //             {
+    //               AudioPipe *pAudioPipe = static_cast<AudioPipe *>(tech_pvt->pAudioPipe);
+    //               switch_log_printf(SWITCH_CHANNEL_LOG, SWITCH_LOG_DEBUG, "processIncomingMessage - FinalTranscript - text:%s, response_time:%ld [ms]\n", jsonTranscription->valuestring, ((switch_micro_time_now() - pAudioPipe->getSilenceStartTime())/1000));
+    //               tech_pvt->responseHandler(session, EVENT_TRANSCRIPTION, jsonTranscription->valuestring);
+    //             }
+    //             // free(jsonString);
+    //         }
+    //       } 
+    //       else switch_log_printf(SWITCH_CHANNEL_LOG, SWITCH_LOG_DEBUG, "processIncomingMessage -  message_type:%s\n",jsonMsgType->valuestring);
+    //     } 
+    //     // else switch_log_printf(SWITCH_CHANNEL_LOG, SWITCH_LOG_DEBUG, "processIncomingMessage - message_type is not string\n");
+    //   }
+    //   else if (0 == type.compare("transcription")) {
+    //     cJSON* jsonData = cJSON_GetObjectItem(json, "data");
+    //     char* jsonString = cJSON_PrintUnformatted(jsonData);
+    //     tech_pvt->responseHandler(session, EVENT_TRANSCRIPTION, jsonString);
+    //     free(jsonString);        
+    //   }
+    //   else if (0 == type.compare("error")) {
+    //     cJSON* jsonData = cJSON_GetObjectItem(json, "data");
+    //     char* jsonString = cJSON_PrintUnformatted(jsonData);
+    //     tech_pvt->responseHandler(session, EVENT_ERROR, jsonString);
+    //     free(jsonString);        
+    //   }
+    //   else {
+    //     switch_log_printf(SWITCH_CHANNEL_LOG, SWITCH_LOG_ERROR, "(%u) processIncomingMessage - unsupported msg type %s\n", tech_pvt->id, type.c_str());  
+    //   }
+    //   cJSON_Delete(json);
+    // }
+    // else {
+    //   switch_log_printf(SWITCH_CHANNEL_LOG, SWITCH_LOG_DEBUG, "(%u) processIncomingMessage - could not parse message: %s\n", tech_pvt->id, message);
+    // }
+    
   }
 
   static void eventCallback(const char* sessionId, AudioPipe::NotifyEvent_t event, const char* message) {
@@ -99,9 +100,7 @@ namespace {
         if (tech_pvt) {
           switch (event) {
             case AudioPipe::CONNECT_SUCCESS:
-              switch_log_printf(SWITCH_CHANNEL_SESSION_LOG(session), SWITCH_LOG_INFO, "connection successful - flush media_bug_buffer\n");
-              // switch_log_printf(SWITCH_CHANNEL_SESSION_LOG(session), SWITCH_LOG_INFO, "connection successful - DON'T flush media_bug_buffer\n");
-              switch_log_printf(SWITCH_CHANNEL_SESSION_LOG(session), SWITCH_LOG_INFO, "connection successful - sessionId: %s message:%s\n", sessionId, message);
+              switch_log_printf(SWITCH_CHANNEL_SESSION_LOG(session), SWITCH_LOG_INFO, "eventCallback - connection successful - sessionId: %s message:%s\n", sessionId, message);
               tech_pvt->responseHandler(session, EVENT_CONNECT_SUCCESS, NULL);
               
               //We are connected and ready for transcription; let's flush audio buffer
@@ -125,22 +124,22 @@ namespace {
               json << "{\"reason\":\"" << message << "\"}";
               tech_pvt->pAudioPipe = nullptr;
               tech_pvt->responseHandler(session, EVENT_CONNECT_FAIL, (char *) json.str().c_str());
-              switch_log_printf(SWITCH_CHANNEL_SESSION_LOG(session), SWITCH_LOG_NOTICE, "connection failed: %s\n", message);
+              switch_log_printf(SWITCH_CHANNEL_SESSION_LOG(session), SWITCH_LOG_NOTICE, "eventCallback - connection failed: %s\n", message);
             }
             break;
             case AudioPipe::CONNECTION_DROPPED:
               // first thing: we can no longer access the AudioPipe
               tech_pvt->pAudioPipe = nullptr;
               tech_pvt->responseHandler(session, EVENT_DISCONNECT, NULL);
-              switch_log_printf(SWITCH_CHANNEL_SESSION_LOG(session), SWITCH_LOG_NOTICE, "connection dropped from far end\n");
+              switch_log_printf(SWITCH_CHANNEL_SESSION_LOG(session), SWITCH_LOG_NOTICE, "eventCallback - connection dropped from far end\n");
             break;
             case AudioPipe::CONNECTION_CLOSED_GRACEFULLY:
               // first thing: we can no longer access the AudioPipe
               tech_pvt->pAudioPipe = nullptr;
-              switch_log_printf(SWITCH_CHANNEL_SESSION_LOG(session), SWITCH_LOG_DEBUG, "connection closed gracefully\n");
+              switch_log_printf(SWITCH_CHANNEL_SESSION_LOG(session), SWITCH_LOG_DEBUG, "eventCallback - connection closed gracefully\n");
             break;
             case AudioPipe::MESSAGE:
-              switch_log_printf(SWITCH_CHANNEL_SESSION_LOG(session), SWITCH_LOG_INFO, "Audio Docker eventCallback - sessionId: %s message:%s\n", sessionId, message);
+              switch_log_printf(SWITCH_CHANNEL_SESSION_LOG(session), SWITCH_LOG_INFO, "eventCallback message - sessionId: %s message:%s\n", sessionId, message);
               processIncomingMessage(tech_pvt, session, message);
             break;
           }
@@ -171,7 +170,7 @@ namespace {
     tech_pvt->channels = channels;
     tech_pvt->id = ++idxCallCount;
     tech_pvt->buffer_overrun_notified = 0;
-    tech_pvt->audio_paused = 0;
+    tech_pvt->audio_paused = 1; // pause audio until we get connected and get response from the far end
     tech_pvt->graceful_shutdown = 0;
     
     size_t buflen = (FRAME_SIZE_8000 * desiredSampling / 8000 * channels * 1000 / RTP_PACKETIZATION_PERIOD * nAudioBufferSecs);
