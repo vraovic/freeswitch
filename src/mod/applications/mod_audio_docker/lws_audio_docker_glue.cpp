@@ -36,9 +36,9 @@ namespace {
   // static char textToSend[(base64AudioSize  + 20) * 2];
   static uint32_t skip_printing = 0;
 
-  void processIncomingMessage(private_t* tech_pvt, switch_core_session_t* session, const char* msg_type, const char* message) {
+  void processIncomingMessage(private_t* tech_pvt, switch_core_session_t* session, const char* message) {
   std::string msg = message;
-  std::string type  = msg_type;
+  // std::string type  = msg_type;
 
     switch_log_printf(SWITCH_CHANNEL_LOG, SWITCH_LOG_DEBUG, "(%u) processIncomingMessage - received %s message\n", tech_pvt->id, type.c_str());
     // if (0 == type.compare("playAudio")) {
