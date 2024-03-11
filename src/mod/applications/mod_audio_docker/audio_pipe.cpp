@@ -191,7 +191,8 @@ int AudioPipe::lws_callback(struct lws *wsi,
 
           return 0;
         }
-        lwsl_notice("AudioPipe::lws_service_thread LWS_CALLBACK_CLIENT_RECEIVE received NON binary data\n");
+        ((char *)in)[len] = '\0';
+        lwsl_notice("AudioPipe::lws_service_thread LWS_CALLBACK_CLIENT_RECEIVE received text - len:%d, text: %s\n",len, (char *)in);
       }
       break;
 
