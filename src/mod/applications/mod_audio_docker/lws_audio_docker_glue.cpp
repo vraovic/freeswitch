@@ -41,23 +41,24 @@ namespace {
   // std::string type  = msg_type;
 
     switch_log_printf(SWITCH_CHANNEL_LOG, SWITCH_LOG_DEBUG, "(%u) processIncomingMessage - received %s message\n", tech_pvt->id, message);
-    // if (!session) {
-    //   lwsl_err("AudioPipe::lws_service_thread LWS_CALLBACK_CLIENT_RECEIVE unable to find session\n");
-    // } else {
-    //   switch_frame_t  write_frame = { 0 };
-    //   switch_status_t status;
-    //   // switch_channel_t *channel = switch_core_session_get_channel(session);
-    //   write_frame.data = msg.c_str();
-    //   write_frame.datalen = strlen(message);
-    //   write_frame.codec = switch_core_session_get_read_codec(session);
+    if (!session) {
+      lwsl_err("AudioPipe::lws_service_thread LWS_CALLBACK_CLIENT_RECEIVE unable to find session\n");
+    } else {
+      switch_frame_t  write_frame = { 0 };
+      switch_status_t status;
+      // switch_channel_t *channel = switch_core_session_get_channel(session);
+      write_frame.data = msg.c_str();
+      write_frame.datalen = strlen(message);
+      write_frame.codec = switch_core_session_get_read_codec(session);
 
-    //   status = switch_core_session_write_frame(session, &write_frame, SWITCH_IO_FLAG_NONE, 0);
-    //   if (status != SWITCH_STATUS_SUCCESS) {
-    //     lwsl_err("AudioPipe::lws_service_thread LWS_CALLBACK_CLIENT_RECEIVE failed to write frame to session - len: %d\n", strlen(msg.c_str()));
-    //   }
-    //   else {
-    //     lwsl_notice("AudioPipe::lws_service_thread LWS_CALLBACK_CLIENT_RECEIVE wrote frame to session: %d\n", strlen(msg.c_str()));
-    //   }
+      status = switch_core_session_write_frame(session, &write_frame, SWITCH_IO_FLAG_NONE, 0);
+      if (status != SWITCH_STATUS_SUCCESS) {
+        lwsl_err("AudioPipe::lws_service_thread LWS_CALLBACK_CLIENT_RECEIVE failed to write frame to session - len: %d\n", strlen(msg.c_str()));
+      }
+      else {
+        lwsl_notice("AudioPipe::lws_service_thread LWS_CALLBACK_CLIENT_RECEIVE wrote frame to session: %d\n", strlen(msg.c_str()));
+      }
+    }
 
 
     // if (0 == type.compare("playAudio")) {
