@@ -18,6 +18,8 @@
 #define EVENT_CONNECT_SUCCESS "mod_audio_docker::connect"
 #define EVENT_CONNECT_FAIL    "mod_audio_docker::connect_failed"
 #define EVENT_BUFFER_OVERRUN  "mod_audio_docker::buffer_overrun"
+#define EVENT_PLAY_AUDIO      "mod_audio_docker::play_audio"
+#define EVENT_KILL_AUDIO      "mod_audio_docker::kill_audio"
 #define EVENT_JSON            "mod_audio_docker::json"
 
 #define MAX_METADATA_LEN (8192)

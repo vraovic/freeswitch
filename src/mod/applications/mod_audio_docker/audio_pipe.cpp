@@ -152,28 +152,30 @@ int AudioPipe::lws_callback(struct lws *wsi,
             // lwsl_user("Received audio data\n");
             // // process_audio_data(in, len); // Pseudo function to handle audio
 
-          lwsl_err("AudioPipe::lws_service_thread LWS_CALLBACK_CLIENT_RECEIVE received binary frame - print and discard for time being.\n");
+          lwsl_err("AudioPipe::lws_service_thread LWS_CALLBACK_CLIENT_RECEIVE received binary frame\n");
           ((char *)in)[len] = '\0';
-          lwsl_info("rx-binary:%d '%s'\n", (int)len, (char *)in);
+          lwsl_notice("rx-binary:%d '%s'\n", (int)len, (char *)in);
 
-	        // switch_frame_t *frame = { 0 };
-          // switch_frame_t *read_frame, write_frame = { 0 };
-	        // switch_status_t status;
-	        // switch_channel_t *channel = switch_core_session_get_channel(session);
-          // write_frame.data = (void *)in;
-          // write_frame.datalen = len;
-          // write_frame.codec = switch_core_session_get_read_codec(session);
+          switch_core_session_t* session = ap->m_uuid.c_str(); // User holds the FreeSWITCH session pointer
+          if (!session) {
+            lwsl_err("AudioPipe::lws_service_thread LWS_CALLBACK_CLIENT_RECEIVE unable to find session\n");
+          } else {
+            switch_frame_t *frame = { 0 };
+            switch_frame_t *read_frame, write_frame = { 0 };
+            switch_status_t status;
+            // switch_channel_t *channel = switch_core_session_get_channel(session);
+            write_frame.data = (void *)in;
+            write_frame.datalen = len;
+            write_frame.codec = switch_core_session_get_read_codec(session);
 
-		      // status = switch_core_session_write_frame(session, &write_frame, SWITCH_IO_FLAG_NONE, 0);
-          // if (status != SWITCH_STATUS_SUCCESS) {
-          //   lwsl_err("AudioPipe::lws_service_thread LWS_CALLBACK_CLIENT_RECEIVE failed to write frame to session\n");
-          // }
-          // else {
-          //   lwsl_info("AudioPipe::lws_service_thread LWS_CALLBACK_CLIENT_RECEIVE wrote frame to session\n");
-          // }
-          // lws_strncpy(buf, in, sizeof(buf));
-		      // lwsl_notice("Client connection received %ld from server '%s'\n",
-			    // (long)len, buf);
+            status = switch_core_session_write_frame(session, &write_frame, SWITCH_IO_FLAG_NONE, 0);
+            if (status != SWITCH_STATUS_SUCCESS) {
+              lwsl_err("AudioPipe::lws_service_thread LWS_CALLBACK_CLIENT_RECEIVE failed to write frame to session - len: %d\n", len);
+            }
+            else {
+              lwsl_notice("AudioPipe::lws_service_thread LWS_CALLBACK_CLIENT_RECEIVE wrote frame to session\n");
+            }
+          }
           return 0;
         }
 
