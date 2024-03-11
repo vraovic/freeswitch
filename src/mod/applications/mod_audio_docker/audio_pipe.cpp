@@ -177,7 +177,7 @@ int AudioPipe::lws_callback(struct lws *wsi,
                       //   else {
                       //     lwsl_notice("AudioPipe::lws_service_thread LWS_CALLBACK_CLIENT_RECEIVE wrote frame to session\n");
                       //   }
-          }
+          // }
           /// alternatively, call callback with the received data
           // if (nullptr != ap->m_recv_buf) {
           //     std::string msg((char *)ap->m_recv_buf, ap->m_recv_buf_ptr - ap->m_recv_buf);
