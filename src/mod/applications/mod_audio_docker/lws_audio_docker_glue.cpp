@@ -47,7 +47,7 @@ namespace {
       switch_frame_t  write_frame = { 0 };
       switch_status_t status;
       // switch_channel_t *channel = switch_core_session_get_channel(session);
-      write_frame.data = msg.c_str();
+      write_frame.data = (void*)message;
       write_frame.datalen = strlen(message);
       write_frame.codec = switch_core_session_get_read_codec(session);
 
