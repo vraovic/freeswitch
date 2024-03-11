@@ -26,7 +26,8 @@ public:
     CONNECT_FAIL,
     CONNECTION_DROPPED,
     CONNECTION_CLOSED_GRACEFULLY,
-    MESSAGE
+    MESSAGE,
+    AUDIO
   };
   typedef void (*log_emit_function)(int level, const char *line);
   typedef void (*notifyHandler_t)(const char *sessionId, NotifyEvent_t event, const char* message);
