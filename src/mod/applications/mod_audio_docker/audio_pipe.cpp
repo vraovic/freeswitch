@@ -176,56 +176,20 @@ int AudioPipe::lws_callback(struct lws *wsi,
               lwsl_notice("AudioPipe::lws_service_thread LWS_CALLBACK_CLIENT_RECEIVE wrote frame to session\n");
             }
           }
+          /// alternatively, call callback with the received data
+          // if (nullptr != ap->m_recv_buf) {
+          //     std::string msg((char *)ap->m_recv_buf, ap->m_recv_buf_ptr - ap->m_recv_buf);
+          //     lwsl_debug("AudioPipe::lws_callback LWS_CALLBACK_CLIENT_RECEIVE - MSG: %s\n", msg.c_str());
+          //     ap->m_callback(ap->m_uuid.c_str(), AudioPipe::MESSAGE, msg.c_str());
+          //     if (nullptr != ap->m_recv_buf) free(ap->m_recv_buf);
+          //   }
+          //   ap->m_recv_buf = ap->m_recv_buf_ptr = nullptr;
+          //   ap->m_recv_buf_len = 0;
+          // } 
+
           return 0;
         }
-
-        if (lws_is_first_fragment(wsi)) {
-          // allocate a buffer for the entire chunk of memory needed
-          // lwsl_notice("AudioPipe::LWS_CALLBACK_CLIENT_RECEIVE - lws_is_first_fragment - yes\n");
-          assert(nullptr == ap->m_recv_buf);
-          ap->m_recv_buf_len = len + lws_remaining_packet_payload(wsi);
-          ap->m_recv_buf = (uint8_t*) malloc(ap->m_recv_buf_len);
-          ap->m_recv_buf_ptr = ap->m_recv_buf;
-        }
-
-        size_t write_offset = ap->m_recv_buf_ptr - ap->m_recv_buf;
-        size_t remaining_space = ap->m_recv_buf_len - write_offset;
-        if (remaining_space < len) {
-          lwsl_notice("AudioPipe::lws_callback LWS_CALLBACK_CLIENT_RECEIVE buffer realloc needed.\n");
-          size_t newlen = ap->m_recv_buf_len + RECV_BUF_REALLOC_SIZE;
-          if (newlen > MAX_RECV_BUF_SIZE) {
-            free(ap->m_recv_buf);
-            ap->m_recv_buf = ap->m_recv_buf_ptr = nullptr;
-            ap->m_recv_buf_len = 0;
-            lwsl_notice("AudioPipe::lws_callback LWS_CALLBACK_CLIENT_RECEIVE max buffer exceeded, truncating message.\n");
-          }
-          else {
-            lwsl_notice("AudioPipe::lws_callback LWS_CALLBACK_CLIENT_RECEIVE - newlen:%u\n",newlen);
-            ap->m_recv_buf = (uint8_t*) realloc(ap->m_recv_buf, newlen);
-            if (nullptr != ap->m_recv_buf) {
-              ap->m_recv_buf_len = newlen;
-              ap->m_recv_buf_ptr = ap->m_recv_buf + write_offset;
-            }
-          }
-        }
-
-        if (nullptr != ap->m_recv_buf) {
-          if (len > 0) {
-            memcpy(ap->m_recv_buf_ptr, in, len);
-            ap->m_recv_buf_ptr += len;
-          }
-          if (lws_is_final_fragment(wsi)) {
-            // lwsl_notice("AudioPipe::lws_callback LWS_CALLBACK_CLIENT_RECEIVE - lws_is_final_fragment - yes\n");
-            if (nullptr != ap->m_recv_buf) {
-              std::string msg((char *)ap->m_recv_buf, ap->m_recv_buf_ptr - ap->m_recv_buf);
-              lwsl_debug("AudioPipe::lws_callback LWS_CALLBACK_CLIENT_RECEIVE - MSG: %s\n", msg.c_str());
-              ap->m_callback(ap->m_uuid.c_str(), AudioPipe::MESSAGE, msg.c_str());
-              if (nullptr != ap->m_recv_buf) free(ap->m_recv_buf);
-            }
-            ap->m_recv_buf = ap->m_recv_buf_ptr = nullptr;
-            ap->m_recv_buf_len = 0;
-          }
-        }
+        lwsl_notice("AudioPipe::lws_service_thread LWS_CALLBACK_CLIENT_RECEIVE received NON binary data\n");
       }
       break;
 

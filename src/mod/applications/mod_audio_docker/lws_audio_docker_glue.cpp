@@ -40,7 +40,7 @@ namespace {
   std::string msg = message;
   // std::string type  = msg_type;
 
-    switch_log_printf(SWITCH_CHANNEL_LOG, SWITCH_LOG_DEBUG, "(%u) processIncomingMessage - received %s message\n", tech_pvt->id, type.c_str());
+    switch_log_printf(SWITCH_CHANNEL_LOG, SWITCH_LOG_DEBUG, "(%u) processIncomingMessage - received %s message\n", tech_pvt->id, message);
     // if (0 == type.compare("playAudio")) {
 
     //     // dont send actual audio bytes in event message
