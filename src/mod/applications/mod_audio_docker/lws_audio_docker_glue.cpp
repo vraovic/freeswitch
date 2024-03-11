@@ -41,6 +41,26 @@ namespace {
   // std::string type  = msg_type;
 
     switch_log_printf(SWITCH_CHANNEL_LOG, SWITCH_LOG_DEBUG, "(%u) processIncomingMessage - received %s message\n", tech_pvt->id, message);
+                      if (!session) {
+                        lwsl_err("AudioPipe::lws_service_thread LWS_CALLBACK_CLIENT_RECEIVE unable to find session\n");
+                      } else {
+                        switch_frame_t *frame = { 0 };
+                        switch_frame_t *read_frame, write_frame = { 0 };
+                        switch_status_t status;
+                        // switch_channel_t *channel = switch_core_session_get_channel(session);
+                        write_frame.data = (void *)in;
+                        write_frame.datalen = len;
+                        write_frame.codec = switch_core_session_get_read_codec(session);
+
+                        status = switch_core_session_write_frame(session, &write_frame, SWITCH_IO_FLAG_NONE, 0);
+                        if (status != SWITCH_STATUS_SUCCESS) {
+                          lwsl_err("AudioPipe::lws_service_thread LWS_CALLBACK_CLIENT_RECEIVE failed to write frame to session - len: %d\n", len);
+                        }
+                        else {
+                          lwsl_notice("AudioPipe::lws_service_thread LWS_CALLBACK_CLIENT_RECEIVE wrote frame to session\n");
+                        }
+
+
     // if (0 == type.compare("playAudio")) {
 
     //     // dont send actual audio bytes in event message
@@ -197,6 +217,10 @@ namespace {
               switch_log_printf(SWITCH_CHANNEL_SESSION_LOG(session), SWITCH_LOG_DEBUG, "eventCallback - connection closed gracefully\n");
             break;
             case AudioPipe::MESSAGE:
+              switch_log_printf(SWITCH_CHANNEL_SESSION_LOG(session), SWITCH_LOG_INFO, "eventCallback message - sessionId: %s message:%s\n", sessionId, message);
+              processIncomingMessage(tech_pvt, session, message);
+            break;
+            case AudioPipe::AUDIO:
               switch_log_printf(SWITCH_CHANNEL_SESSION_LOG(session), SWITCH_LOG_INFO, "eventCallback message - sessionId: %s message:%s\n", sessionId, message);
               processIncomingMessage(tech_pvt, session, message);
             break;
