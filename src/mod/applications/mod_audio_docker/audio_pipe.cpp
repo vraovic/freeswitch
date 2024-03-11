@@ -12,7 +12,7 @@
 
 namespace {
 
-  static const char *requestedTcpKeepaliveSecs = std::getenv("MOD_AUDIO_FORK_TCP_KEEPALIVE_SECS");
+  static const char *requestedTcpKeepaliveSecs = std::getenv("MOD_AUDIO_DOCKER_TCP_KEEPALIVE_SECS");
   static int nTcpKeepaliveSecs = requestedTcpKeepaliveSecs ? ::atoi(requestedTcpKeepaliveSecs) : 55;
 }
   static const char* apiToken = std::getenv("MOD_AUDIO_DOCKER_TOKEN");
@@ -64,10 +64,11 @@ int AudioPipe::lws_callback(struct lws *wsi,
           unsigned char **p = (unsigned char **)in, *end = (*p) + len;
           char b[128];
 
-          // memcpy(b, apiToken,strlen(apiToken));
-          // b[strlen(apiToken)] = '\0';
+          memcpy(b, apiToken,strlen(apiToken));
+          b[strlen(apiToken)] = '\0';
           lwsl_notice("AudioPipe::lws_callback  HANDSHAKE_HEADER Authorization: %s\n",b);
-          // if (lws_add_http_header_by_token(wsi, WSI_TOKEN_HTTP_AUTHORIZATION, (unsigned char *)b, strlen(b), p, end)) return -1;
+          lwsl_notice("AudioPipe::lws_callback  HANDSHAKE_HEADER Authorization - token: %s\n",apiToken);
+          if (lws_add_http_header_by_token(wsi, WSI_TOKEN_HTTP_AUTHORIZATION, (unsigned char *)b, strlen(b), p, end)) return -1;
       }
       break;
 
@@ -143,7 +144,36 @@ int AudioPipe::lws_callback(struct lws *wsi,
         }
 
         if (lws_frame_is_binary(wsi)) {
-          lwsl_err("AudioPipe::lws_callback LWS_CALLBACK_CLIENT_RECEIVE received binary frame, discarding.\n");
+          // // Handle incoming messages from the server.
+          // printf("Received data: %s\n", (const char *)in);
+           // Here, 'in' is your received audio data and 'len' is its length
+
+            // // You would process this data, likely pushing it into a buffer or directly to FreeSWITCH media handling
+            // lwsl_user("Received audio data\n");
+            // // process_audio_data(in, len); // Pseudo function to handle audio
+
+          lwsl_err("AudioPipe::lws_service_thread LWS_CALLBACK_CLIENT_RECEIVE received binary frame - print and discard for time being.\n");
+          ((char *)in)[len] = '\0';
+          lwsl_info("rx-binary:%d '%s'\n", (int)len, (char *)in);
+
+	        // switch_frame_t *frame = { 0 };
+          // switch_frame_t *read_frame, write_frame = { 0 };
+	        // switch_status_t status;
+	        // switch_channel_t *channel = switch_core_session_get_channel(session);
+          // write_frame.data = (void *)in;
+          // write_frame.datalen = len;
+          // write_frame.codec = switch_core_session_get_read_codec(session);
+
+		      // status = switch_core_session_write_frame(session, &write_frame, SWITCH_IO_FLAG_NONE, 0);
+          // if (status != SWITCH_STATUS_SUCCESS) {
+          //   lwsl_err("AudioPipe::lws_service_thread LWS_CALLBACK_CLIENT_RECEIVE failed to write frame to session\n");
+          // }
+          // else {
+          //   lwsl_info("AudioPipe::lws_service_thread LWS_CALLBACK_CLIENT_RECEIVE wrote frame to session\n");
+          // }
+          // lws_strncpy(buf, in, sizeof(buf));
+		      // lwsl_notice("Client connection received %ld from server '%s'\n",
+			    // (long)len, buf);
           return 0;
         }
 
@@ -492,7 +522,7 @@ AudioPipe::AudioPipe(const char* uuid, const char* host, unsigned int port, cons
   m_audio_buffer = new uint8_t[m_audio_buffer_max_len];
   if (apiToken) {
     m_api_token.assign(apiToken);
-    lwsl_notice("AudioPipe:: init - apiToken:%s\n", apiToken);
+    lwsl_notice("AudioPipe:: init - apiToken:%s, tcp_keepalive:%d\n", apiToken, nTcpKeepaliveSecs);
   }
 }
 AudioPipe::~AudioPipe() {
@@ -567,7 +597,7 @@ char* AudioPipe::b64AudioEncoding(size_t len) {
 
 
 void AudioPipe::audioWritePtrSubtract(size_t len) {
-//  lwsl_notice("audioWritePtrSubtract - m_audio_buffer_write_offset: %u, len:%u\n", m_audio_buffer_write_offset,len);
+ lwsl_notice("audioWritePtrSubtract - m_audio_buffer_write_offset: %u, len:%u\n", m_audio_buffer_write_offset,len);
 
   if ((m_audio_buffer_write_offset) > len ) {
     uint8_t * buffer[m_audio_buffer_write_offset - len + 1];
@@ -577,7 +607,7 @@ void AudioPipe::audioWritePtrSubtract(size_t len) {
     // memcpy(m_audio_buffer + LWS_PRE, m_audio_buffer + LWS_PRE + len, m_audio_buffer_write_offset - len);
   }
   m_audio_buffer_write_offset -= len;
-//  lwsl_notice("audioWritePtrSubtract - exit - m_audio_buffer_write_offset: %u\n", m_audio_buffer_write_offset);
+ lwsl_notice("audioWritePtrSubtract - exit - m_audio_buffer_write_offset: %u\n", m_audio_buffer_write_offset);
 }
 
 
