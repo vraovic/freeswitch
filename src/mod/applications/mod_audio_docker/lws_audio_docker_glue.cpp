@@ -571,6 +571,8 @@ extern "C" {
 
       pAudioPipe->lockAudioBuffer();
       size_t available = pAudioPipe->audioSpaceAvailable();
+      switch_log_printf(SWITCH_CHANNEL_SESSION_LOG(session), SWITCH_LOG_NOTICE, "AUDIO-BUFFER available:%u\n",available );
+
       if (NULL == tech_pvt->resampler) {
         switch_frame_t frame = { 0 };
         frame.data = pAudioPipe->audioWritePtr();
@@ -596,7 +598,7 @@ extern "C" {
           switch_status_t rv = switch_core_media_bug_read(bug, &frame, SWITCH_TRUE);
           if (rv != SWITCH_STATUS_SUCCESS) break;
           if (frame.datalen) {
-            // switch_log_printf(SWITCH_CHANNEL_SESSION_LOG(session), SWITCH_LOG_NOTICE, "8000 samling rate - READING frame.datalen: %u\n",frame.datalen); 
+            switch_log_printf(SWITCH_CHANNEL_SESSION_LOG(session), SWITCH_LOG_NOTICE, "8000 samling rate - READING frame.datalen: %u\n",frame.datalen); 
             pAudioPipe->audioWritePtrAdd(frame.datalen);
             frame.buflen = available = pAudioPipe->audioSpaceAvailable();
             frame.data = pAudioPipe->audioWritePtr();
@@ -658,7 +660,7 @@ extern "C" {
               break; 
             }
             else {
-              switch_log_printf(SWITCH_CHANNEL_SESSION_LOG(session), SWITCH_LOG_DEBUG, "Not enough data to send - audioSpaceSize: %u\n", pAudioPipe->audioSpaceSize());
+              switch_log_printf(SWITCH_CHANNEL_SESSION_LOG(session), SWITCH_LOG_DEBUG, "Not enough data to send - m_audio_buffer_write_offset: %u\n", pAudioPipe->audioSpaceSize());
             }
 
           }

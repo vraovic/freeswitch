@@ -198,7 +198,7 @@ int AudioPipe::lws_callback(struct lws *wsi,
 
     case LWS_CALLBACK_CLIENT_WRITEABLE:
       {
-        //  lwsl_notice("AudioPipe::lws_callback LWS_CALLBACK_CLIENT_WRITEABLE \n"); 
+         lwsl_notice("AudioPipe::lws_callback LWS_CALLBACK_CLIENT_WRITEABLE \n"); 
         AudioPipe* ap = *ppAp;
         if (!ap) {
           lwsl_err("AudioPipe::lws_callback LWS_CALLBACK_CLIENT_WRITEABLE %s unable to find wsi %p..\n", ap->m_uuid.c_str(), wsi); 
@@ -248,18 +248,21 @@ int AudioPipe::lws_callback(struct lws *wsi,
         }
 
         // check for audio packets
-        // {
-        //   std::lock_guard<std::mutex> lk(ap->m_audio_mutex);
-        //   if (ap->m_audio_buffer_write_offset) {
-        //     size_t datalen = ap->m_audio_buffer_write_offset;
-        //     int sent = lws_write(wsi, (unsigned char *) ap->m_audio_buffer, datalen, LWS_WRITE_BINARY);
-        //     if (sent < datalen) {
-        //       lwsl_err("AudioPipe::lws_service_thread LWS_CALLBACK_CLIENT_WRITEABLE %s attemped to send %lu only sent %d wsi %p..\n", 
-        //         ap->m_uuid.c_str(), datalen, sent, wsi); 
-        //     }
-        //     ap->m_audio_buffer_write_offset = 0;
-        //   }
-        // }
+        {
+          std::lock_guard<std::mutex> lk(ap->m_audio_mutex);
+          if (ap->m_audio_buffer_write_offset) {
+            size_t datalen = ap->m_audio_buffer_write_offset;
+            int sent = lws_write(wsi, (unsigned char *) ap->m_audio_buffer, datalen, LWS_WRITE_BINARY);
+            if (sent < datalen) {
+              lwsl_err("AudioPipe::lws_service_thread LWS_CALLBACK_CLIENT_WRITEABLE %s attemped to send %lu only sent %d wsi %p..\n", 
+                ap->m_uuid.c_str(), datalen, sent, wsi); 
+            } else {
+            lwsl_notice("AudioPipe::lws_write -sent %d binary audio data\n", sent); 
+            }
+
+            ap->m_audio_buffer_write_offset = 0;
+          }
+        }
 
         return 0;
       }
@@ -543,7 +546,7 @@ void AudioPipe::bufferForSending(const char* text, size_t len) {
 }
 
 void AudioPipe::unlockAudioBuffer() {
-  // if (m_audio_buffer_write_offset > LWS_PRE) addPendingWrite(this);
+  if (m_audio_buffer_write_offset > LWS_PRE) addPendingWrite(this);
   m_audio_mutex.unlock();
 }
 
