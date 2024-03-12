@@ -570,19 +570,19 @@ extern "C" {
       }
 
       pAudioPipe->lockAudioBuffer();
-      size_t available = pAudioPipe->audioSpaceAvailable();
+      size_t available = pAudioPipe->binarySpaceAvailable();
       switch_log_printf(SWITCH_CHANNEL_SESSION_LOG(session), SWITCH_LOG_NOTICE, "AUDIO-BUFFER available:%u\n",available );
 
       if (NULL == tech_pvt->resampler) {
         switch_frame_t frame = { 0 };
-        frame.data = pAudioPipe->audioWritePtr();
+        frame.data = pAudioPipe->binaryWritePtr();
         frame.buflen = available;
         size_t transcription_size = FRAME_SIZE_8000 * ::atoi(numberOfFramesForTranscription);
 
         while (true) {
 
           // check if buffer would be overwritten; dump packets if so
-          if (available < pAudioPipe->audioMinSpace()) {
+          if (available < pAudioPipe->binaryMinSpace()) {
             if (!tech_pvt->buffer_overrun_notified) {
               tech_pvt->buffer_overrun_notified = 1;
               tech_pvt->responseHandler(session, EVENT_BUFFER_OVERRUN, NULL);
@@ -591,17 +591,17 @@ extern "C" {
               tech_pvt->id);
             pAudioPipe->audioWritePtrResetToZero();
 
-            frame.data = pAudioPipe->audioWritePtr();
-            frame.buflen = available = pAudioPipe->audioSpaceAvailable();
+            frame.data = pAudioPipe->binaryWritePtr();
+            frame.buflen = available = pAudioPipe->binarySpaceAvailable();
           }
 
           switch_status_t rv = switch_core_media_bug_read(bug, &frame, SWITCH_TRUE);
           if (rv != SWITCH_STATUS_SUCCESS) break;
           if (frame.datalen) {
             switch_log_printf(SWITCH_CHANNEL_SESSION_LOG(session), SWITCH_LOG_NOTICE, "8000 samling rate - READING frame.datalen: %u\n",frame.datalen); 
-            pAudioPipe->audioWritePtrAdd(frame.datalen);
-            frame.buflen = available = pAudioPipe->audioSpaceAvailable();
-            frame.data = pAudioPipe->audioWritePtr();
+            pAudioPipe->binaryWritePtrAdd(frame.datalen);
+            frame.buflen = available = pAudioPipe->binarySpaceAvailable();
+            frame.data = pAudioPipe->binaryWritePtr();
             dirty = true;
             if (pAudioPipe->audioSpaceSize() >= transcription_size) {
 
@@ -618,16 +618,6 @@ extern "C" {
               score = (uint32_t) (energy / samples);
 
               switch_log_printf(SWITCH_CHANNEL_SESSION_LOG(session), SWITCH_LOG_WARNING, "TRANSCRIPTION FRAME ENERGY:%d, samples:%d\n",score, samples);
-
-         			// uint8_t *fdata1 = (uint8_t *) pAudioPipe->audioReadPtr();
-              // uint32_t samples1 =  transcription_size/ sizeof(*fdata1);
-              // uint32_t score1, count1 = 0, j1 = 0;
-              // double energy1 = 0;
-              // for (count1 = 0; count1 < samples1; count1++) {
-              //   energy1 += abs(fdata1[j1++]);
-              // }
-              // score1 = (uint32_t) (energy1 / samples1);
-              // switch_log_printf(SWITCH_CHANNEL_SESSION_LOG(session), SWITCH_LOG_WARNING, "TRANSCRIPTION FRAME ENERGY1:%d, samples1:%d\n",score1, samples1);
 
               if (score > 100) {
                 if (pAudioPipe->isAudioDetected() == false) {
@@ -647,16 +637,6 @@ extern "C" {
                 switch_channel_t *channel = switch_core_session_get_channel(session);
                 switch_channel_set_variable(channel, "speaking_state", "0");
               }
-
-              // char textToSend[(base64AudioSize/2  + 20)];
-              // memset(textToSend, '\0', sizeof(textToSend));
-              // strcat(textToSend, pAudioPipe->b64AudioEncoding(transcription_size));
-              // switch_log_printf(SWITCH_CHANNEL_SESSION_LOG(session), SWITCH_LOG_NOTICE, "audio_docker_frame - base64_encode audio - textToSend:%s, len:%u\n", textToSend, strlen(textToSend));
-              // pAudioPipe->audioWritePtrSubtract(transcription_size);
-
-              // pAudioPipe->bufferForSending(textToSend, strlen(textToSend));
-              // audio_docker_session_send_text(session, textToSend);
-              // audio_docker_session_send_text(session, (char*)json.str());
               break; 
             }
             else {
@@ -685,40 +665,20 @@ extern "C" {
             speex_resampler_process_interleaved_int(tech_pvt->resampler, 
               (const spx_int16_t *) frame.data, 
               (spx_uint32_t *) &in_len, 
-              (spx_int16_t *) ((char *) pAudioPipe->audioWritePtr()),
+              (spx_int16_t *) ((char *) pAudioPipe->binaryWritePtr()),
               &out_len);
             switch_log_printf(SWITCH_CHANNEL_SESSION_LOG(session), SWITCH_LOG_NOTICE, "audio_docker_frame - datalen:%u, in_len: %u, new value out_len:%u channels:%u\n",frame.datalen,in_len, out_len, tech_pvt->channels);
 
             if (out_len > 0) {
               // bytes written = num channels * 2 * num channels
               size_t bytes_written = out_len << tech_pvt->channels;
-              pAudioPipe->audioWritePtrAdd(bytes_written);
-              available = pAudioPipe->audioSpaceAvailable();
+              pAudioPipe->binaryWritePtrAdd(bytes_written);
+              available = pAudioPipe->binarySpaceAvailable();
               dirty = true;
               switch_log_printf(SWITCH_CHANNEL_SESSION_LOG(session), SWITCH_LOG_NOTICE, "audio_docker_frame - bytes_written:%u, available:%u, audioBufferSize: %u\n", bytes_written, available, pAudioPipe->audioSpaceSize());
 
-              // if (pAudioPipe->audioSpaceSize() >= transcription_size) {
-
-              //   char textToSend[(base64AudioSize  + 20)];
-              //   memset(textToSend, '\0', sizeof(textToSend));
-              //   strcat(textToSend, "{\"audio_data\":\"");
-              //   // strcat(textToSend, pAudioPipe->base64EncodedAudio(transcription_size).c_str());
-              //   strcat(textToSend, pAudioPipe->b64AudioEncoding(transcription_size));
-              //   strcat(textToSend, "\"}");
-              //   // switch_log_printf(SWITCH_CHANNEL_SESSION_LOG(session), SWITCH_LOG_NOTICE, "audio_docker_frame - base64_encode audio - textToSend:%s, len:%u\n", textToSend, strlen(textToSend));
-              //   pAudioPipe->audioWritePtrSubtract(transcription_size);
-
-              //   pAudioPipe->bufferForSending(textToSend, strlen(textToSend));
-              //   // audio_docker_session_send_text(session, textToSend);
-              //   // audio_docker_session_send_text(session, (char*)json.str());
-              //   break; 
-              // }
-              // else {
-              //   // switch_log_printf(SWITCH_CHANNEL_SESSION_LOG(session), SWITCH_LOG_DEBUG, "Not enough data to send - audioSpaceSize: %u\n", pAudioPipe->audioSpaceSize());
-              // }
-
             }
-            if (available < pAudioPipe->audioMinSpace()) {
+            if (available < pAudioPipe->binaryMinSpace()) {
               if (!tech_pvt->buffer_overrun_notified) {
                 tech_pvt->buffer_overrun_notified = 1;
                 switch_log_printf(SWITCH_CHANNEL_SESSION_LOG(session), SWITCH_LOG_ERROR, "(%u) dropping packets!\n", 

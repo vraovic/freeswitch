@@ -567,19 +567,3 @@ char* AudioPipe::b64AudioEncoding(size_t len) {
   return norwood::b64_encode((unsigned char*)audioReadPtr(), len);
 }
 
-
-void AudioPipe::audioWritePtrSubtract(size_t len) {
- lwsl_notice("audioWritePtrSubtract - m_audio_buffer_write_offset: %u, len:%u\n", m_audio_buffer_write_offset,len);
-
-  if ((m_audio_buffer_write_offset) > len ) {
-    uint8_t * buffer[m_audio_buffer_write_offset - len + 1];
-    memset(buffer, 0, sizeof(buffer));
-    memcpy(buffer, m_audio_buffer + len, m_audio_buffer_write_offset - len);
-    memcpy(m_audio_buffer, buffer, m_audio_buffer_write_offset - len);
-    // memcpy(m_audio_buffer + LWS_PRE, m_audio_buffer + LWS_PRE + len, m_audio_buffer_write_offset - len);
-  }
-  m_audio_buffer_write_offset -= len;
- lwsl_notice("audioWritePtrSubtract - exit - m_audio_buffer_write_offset: %u\n", m_audio_buffer_write_offset);
-}
-
-

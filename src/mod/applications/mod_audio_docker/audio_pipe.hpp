@@ -50,26 +50,25 @@ public:
   LwsState_t getLwsState(void) { return m_state; }
   void connect(void);
   void bufferForSending(const char* text, size_t len);
-  size_t audioSpaceAvailable(void) {
+  size_t binarySpaceAvailable(void) {
     return m_audio_buffer_max_len - m_audio_buffer_write_offset;
   }
   size_t audioSpaceSize(void) {
     return m_audio_buffer_write_offset;
   }
-  size_t audioMinSpace(void) {
+  size_t binaryMinSpace(void) {
     return m_audio_buffer_min_freespace;
   }
-  char * audioWritePtr(void) { 
+  char * binaryWritePtr(void) { 
     return (char *) m_audio_buffer + m_audio_buffer_write_offset;
   }
   char * audioReadPtr(void) { 
     return (char *) m_audio_buffer;
   }
-  void audioWritePtrAdd(size_t len) {
+  void binaryWritePtrAdd(size_t len) {
     m_audio_buffer_write_offset += len;
   }
-  void audioWritePtrSubtract(size_t len);
-  
+ 
   void audioWritePtrResetToZero(void) {
     m_audio_buffer_write_offset = 0;
   }
