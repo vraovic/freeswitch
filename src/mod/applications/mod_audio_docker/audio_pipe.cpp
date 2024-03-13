@@ -143,6 +143,13 @@ int AudioPipe::lws_callback(struct lws *wsi,
           lwsl_err("AudioPipe::lws_callback LWS_CALLBACK_CLIENT_RECEIVE %s unable to find wsi %p..\n", ap->m_uuid.c_str(), wsi); 
           return 0;
         }
+		lwsl_user("LWS_CALLBACK_CLIENT_RECEIVE: %4d (rpp %5d, first %d, last %d, bin %d)\n",
+			(int)len, (int)lws_remaining_packet_payload(wsi),
+			lws_is_first_fragment(wsi),
+			lws_is_final_fragment(wsi),
+			lws_frame_is_binary(wsi));
+
+		// lwsl_hexdump_notice(in, len);
 
         if (lws_frame_is_binary(wsi)) {
           // // Handle incoming messages from the server.
@@ -154,9 +161,13 @@ int AudioPipe::lws_callback(struct lws *wsi,
             // // process_audio_data(in, len); // Pseudo function to handle audio
 
           lwsl_err("AudioPipe::lws_service_thread LWS_CALLBACK_CLIENT_RECEIVE received binary frame\n");
+
           ((char *)in)[len] = '\0';
-          lwsl_notice("rx-binary:%d '%s'\n", (int)len, (char *)in);
-          ap->m_callback(ap->m_uuid.c_str(), AudioPipe::AUDIO, (char *)in);
+          lwsl_notice("rx-binary:%d\n", (int)len);
+          lwsl_hexdump_notice(in, len);
+          char audio[len] = {0};
+          memcpy(audio, in, len);
+          ap->m_callback(ap->m_uuid.c_str(), AudioPipe::AUDIO, (char *)audio);
 
                       // switch_core_session_t* session = ap->m_uuid.c_str(); // User holds the FreeSWITCH session pointer
                       // if (!session) {

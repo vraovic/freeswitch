@@ -36,28 +36,35 @@ namespace {
   // static char textToSend[(base64AudioSize  + 20) * 2];
   static uint32_t skip_printing = 0;
 
-  void processIncomingMessage(private_t* tech_pvt, switch_core_session_t* session, const char* message) {
+  void processIncomingMessage(private_t* tech_pvt, switch_core_session_t* session, const char* msg_type, const char* message) {
   std::string msg = message;
-  // std::string type  = msg_type;
+  std::string type  = msg_type;
 
-    switch_log_printf(SWITCH_CHANNEL_LOG, SWITCH_LOG_DEBUG, "(%u) processIncomingMessage - received %s message\n", tech_pvt->id, message);
+    switch_log_printf(SWITCH_CHANNEL_LOG, SWITCH_LOG_DEBUG, "(%u) processIncomingMessage - received msg_type:%s, message:%s \n", tech_pvt->id,type, msg_type, message);
     if (!session) {
       lwsl_err("AudioPipe::lws_service_thread LWS_CALLBACK_CLIENT_RECEIVE unable to find session\n");
     } else {
-      switch_frame_t  write_frame = { 0 };
-      switch_status_t status;
-      // switch_channel_t *channel = switch_core_session_get_channel(session);
-      write_frame.data = (void*)message;
-      write_frame.datalen = strlen(message);
-      write_frame.codec = switch_core_session_get_read_codec(session);
+      if (msg_type == "AUDIO") {
+        switch_frame_t  write_frame = { 0 };
+        switch_status_t status;
+        // switch_channel_t *channel = switch_core_session_get_channel(session);
+        write_frame.data = (void*)message;
+        write_frame.datalen = strlen(message);
+        write_frame.codec = switch_core_session_get_read_codec(session);
 
-      status = switch_core_session_write_frame(session, &write_frame, SWITCH_IO_FLAG_NONE, 0);
-      if (status != SWITCH_STATUS_SUCCESS) {
-        lwsl_err("AudioPipe::lws_service_thread LWS_CALLBACK_CLIENT_RECEIVE failed to write frame to session - len: %d\n", strlen(msg.c_str()));
+        status = switch_core_session_write_frame(session, &write_frame, SWITCH_IO_FLAG_NONE, 0);
+        if (status != SWITCH_STATUS_SUCCESS) {
+          lwsl_err("AudioPipe::lws_service_thread LWS_CALLBACK_CLIENT_RECEIVE failed to write frame to session - len: %d\n", strlen(msg.c_str()));
+        }
+        else {
+          lwsl_notice("AudioPipe::lws_service_thread LWS_CALLBACK_CLIENT_RECEIVE wrote frame to session: %d\n", strlen(msg.c_str()));
+        }
+      } else if (msg_type == "MESSAGE"){
+        lwsl_err("AudioPipe::lws_service_thread LWS_CALLBACK_CLIENT_RECEIVE message:%s\n", message);
+      } else {
+        lwsl_err("AudioPipe::lws_service_thread LWS_CALLBACK_CLIENT_RECEIVE unknown message type\n");
       }
-      else {
-        lwsl_notice("AudioPipe::lws_service_thread LWS_CALLBACK_CLIENT_RECEIVE wrote frame to session: %d\n", strlen(msg.c_str()));
-      }
+
     }
 
 
@@ -218,11 +225,11 @@ namespace {
             break;
             case AudioPipe::MESSAGE:
               switch_log_printf(SWITCH_CHANNEL_SESSION_LOG(session), SWITCH_LOG_INFO, "eventCallback message - sessionId: %s message:%s\n", sessionId, message);
-              processIncomingMessage(tech_pvt, session, message);
+              processIncomingMessage(tech_pvt, session,"MESSAGE", message);
             break;
             case AudioPipe::AUDIO:
-              switch_log_printf(SWITCH_CHANNEL_SESSION_LOG(session), SWITCH_LOG_INFO, "eventCallback message - sessionId: %s message:%s\n", sessionId, message);
-              processIncomingMessage(tech_pvt, session, message);
+              // switch_log_printf(SWITCH_CHANNEL_SESSION_LOG(session), SWITCH_LOG_INFO, "eventCallback message - sessionId: %s message:%s\n", sessionId, message);
+              processIncomingMessage(tech_pvt, session,"AUDIO", message);
             break;
           }
         }
