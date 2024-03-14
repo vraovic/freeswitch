@@ -173,6 +173,8 @@ private:
  	int64_t m_silence_start_time;
   bool m_silence_detected;
   bool m_audio_detected;
+  FILE* m_audio_TTS_file;
+  unsigned int m_audio_TTS_chunk_size;
 };
 
 #endif

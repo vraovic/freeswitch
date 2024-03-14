@@ -160,14 +160,49 @@ int AudioPipe::lws_callback(struct lws *wsi,
             // lwsl_user("Received audio data\n");
             // // process_audio_data(in, len); // Pseudo function to handle audio
 
-          lwsl_err("AudioPipe::lws_service_thread LWS_CALLBACK_CLIENT_RECEIVE received binary frame\n");
+          lwsl_notice("AudioPipe::lws_service_thread LWS_CALLBACK_CLIENT_RECEIVE received binary frame - len: %d\n", (int)len);
 
           ((char *)in)[len] = '\0';
-          lwsl_notice("rx-binary:%d\n", (int)len);
           lwsl_hexdump_notice(in, len);
           char audio[len] = {0};
           memcpy(audio, in, len);
-          ap->m_callback(ap->m_uuid.c_str(), AudioPipe::AUDIO, (char *)audio);
+          // if (app->m_audio_TTS_file == NULL)
+          // {
+          //     //########################
+          //              // Open file in append mode if not already opened
+          //     std::string filename = ap->m_uuid + ".wav";
+          //     std::string path = freeswitchHome + filename;
+
+          //     //  // Check if the file exists
+          //     // if (access(path, F_OK) == 0) {
+          //     //   switch_log_printf(SWITCH_CHANNEL_LOG, SWITCH_LOG_ERROR, "The file %s exists.\n", path.c_str());
+          //     // } else {
+          //     //     printf("The file %s does not exist.\n", filename);
+          //     if (tech_pvt->pAudioPipe->m_audio_TTS_file == NULL) {
+          //       tech_pvt->pAudioPipe->m_audio_TTS_file = fopen(path.c_str(), "ab"); 
+          //       if (!tech_pvt->pAudioPipe->m_audio_TTS_file) {
+          //           // Handle error, could not open file
+          //           switch_log_printf(SWITCH_CHANNEL_LOG, SWITCH_LOG_ERROR, "Failed to open file %s\n", path.c_str());
+          //           return;
+          //       }
+          //       unsigned char header[44] = {0};
+          //       memcpy(header, message, 44);
+          //       parse_wav_header(header);
+
+          //       // Append the received data to the wav file
+          //   size_t written = fwrite(, sizeof(char), len, wav_file);
+          //   if (written != len) {
+          //       // Handle partial write or error
+          //       switch_log_printf(SWITCH_CHANNEL_LOG, SWITCH_LOG_ERROR, "Failed to write data to received_audio.wav\n");
+          //   }
+
+          //     } else {
+          //       switch_log_printf(SWITCH_CHANNEL_LOG, SWITCH_LOG_ERROR, "The file %s exists.\n", path.c_str());
+          //       //write to file 
+          //     }
+          //     //#########################
+          // }
+          ap->m_callback(ap->m_uuid.c_str(), AudioPipe::AUDIO, (char *)audio, app->m_audio_TTS_file);
 
                       // switch_core_session_t* session = ap->m_uuid.c_str(); // User holds the FreeSWITCH session pointer
                       // if (!session) {
@@ -500,6 +535,7 @@ AudioPipe::AudioPipe(const char* uuid, const char* host, unsigned int port, cons
   m_audio_buffer_min_freespace(minFreespace), m_audio_buffer_max_len(bufLen), m_gracefulShutdown(false),
   m_silence_detected(false), m_audio_detected(false),
   m_audio_buffer_write_offset(0), m_recv_buf(nullptr), m_recv_buf_ptr(nullptr), 
+  m_audio_TTS_file(nullptr),m_audio_TTS_chunk_size(0),
   m_state(LWS_CLIENT_IDLE), m_wsi(nullptr), m_vhd(nullptr), m_callback(callback) {
 
   m_audio_buffer = new uint8_t[m_audio_buffer_max_len];
