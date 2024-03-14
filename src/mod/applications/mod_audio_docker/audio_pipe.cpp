@@ -202,7 +202,7 @@ int AudioPipe::lws_callback(struct lws *wsi,
           //     }
           //     //#########################
           // }
-          ap->m_callback(ap->m_uuid.c_str(), AudioPipe::AUDIO, (char *)audio, app->m_audio_TTS_file);
+          ap->m_callback(ap->m_uuid.c_str(), AudioPipe::AUDIO, (char *)audio, ap->getAudioTTSfile());
 
                       // switch_core_session_t* session = ap->m_uuid.c_str(); // User holds the FreeSWITCH session pointer
                       // if (!session) {
