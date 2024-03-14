@@ -285,17 +285,19 @@ void parse_wav_header(unsigned char *header) {
               switch_log_printf(SWITCH_CHANNEL_SESSION_LOG(session), SWITCH_LOG_INFO, "eventCallback audio - sessionId: %s message:%s\n", sessionId, message);
               //########################
                        // Open file in append mode if not already opened
-              std::string filename = strcat(sessionId,".wav");
-              std::string path =  strcat(freeswitchHome, filename.c_str());
+              std::string filename = strcat((char*)sessionId,".wav");
+              std::string path =  strcat((char*)freeswitchHome, filename.c_str());
 
               //  // Check if the file exists
               // if (access(path, F_OK) == 0) {
               //   switch_log_printf(SWITCH_CHANNEL_LOG, SWITCH_LOG_ERROR, "The file %s exists.\n", path.c_str());
               // } else {
               //     printf("The file %s does not exist.\n", filename);
-              if (tech_pvt->pAudioPipe->m_audio_TTS_file == NULL) {
-                tech_pvt->pAudioPipe->m_audio_TTS_file = fopen(path.c_str(), "ab"); 
-                if (!tech_pvt->pAudioPipe->m_audio_TTS_file) {
+              AudioPipe *pAudioPipe = static_cast<AudioPipe *>(tech_pvt->pAudioPipe);
+              int len = sizeof(message);
+              if (pAudioPipe->m_audio_TTS_file == NULL) {
+                pAudioPipe->m_audio_TTS_file = fopen(path.c_str(), "ab"); 
+                if (!pAudioPipe->m_audio_TTS_file) {
                     // Handle error, could not open file
                     switch_log_printf(SWITCH_CHANNEL_LOG, SWITCH_LOG_ERROR, "Failed to open file %s\n", path.c_str());
                     return;
@@ -313,15 +315,16 @@ void parse_wav_header(unsigned char *header) {
               } else {
                 switch_log_printf(SWITCH_CHANNEL_LOG, SWITCH_LOG_ERROR, "The file %s exists - write data length: %d.\n", path.c_str(), len);
                 //write to file 
-                size_t written = fwrite(message, sizeof(char), len, tech_pvt->pAudioPipe->m_audio_TTS_file);
+                size_t written = fwrite(message, sizeof(char), len, pAudioPipe->m_audio_TTS_file);
               }
-              if (tech_pvt->pAudioPipe->m_audio_TTS_chunk_size == 0) {
-                tech_pvt->pAudioPipe->m_audio_TTS_chunk_size = len;
-              } else if (tech_pvt->pAudioPipe->m_audio_TTS_chunk_size > len){
-                fclose(tech_pvt->pAudioPipe->m_audio_TTS_file);
-                tech_pvt->pAudioPipe->m_audio_TTS_chunk_size = 0;
+              if (pAudioPipe->m_audio_TTS_chunk_size == 0) {
+                pAudioPipe->m_audio_TTS_chunk_size = len;
+              } else if (pAudioPipe->m_audio_TTS_chunk_size > len){
+                fclose(pAudioPipe->m_audio_TTS_file);
+                pAudioPipe->m_audio_TTS_chunk_size = 0;
                 switch_log_printf(SWITCH_CHANNEL_LOG, SWITCH_LOG_NOTICE, "We have received audio(%d)   - play it now\n",len);
-                processIncomingMessage(tech_pvt, session,"AUDIO", message, tech_pvt->pAudioPipe->m_audio_TTS_file);
+                FILE *file = pAudioPipe->m_audio_TTS_file;
+                processIncomingMessage(tech_pvt, session,"AUDIO", message, file);
               }
               //#########################
             break;
