@@ -100,7 +100,7 @@ int AudioPipe::lws_callback(struct lws *wsi,
           *ppAp = ap;
           ap->m_vhd = vhd;
           ap->m_state = LWS_CLIENT_CONNECTED;
-          lwsl_debug("AudioPipe::lws_callback LWS_CALLBACK_CLIENT_ESTABLISHED - %s - calling a-->m_callback\n"); 
+          lwsl_debug("AudioPipe::lws_callback LWS_CALLBACK_CLIENT_ESTABLISHED - %s - calling a-->m_callback\n", ap->m_uuid.c_str()); 
           ap->m_callback(ap->m_uuid.c_str(), AudioPipe::CONNECT_SUCCESS, NULL);
         }
         else {
@@ -143,7 +143,7 @@ int AudioPipe::lws_callback(struct lws *wsi,
           lwsl_err("AudioPipe::lws_callback LWS_CALLBACK_CLIENT_RECEIVE %s unable to find wsi %p..\n", ap->m_uuid.c_str(), wsi); 
           return 0;
         }
-		lwsl_user("LWS_CALLBACK_CLIENT_RECEIVE: %4d (rpp %5d, first %d, last %d, bin %d)\n",
+		lwsl_notice("LWS_CALLBACK_CLIENT_RECEIVE: %4d (rpp %5d, first %d, last %d, bin %d)\n",
 			(int)len, (int)lws_remaining_packet_payload(wsi),
 			lws_is_first_fragment(wsi),
 			lws_is_final_fragment(wsi),
@@ -163,7 +163,7 @@ int AudioPipe::lws_callback(struct lws *wsi,
           lwsl_notice("AudioPipe::lws_service_thread LWS_CALLBACK_CLIENT_RECEIVE received binary frame - len: %d\n", (int)len);
 
           ((char *)in)[len] = '\0';
-          lwsl_hexdump_notice(in, len);
+          // lwsl_hexdump_notice(in, len);
           char audio[len] = {0};
           memcpy(audio, in, len);
           // if (app->m_audio_TTS_file == NULL)

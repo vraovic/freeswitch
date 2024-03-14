@@ -31,7 +31,7 @@ namespace {
   static int nAudioBufferSecs = std::max(1, std::min(requestedBufferSecs ? ::atoi(requestedBufferSecs) : 2, 5));
   static const char *requestedNumServiceThreads = std::getenv("MOD_AUDIO_DOCKER_THREADS");
   static const char *playAudioMethod = std::getenv("MOD_AUDIO_DOCKER_PLAY_AUDIO_METHOD") ? std::getenv("MOD_AUDIO_DOCKER_PLAY_AUDIO_METHOD") : "storeAudio"; // storeAudio or streamAudio
-  static const char *freeswitchHome = std::getenv("HOME") ? std::getenv("HOME") : "/usr/local/freswitch/"; 
+  static const char *freeswitchHome = std::getenv("HOME") ? std::getenv("HOME") : "/usr/local/freswitch"; 
   static const char* mySubProtocolName = std::getenv("MOD_AUDIO_DOCKER_SUBPROTOCOL_NAME") ?
     std::getenv("MOD_AUDIO_DOCKER_SUBPROTOCOL_NAME") : "streaming";
   static unsigned int nServiceThreads = std::max(1, std::min(requestedNumServiceThreads ? ::atoi(requestedNumServiceThreads) : 1, 5));
@@ -43,7 +43,7 @@ namespace {
 
 void parse_wav_header(unsigned char *header) {
     if (strncmp((const char *)header, "RIFF", 4)) {
-        fprintf(stderr, "This is not a valid WAV file.\n");
+        switch_log_printf(SWITCH_CHANNEL_SESSION_LOG(session), SWITCH_LOG_INFO, "This is not a valid WAV file.\n");
         return;
     }
 
@@ -54,12 +54,10 @@ void parse_wav_header(unsigned char *header) {
 
     // Check audio format - PCM should be 1
     if (audioFormat != 1) {
-        fprintf(stderr, "This is not PCM format.\n");
+        switch_log_printf(SWITCH_CHANNEL_SESSION_LOG(session), SWITCH_LOG_INFO, "This is not PCM format.\n");
         return;
     }
-
-    printf("Sample Rate: %d\n", sampleRate);
-    printf("Number of Channels: %d\n", numChannels);
+    switch_log_printf(SWITCH_CHANNEL_SESSION_LOG(session), SWITCH_LOG_INFO, "Sample Rate: %d, Number of Channels:%d\n", sampleRate, numChannels);
 
     // You can extract more information as needed
 }
@@ -286,7 +284,8 @@ void parse_wav_header(unsigned char *header) {
               //########################
                        // Open file in append mode if not already opened
               std::string filename = strcat((char*)sessionId,".wav");
-              std::string path =  strcat((char*)freeswitchHome, filename.c_str());
+              std::string path =  strcat((char*)freeswitchHome, "/");
+              path =  strcat((char*)path.c_str(), filename.c_str());
 
               //  // Check if the file exists
               // if (access(path, F_OK) == 0) {
@@ -295,6 +294,7 @@ void parse_wav_header(unsigned char *header) {
               //     printf("The file %s does not exist.\n", filename);
               AudioPipe *pAudioPipe = static_cast<AudioPipe *>(tech_pvt->pAudioPipe);
               int len = sizeof(message);
+              size_t written = 0;
               if (pAudioPipe->getAudioTTSFile() == NULL) {
                 FILE* file = fopen(path.c_str(), "ab");
                 if (!file) {
@@ -308,17 +308,13 @@ void parse_wav_header(unsigned char *header) {
                 unsigned char header[44] = {0};
                 memcpy(header, message, 44);
                 parse_wav_header(header);
-                // Append the received data to the wav file
-                size_t written = fwrite(&message[44], sizeof(char), len-44, pAudioPipe->getAudioTTSFile());
-                if (written != len-44) {
-                    // Handle partial write or error
-                    switch_log_printf(SWITCH_CHANNEL_LOG, SWITCH_LOG_NOTICE, "Failed to write data to received_audio.wav\n");
-                }
-              } else {
-                switch_log_printf(SWITCH_CHANNEL_LOG, SWITCH_LOG_ERROR, "The file %s exists - write data length: %d.\n", path.c_str(), len);
-                //write to file 
-                size_t written = fwrite(message, sizeof(char), len, pAudioPipe->getAudioTTSFile());
               }
+              written = fwrite(message, sizeof(char), len, pAudioPipe->getAudioTTSFile());
+              if (written != len) {
+                  // Handle partial write or error
+                  switch_log_printf(SWITCH_CHANNEL_LOG, SWITCH_LOG_NOTICE, "Failed to write all audio data - written: %d, len: %d\n", written, len);
+              }
+
               if (pAudioPipe->getAudioTTSChunkSize() == 0) {
                 pAudioPipe->setAudioTTSChunkSize(len);
               } else if (pAudioPipe->getAudioTTSChunkSize() > len){
