@@ -78,7 +78,7 @@ void parse_wav_header(unsigned char *header) {
 
         } else {
           if (session && switch_channel_ready(switch_core_session_get_channel(session))) {
-            std::string filename = strcat( freeswitchHome, switch_core_session_get_uuid(session));
+            std::string filename = strcat( (char*)freeswitchHome, switch_core_session_get_uuid(session));
             filename = filename + ".wav";
               switch_status_t status = switch_ivr_play_file(session, NULL, filename.c_str(), NULL);
               if (status != SWITCH_STATUS_SUCCESS) {
