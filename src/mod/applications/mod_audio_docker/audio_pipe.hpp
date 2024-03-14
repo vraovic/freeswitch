@@ -114,6 +114,22 @@ public:
   {
     m_silence_start_time = time;
   }
+  FILE* getAudioTTSFile(void)
+  {
+    return m_audio_TTS_file;
+  }
+  void setAudioTTSFile(FILE* file)
+  {
+    m_audio_TTS_file = file;
+  }
+  unsigned int getAudioTTSChunkSize(void)
+  {
+    return m_audio_TTS_chunk_size;
+  }
+  void setAudioTTSChunkSize(unsigned int size)
+  {
+    m_audio_TTS_chunk_size = size;
+  }
 
   // no default constructor or copying
   AudioPipe() = delete;

@@ -295,19 +295,21 @@ void parse_wav_header(unsigned char *header) {
               //     printf("The file %s does not exist.\n", filename);
               AudioPipe *pAudioPipe = static_cast<AudioPipe *>(tech_pvt->pAudioPipe);
               int len = sizeof(message);
-              if (pAudioPipe->m_audio_TTS_file == NULL) {
-                pAudioPipe->m_audio_TTS_file = fopen(path.c_str(), "ab"); 
-                if (!pAudioPipe->m_audio_TTS_file) {
-                    // Handle error, could not open file
-                    switch_log_printf(SWITCH_CHANNEL_LOG, SWITCH_LOG_ERROR, "Failed to open file %s\n", path.c_str());
-                    return;
+              if (pAudioPipe->getAudioTTSFile() == NULL) {
+                FILE* file = fopen(path.c_str(), "ab");
+                if (!file) {
+                  // Handle error, could not open file
+                  switch_log_printf(SWITCH_CHANNEL_LOG, SWITCH_LOG_ERROR, "Failed to open file %s\n", path.c_str());
+                  return;
+                } else {
+                  pAudioPipe->setAudioTTSFile(file); 
                 }
                 switch_log_printf(SWITCH_CHANNEL_LOG, SWITCH_LOG_NOTICE, "Creating file %s\n", path.c_str());
                 unsigned char header[44] = {0};
                 memcpy(header, message, 44);
                 parse_wav_header(header);
                 // Append the received data to the wav file
-                size_t written = fwrite(&message[44], sizeof(char), len-44, tech_pvt->pAudioPipe->m_audio_TTS_file);
+                size_t written = fwrite(&message[44], sizeof(char), len-44, pAudioPipe->getAudioTTSFile());
                 if (written != len-44) {
                     // Handle partial write or error
                     switch_log_printf(SWITCH_CHANNEL_LOG, SWITCH_LOG_NOTICE, "Failed to write data to received_audio.wav\n");
@@ -315,15 +317,15 @@ void parse_wav_header(unsigned char *header) {
               } else {
                 switch_log_printf(SWITCH_CHANNEL_LOG, SWITCH_LOG_ERROR, "The file %s exists - write data length: %d.\n", path.c_str(), len);
                 //write to file 
-                size_t written = fwrite(message, sizeof(char), len, pAudioPipe->m_audio_TTS_file);
+                size_t written = fwrite(message, sizeof(char), len, pAudioPipe->getAudioTTSFile());
               }
-              if (pAudioPipe->m_audio_TTS_chunk_size == 0) {
-                pAudioPipe->m_audio_TTS_chunk_size = len;
-              } else if (pAudioPipe->m_audio_TTS_chunk_size > len){
-                fclose(pAudioPipe->m_audio_TTS_file);
-                pAudioPipe->m_audio_TTS_chunk_size = 0;
+              if (pAudioPipe->getAudioTTSChunkSize() == 0) {
+                pAudioPipe->setAudioTTSChunkSize(len);
+              } else if (pAudioPipe->getAudioTTSChunkSize() > len){
+                fclose(pAudioPipe->getAudioTTSFile());
+                ppAudioPipe->setAudioTTSChunkSize(0);
                 switch_log_printf(SWITCH_CHANNEL_LOG, SWITCH_LOG_NOTICE, "We have received audio(%d)   - play it now\n",len);
-                FILE *file = pAudioPipe->m_audio_TTS_file;
+                FILE *file = pAudioPipe->getAudioTTSFile();
                 processIncomingMessage(tech_pvt, session,"AUDIO", message, file);
               }
               //#########################
