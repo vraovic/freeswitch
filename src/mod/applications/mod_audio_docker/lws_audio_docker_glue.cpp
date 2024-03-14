@@ -323,7 +323,7 @@ void parse_wav_header(unsigned char *header) {
                 pAudioPipe->setAudioTTSChunkSize(len);
               } else if (pAudioPipe->getAudioTTSChunkSize() > len){
                 fclose(pAudioPipe->getAudioTTSFile());
-                ppAudioPipe->setAudioTTSChunkSize(0);
+                pAudioPipe->setAudioTTSChunkSize(0);
                 switch_log_printf(SWITCH_CHANNEL_LOG, SWITCH_LOG_NOTICE, "We have received audio(%d)   - play it now\n",len);
                 FILE *file = pAudioPipe->getAudioTTSFile();
                 processIncomingMessage(tech_pvt, session,"AUDIO", message, file);
