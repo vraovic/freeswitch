@@ -43,7 +43,7 @@ namespace {
 
 void parse_wav_header(unsigned char *header) {
     if (strncmp((const char *)header, "RIFF", 4)) {
-        switch_log_printf(SWITCH_CHANNEL_SESSION_LOG(session), SWITCH_LOG_INFO, "This is not a valid WAV file.\n");
+      switch_log_printf(SWITCH_CHANNEL_LOG, SWITCH_LOG_DEBUG, "This is not a valid WAV file.\n");
         return;
     }
 
@@ -54,10 +54,10 @@ void parse_wav_header(unsigned char *header) {
 
     // Check audio format - PCM should be 1
     if (audioFormat != 1) {
-        switch_log_printf(SWITCH_CHANNEL_SESSION_LOG(session), SWITCH_LOG_INFO, "This is not PCM format.\n");
+      switch_log_printf(SWITCH_CHANNEL_LOG, SWITCH_LOG_DEBUG, "This is not PCM format.\n");
         return;
     }
-    switch_log_printf(SWITCH_CHANNEL_SESSION_LOG(session), SWITCH_LOG_INFO, "Sample Rate: %d, Number of Channels:%d\n", sampleRate, numChannels);
+    switch_log_printf(SWITCH_CHANNEL_LOG, SWITCH_LOG_DEBUG, "Sample Rate: %d, Number of Channels:%d\n", sampleRate, numChannels);
 
     // You can extract more information as needed
 }
