@@ -78,7 +78,8 @@ void parse_wav_header(unsigned char *header) {
 
         } else {
           if (session && switch_channel_ready(switch_core_session_get_channel(session))) {
-              switch_status_t status = switch_ivr_play_file(session, NULL, wav_file, NULL);
+            std::string filename = freeswitchHome + switch_core_session_get_uuid(session)+".wav";
+              switch_status_t status = switch_ivr_play_file(session, NULL, filename.c_str(), NULL);
               if (status != SWITCH_STATUS_SUCCESS) {
                   switch_log_printf(SWITCH_CHANNEL_SESSION_LOG(session), SWITCH_LOG_WARNING, "Failed to play audio file: %s\n", wav_file);
               } else {
