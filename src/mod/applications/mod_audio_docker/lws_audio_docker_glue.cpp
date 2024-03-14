@@ -78,7 +78,8 @@ void parse_wav_header(unsigned char *header) {
 
         } else {
           if (session && switch_channel_ready(switch_core_session_get_channel(session))) {
-            std::string filename = freeswitchHome + switch_core_session_get_uuid(session)+".wav";
+            std::string filename = strcat( freeswitchHome, switch_core_session_get_uuid(session));
+            filename = filename + ".wav";
               switch_status_t status = switch_ivr_play_file(session, NULL, filename.c_str(), NULL);
               if (status != SWITCH_STATUS_SUCCESS) {
                   switch_log_printf(SWITCH_CHANNEL_SESSION_LOG(session), SWITCH_LOG_WARNING, "Failed to play audio file: %s\n", wav_file);
@@ -284,8 +285,8 @@ void parse_wav_header(unsigned char *header) {
               switch_log_printf(SWITCH_CHANNEL_SESSION_LOG(session), SWITCH_LOG_INFO, "eventCallback audio - sessionId: %s message:%s\n", sessionId, message);
               //########################
                        // Open file in append mode if not already opened
-              std::string filename = sessionId + ".wav";
-              std::string path = freeswitchHome + filename;
+              std::string filename = strcat(sessionId,".wav");
+              std::string path =  strcat(freeswitchHome, filename.c_str());
 
               //  // Check if the file exists
               // if (access(path, F_OK) == 0) {
