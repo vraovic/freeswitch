@@ -78,7 +78,7 @@ void parse_wav_header(unsigned char *header) {
               unsigned char header[44] = {0};
               memcpy(header, message, 44);
               parse_wav_header(header);
-
+              const char* sessionId = switch_core_session_get_uuid(session);
               std::string filename = strcat((char*)sessionId,".wav");
               std::string path =  strcat((char*)freeswitchHome, "/");
               path = path + "/" + filename
