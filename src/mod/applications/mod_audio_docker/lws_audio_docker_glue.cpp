@@ -238,7 +238,7 @@ void parse_wav_header(unsigned char *header) {
     // }
   }
 
-  static void eventCallback(const char* sessionId, AudioPipe::NotifyEvent_t event, const char* message, size_t msg_length) {
+  static void eventCallback(const char* sessionId, AudioPipe::NotifyEvent_t event, const char* message, size_t msg_length = 0) {
     switch_core_session_t* session = switch_core_session_locate(sessionId);
     if (session) {
       switch_channel_t *channel = switch_core_session_get_channel(session);

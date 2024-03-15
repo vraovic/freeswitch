@@ -30,7 +30,7 @@ public:
     AUDIO
   };
   typedef void (*log_emit_function)(int level, const char *line);
-  typedef void (*notifyHandler_t)(const char *sessionId, NotifyEvent_t event, const char* message);
+  typedef void (*notifyHandler_t)(const char *sessionId, NotifyEvent_t event, const char* message, size_t msg_length = 0);
 
   struct lws_per_vhost_data {
     struct lws_context *context;
