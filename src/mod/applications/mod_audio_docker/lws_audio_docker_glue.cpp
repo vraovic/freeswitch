@@ -98,7 +98,7 @@ void parse_wav_header(unsigned char *header) {
               } else {
                   switch_log_printf(SWITCH_CHANNEL_LOG, SWITCH_LOG_DEBUG, "Failed to play audio file: %s\n", path);
                   // Delete the file
-                  if (remove(file) == 0) {
+                  if (remove(path.c_str()) == 0) {
                   switch_log_printf(SWITCH_CHANNEL_LOG, SWITCH_LOG_DEBUG, "The file %s was deleted successfully.\n", path);
                   } else {
                   switch_log_printf(SWITCH_CHANNEL_LOG, SWITCH_LOG_DEBUG,  "Error deleting the file");
