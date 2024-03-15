@@ -66,25 +66,25 @@ void parse_wav_header(unsigned char *header) {
   std::string msg = message;
   std::string type  = msg_type;
 
-    switch_log_printf(SWITCH_CHANNEL_LOG, SWITCH_LOG_DEBUG, "(%u) processIncomingMessage - received msg_type:%s, message:%s \n", tech_pvt->id, type, msg);
+    // switch_log_printf(SWITCH_CHANNEL_LOG, SWITCH_LOG_DEBUG, "(%u) processIncomingMessage - received msg_type:%s, message:%s \n", tech_pvt->id, type, msg);
     if (!session) {
       switch_log_printf(SWITCH_CHANNEL_LOG, SWITCH_LOG_DEBUG, "processIncomingMessage - unable to find session\n");
     } else {
       if (type == "AUDIO") {
         // Let's try both options - stream audio to the session and and to a callig party as well as store it in a file and then send it to the session
-        switch_log_printf(SWITCH_CHANNEL_LOG, SWITCH_LOG_DEBUG, "(%u) processIncomingMessage - AUDIO message-len:%s\n",msg.length());
+          lwsl_notice("processIncomingMessage - AUDIO (len:%d) message:%s\n",strlen(msg.c_str()), msg);
           if (session && switch_channel_ready(switch_core_session_get_channel(session))) {
 ///=================================
               unsigned char header[44] = {0};
-              memcpy(header, message, 44);
+              memcpy(header, msg.c_str(), 44);
               parse_wav_header(header);
               const char* sessionId = switch_core_session_get_uuid(session);
               std::string filename = strcat((char*)sessionId,".wav");
               std::string path =  strcat((char*)freeswitchHome, "/");
-              path = path + "/" + filename;
+              path = path + filename;
              
               FILE* file = fopen(path.c_str(), "ab");
-              size_t len = sizeof(message);
+              size_t len = strlen(msg.c_str());
               size_t written = fwrite(message, sizeof(char), len, file);
               fclose(file);
               switch_log_printf(SWITCH_CHANNEL_LOG, SWITCH_LOG_DEBUG, "processIncomingMessage - store audio into file: %s message-len:%d\n",path, len);
@@ -124,7 +124,7 @@ void parse_wav_header(unsigned char *header) {
         //   lwsl_notice("AudioPipe::lws_service_thread LWS_CALLBACK_CLIENT_RECEIVE wrote frame to session: %d\n", strlen(msg.c_str()));
         // }
       } else if (type == "MESSAGE"){
-        lwsl_notice("processIncomingMessage - MESSAGE message:%s\n", message);
+        lwsl_notice("processIncomingMessage - MESSAGE (len:%d) message:%s\n",strlen(msg.c_str()), msg);
       } else {
         lwsl_err("processIncomingMessage - unknown message type\n");
       }
