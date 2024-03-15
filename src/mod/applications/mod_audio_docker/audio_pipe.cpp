@@ -85,7 +85,7 @@ int AudioPipe::lws_callback(struct lws *wsi,
         if (ap) {
           lwsl_notice("AudioPipe::lws_callback - LWS_CALLBACK_CLIENT_CONNECTION_ERROR\n");
           ap->m_state = LWS_CLIENT_FAILED;
-          ap->m_callback(ap->m_uuid.c_str(), AudioPipe::CONNECT_FAIL, (char *) in);
+          ap->m_callback(ap->m_uuid.c_str(), AudioPipe::CONNECT_FAIL, (char *) in, 0);
         }
         else {
           lwsl_err("AudioPipe::lws_callback LWS_CALLBACK_CLIENT_CONNECTION_ERROR unable to find wsi %p..\n", wsi); 
@@ -101,7 +101,7 @@ int AudioPipe::lws_callback(struct lws *wsi,
           ap->m_vhd = vhd;
           ap->m_state = LWS_CLIENT_CONNECTED;
           lwsl_debug("AudioPipe::lws_callback LWS_CALLBACK_CLIENT_ESTABLISHED - %s - calling a-->m_callback\n", ap->m_uuid.c_str()); 
-          ap->m_callback(ap->m_uuid.c_str(), AudioPipe::CONNECT_SUCCESS, NULL);
+          ap->m_callback(ap->m_uuid.c_str(), AudioPipe::CONNECT_SUCCESS, NULL,0);
         }
         else {
           lwsl_err("AudioPipe::lws_callback LWS_CALLBACK_CLIENT_ESTABLISHED %s unable to find wsi %p..\n", ap->m_uuid.c_str(), wsi); 
@@ -118,12 +118,12 @@ int AudioPipe::lws_callback(struct lws *wsi,
         }
         if (ap->m_state == LWS_CLIENT_DISCONNECTING) {
           // closed by us
-          ap->m_callback(ap->m_uuid.c_str(), AudioPipe::CONNECTION_CLOSED_GRACEFULLY, NULL);
+          ap->m_callback(ap->m_uuid.c_str(), AudioPipe::CONNECTION_CLOSED_GRACEFULLY, NULL,0);
         }
         else if (ap->m_state == LWS_CLIENT_CONNECTED) {
           // closed by far end
           lwsl_notice("%s socket closed by far end\n", ap->m_uuid.c_str());
-          ap->m_callback(ap->m_uuid.c_str(), AudioPipe::CONNECTION_DROPPED, NULL);
+          ap->m_callback(ap->m_uuid.c_str(), AudioPipe::CONNECTION_DROPPED, NULL,0);
         }
         ap->m_state = LWS_CLIENT_DISCONNECTED;
 
