@@ -81,7 +81,7 @@ void parse_wav_header(unsigned char *header) {
               const char* sessionId = switch_core_session_get_uuid(session);
               std::string filename = strcat((char*)sessionId,".wav");
               std::string path =  strcat((char*)freeswitchHome, "/");
-              path = path + "/" + filename
+              path = path + "/" + filename;
              
               FILE* file = fopen(path.c_str(), "ab");
               size_t len = sizeof(message);
