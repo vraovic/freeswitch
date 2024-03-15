@@ -62,7 +62,7 @@ void parse_wav_header(unsigned char *header) {
     // You can extract more information as needed
 }
 
-  void processIncomingMessage(private_t* tech_pvt, switch_core_session_t* session, const char* msg_type, const char* message) {
+  void processIncomingMessage(private_t* tech_pvt, switch_core_session_t* session, const char* msg_type, const char* message, size_t length) {
   std::string msg = message;
   std::string type  = msg_type;
 
@@ -72,11 +72,11 @@ void parse_wav_header(unsigned char *header) {
     } else {
       if (type == "AUDIO") {
         // Let's try both options - stream audio to the session and and to a callig party as well as store it in a file and then send it to the session
-          lwsl_notice("processIncomingMessage - AUDIO (len:%d) message:%s\n",strlen(msg.c_str()), msg);
+          lwsl_notice("processIncomingMessage - AUDIO (len:%d) message:%s\n",length, msg);
           if (session && switch_channel_ready(switch_core_session_get_channel(session))) {
 ///=================================
               unsigned char header[44] = {0};
-              memcpy(header, msg.c_str(), 44);
+              memcpy(header, message, 44);
               parse_wav_header(header);
               const char* sessionId = switch_core_session_get_uuid(session);
               std::string filename = strcat((char*)sessionId,".wav");
@@ -84,13 +84,12 @@ void parse_wav_header(unsigned char *header) {
               path = path + filename;
              
               FILE* file = fopen(path.c_str(), "ab");
-              size_t len = strlen(msg.c_str());
-              size_t written = fwrite(message, sizeof(char), len, file);
+              size_t written = fwrite(message, sizeof(char), length, file);
               fclose(file);
-              switch_log_printf(SWITCH_CHANNEL_LOG, SWITCH_LOG_DEBUG, "processIncomingMessage - store audio into file: %s message-len:%d\n",path, len);
-              if (written != len) {
+              switch_log_printf(SWITCH_CHANNEL_LOG, SWITCH_LOG_DEBUG, "processIncomingMessage - store audio into file: %s message-len:%d\n",path, length);
+              if (written != length) {
                   // Handle partial write or error
-                  switch_log_printf(SWITCH_CHANNEL_LOG, SWITCH_LOG_NOTICE, "Failed to write all audio data - written: %d, len: %d\n", written, len);
+                  switch_log_printf(SWITCH_CHANNEL_LOG, SWITCH_LOG_NOTICE, "Failed to write all audio data - written: %d, len: %d\n", written, length);
               }
               switch_status_t status = switch_ivr_play_file(session, NULL, path.c_str(), NULL);
               if (status != SWITCH_STATUS_SUCCESS) {
@@ -239,7 +238,7 @@ void parse_wav_header(unsigned char *header) {
     // }
   }
 
-  static void eventCallback(const char* sessionId, AudioPipe::NotifyEvent_t event, const char* message) {
+  static void eventCallback(const char* sessionId, AudioPipe::NotifyEvent_t event, const char* message, size_t msg_length) {
     switch_core_session_t* session = switch_core_session_locate(sessionId);
     if (session) {
       switch_channel_t *channel = switch_core_session_get_channel(session);
@@ -288,11 +287,11 @@ void parse_wav_header(unsigned char *header) {
               switch_log_printf(SWITCH_CHANNEL_SESSION_LOG(session), SWITCH_LOG_DEBUG, "eventCallback - connection closed gracefully\n");
             break;
             case AudioPipe::MESSAGE:
-              switch_log_printf(SWITCH_CHANNEL_SESSION_LOG(session), SWITCH_LOG_INFO, "eventCallback message - sessionId: %s message:%s\n", sessionId, message);
-              processIncomingMessage(tech_pvt, session,"MESSAGE", message);
+              switch_log_printf(SWITCH_CHANNEL_SESSION_LOG(session), SWITCH_LOG_INFO, "eventCallback message - sessionId: %s message:%s, len:%4d\n", sessionId, message, msg_length);
+              processIncomingMessage(tech_pvt, session,"MESSAGE", message, msg_length);
             break;
             case AudioPipe::AUDIO:
-              switch_log_printf(SWITCH_CHANNEL_SESSION_LOG(session), SWITCH_LOG_INFO, "eventCallback AUDIO - sessionId: %s message:%s\n", sessionId, message);
+              switch_log_printf(SWITCH_CHANNEL_SESSION_LOG(session), SWITCH_LOG_INFO, "eventCallback AUDIO - sessionId: %s message:%s, len:%4d\n", sessionId, message, msg_length);
               // //########################
               //          // Open file in append mode if not already opened
               // std::string filename = strcat((char*)sessionId,".wav");
@@ -337,7 +336,7 @@ void parse_wav_header(unsigned char *header) {
               //   processIncomingMessage(tech_pvt, session,"AUDIO", message, file);
               // }
               // //#########################
-              processIncomingMessage(tech_pvt, session,"AUDIO", message);
+              processIncomingMessage(tech_pvt, session,"AUDIO", message, msg_length);
 
             break;
           }

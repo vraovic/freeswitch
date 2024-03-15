@@ -153,6 +153,7 @@ int AudioPipe::lws_callback(struct lws *wsi,
           // allocate a buffer for the entire chunk of memory needed
           assert(nullptr == ap->m_recv_buf);
           ap->m_recv_buf_len = len + lws_remaining_packet_payload(wsi);
+		      lwsl_notice("LWS_CALLBACK_CLIENT_RECEIVE - allocate recv_buf_len: %4d\n",ap->m_recv_buf_len);
           ap->m_recv_buf = (uint8_t*) malloc(ap->m_recv_buf_len);
           ap->m_recv_buf_ptr = ap->m_recv_buf;
         }
@@ -185,10 +186,11 @@ int AudioPipe::lws_callback(struct lws *wsi,
           if (lws_is_final_fragment(wsi)) {
             if (nullptr != ap->m_recv_buf) {
               std::string msg((char *)ap->m_recv_buf, ap->m_recv_buf_ptr - ap->m_recv_buf);
+		          lwsl_notice("LWS_CALLBACK_CLIENT_RECEIVE - before m_callback - m_recv_buf_len: %4d, copied: %4d\n",ap->m_recv_buf_len, (size_t)(ap->m_recv_buf_ptr - ap->m_recv_buf));
               if (lws_frame_is_binary(wsi)) {
-                ap->m_callback(ap->m_uuid.c_str(), AudioPipe::AUDIO, msg.c_str());
+                ap->m_callback(ap->m_uuid.c_str(), AudioPipe::AUDIO, msg.c_str(), (size_t)(ap->m_recv_buf_ptr - ap->m_recv_buf));
               } else {
-                ap->m_callback(ap->m_uuid.c_str(), AudioPipe::MESSAGE, msg.c_str());
+                ap->m_callback(ap->m_uuid.c_str(), AudioPipe::MESSAGE, msg.c_str(),(size_t)(ap->m_recv_buf_ptr - ap->m_recv_buf) );
               }
               if (nullptr != ap->m_recv_buf) free(ap->m_recv_buf);
             }

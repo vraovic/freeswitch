@@ -190,14 +190,14 @@ SWITCH_STANDARD_API(audio_docker_function)
 		argc = switch_separate_string(mycmd, ' ', argv, (sizeof(argv) / sizeof(argv[0])));
 	}
 	assert(cmd);
-	switch_log_printf(SWITCH_CHANNEL_LOG, SWITCH_LOG_NOTICE, "mod_audio_docker - cmd: %s argc:%u\n", cmd, argc);
+	switch_log_printf(SWITCH_CHANNEL_LOG, SWITCH_LOG_NOTICE, "mod_audio_docker - cmd: %s, argv[0]:%s, argv[1]:%s,argc:%u\n", cmd,argv[0], argv[1], argc);
 
 	if ((lsession = switch_core_session_locate(argv[0]))) 
 	{
 		if (!strcasecmp(argv[1], "stop")) 
 		{
-			status = do_stop(lsession, argc > 2 ? argv[2] : NULL);
-			} 
+			status = do_stop(lsession, argv[2]);
+		} 
 		else if (!strcasecmp(argv[1], "pause")) 
 		{
 			status = do_pauseresume(lsession, 1);
