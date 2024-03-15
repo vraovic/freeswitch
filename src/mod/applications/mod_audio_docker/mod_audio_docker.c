@@ -191,90 +191,79 @@ SWITCH_STANDARD_API(audio_docker_function)
 	assert(cmd);
 	switch_log_printf(SWITCH_CHANNEL_SESSION_LOG(session), SWITCH_LOG_NOTICE, "mod_audio_docker - cmd: %s argc:%u\n", cmd, argc);
 
+	switch_core_session_t *lsession = NULL;
 
-	// if (zstr(cmd) || argc < 2 ||
-	// 	(0 == strcmp(argv[1], "start") && argc < 5)) {
-
-	// 	switch_log_printf(SWITCH_CHANNEL_SESSION_LOG(session), SWITCH_LOG_ERROR, "Error with command %s %s %s.\n", cmd, argv[0], argv[1]);
-	// 	stream->write_function(stream, "-USAGE: %s\n", AUDIO_DOCKER_API_SYNTAX);
-	// 	goto done;
-	// } 
-	// else 
+	if ((lsession = switch_core_session_locate(argv[0]))) 
 	{
-		switch_core_session_t *lsession = NULL;
-
-		if ((lsession = switch_core_session_locate(argv[0]))) 
+		if (!strcasecmp(argv[1], "stop")) 
 		{
-			if (!strcasecmp(argv[1], "stop")) 
-			{
-				status = do_stop(lsession, argc > 2 ? argv[2] : NULL);
-      		} 
-			else if (!strcasecmp(argv[1], "pause")) 
-			{
-				status = do_pauseresume(lsession, 1);
-      		}
-			else if (!strcasecmp(argv[1], "resume")) 
-			{
-				status = do_pauseresume(lsession, 0);
-      		}
-			else if (!strcasecmp(argv[1], "graceful-shutdown")) 
-			{
-				status = do_graceful_shutdown(lsession);
-      	}
-      		else if (!strcasecmp(argv[1], "send_text")) 
-			{
-        		if (argc < 3) 
-				{
-          			switch_log_printf(SWITCH_CHANNEL_SESSION_LOG(session), SWITCH_LOG_ERROR, "send_text requires an argument specifying text to send\n");
-          			switch_core_session_rwunlock(lsession);
-          			goto done;
-        		}
-        		status = send_text(lsession, argv[2]);
-      		}
-      	else if (!strcasecmp(argv[1], "start")) 
-			{
-				switch_channel_t *channel = switch_core_session_get_channel(lsession);
-        		char host[MAX_WS_URL_LEN], path[MAX_PATH_LEN], path1[MAX_PATH_LEN];
-        		unsigned int port;
-        		int sslFlags;
-        		int sampling = 16000;
-      			switch_media_bug_flag_t flags = SMBF_READ_STREAM ;
-				switch_log_printf(SWITCH_CHANNEL_SESSION_LOG(session), SWITCH_LOG_NOTICE, "argv[2]: %s path-size:%lu\n", argv[2], sizeof(path));
-
-        		if (!parse_ws_uri(channel, argv[2], &host[0], &path[0], &port, &sslFlags)) 
-				{
-          			switch_log_printf(SWITCH_CHANNEL_SESSION_LOG(session), SWITCH_LOG_ERROR, "invalid websocket uri: %s\n", argv[2]);
-        		}
-        		else 
-				{
-					// Extract sampling rate from the path
-					char *token =NULL;
-    				char *next_token =NULL;
-					char *token1 = NULL;
-    				// char *next_token1 =NULL;
-					strcpy(path1, path);
-          			switch_log_printf(SWITCH_CHANNEL_SESSION_LOG(session), SWITCH_LOG_NOTICE, "Make TOKENS - copy to path1:%s\n",path1);
-					token = strtok(path1, "&");
-					token1 = strtok(token,"=");
-        			next_token = strtok(NULL, "=");
-					sampling = atoi(next_token);
-
-          			switch_log_printf(SWITCH_CHANNEL_SESSION_LOG(session), SWITCH_LOG_NOTICE, "TOKEN:%s, NEXT_TOKEN:%s, token1: %s, sampling:%d\n",token, next_token,token1,sampling);
-          			switch_log_printf(SWITCH_CHANNEL_SESSION_LOG(session), SWITCH_LOG_NOTICE, "start_capture - host:%s,port:%d, path:%s, sampling:%d\n",host,port, path, sampling);
-
-          			status = start_capture(lsession, flags, host, port, path, sampling, sslFlags, "mod_audio_docker");
-        		}
+			status = do_stop(lsession, argc > 2 ? argv[2] : NULL);
+			} 
+		else if (!strcasecmp(argv[1], "pause")) 
+		{
+			status = do_pauseresume(lsession, 1);
 			}
-      		else 
-			{
-        		switch_log_printf(SWITCH_CHANNEL_SESSION_LOG(session), SWITCH_LOG_ERROR, "unsupported mod_audio_docker cmd: %s\n", argv[1]);
-      		}
-			switch_core_session_rwunlock(lsession);
-		}
-		else 
+		else if (!strcasecmp(argv[1], "resume")) 
 		{
-			switch_log_printf(SWITCH_CHANNEL_SESSION_LOG(session), SWITCH_LOG_ERROR, "Error locating session %s\n", argv[0]);
+			status = do_pauseresume(lsession, 0);
+			}
+		else if (!strcasecmp(argv[1], "graceful-shutdown")) 
+		{
+			status = do_graceful_shutdown(lsession);
 		}
+			else if (!strcasecmp(argv[1], "send_text")) 
+		{
+			if (argc < 3) 
+			{
+					switch_log_printf(SWITCH_CHANNEL_SESSION_LOG(session), SWITCH_LOG_ERROR, "send_text requires an argument specifying text to send\n");
+					switch_core_session_rwunlock(lsession);
+					goto done;
+			}
+			status = send_text(lsession, argv[2]);
+			}
+		else if (!strcasecmp(argv[1], "start")) 
+		{
+			switch_channel_t *channel = switch_core_session_get_channel(lsession);
+			char host[MAX_WS_URL_LEN], path[MAX_PATH_LEN], path1[MAX_PATH_LEN];
+			unsigned int port;
+			int sslFlags;
+			int sampling = 16000;
+				switch_media_bug_flag_t flags = SMBF_READ_STREAM ;
+			switch_log_printf(SWITCH_CHANNEL_SESSION_LOG(session), SWITCH_LOG_NOTICE, "argv[2]: %s path-size:%lu\n", argv[2], sizeof(path));
+
+			if (!parse_ws_uri(channel, argv[2], &host[0], &path[0], &port, &sslFlags)) 
+			{
+					switch_log_printf(SWITCH_CHANNEL_SESSION_LOG(session), SWITCH_LOG_ERROR, "invalid websocket uri: %s\n", argv[2]);
+			}
+			else 
+			{
+				// Extract sampling rate from the path
+				char *token =NULL;
+				char *next_token =NULL;
+				char *token1 = NULL;
+				// char *next_token1 =NULL;
+				strcpy(path1, path);
+					switch_log_printf(SWITCH_CHANNEL_SESSION_LOG(session), SWITCH_LOG_NOTICE, "Make TOKENS - copy to path1:%s\n",path1);
+				token = strtok(path1, "&");
+				token1 = strtok(token,"=");
+				next_token = strtok(NULL, "=");
+				sampling = atoi(next_token);
+
+					switch_log_printf(SWITCH_CHANNEL_SESSION_LOG(session), SWITCH_LOG_NOTICE, "TOKEN:%s, NEXT_TOKEN:%s, token1: %s, sampling:%d\n",token, next_token,token1,sampling);
+					switch_log_printf(SWITCH_CHANNEL_SESSION_LOG(session), SWITCH_LOG_NOTICE, "start_capture - host:%s,port:%d, path:%s, sampling:%d\n",host,port, path, sampling);
+
+					status = start_capture(lsession, flags, host, port, path, sampling, sslFlags, "mod_audio_docker");
+			}
+		}
+			else 
+		{
+			switch_log_printf(SWITCH_CHANNEL_SESSION_LOG(session), SWITCH_LOG_ERROR, "unsupported mod_audio_docker cmd: %s\n", argv[1]);
+			}
+		switch_core_session_rwunlock(lsession);
+	}
+	else 
+	{
+		switch_log_printf(SWITCH_CHANNEL_SESSION_LOG(session), SWITCH_LOG_ERROR, "Error locating session %s\n", argv[0]);
 	}
 
 	if (status == SWITCH_STATUS_SUCCESS) {

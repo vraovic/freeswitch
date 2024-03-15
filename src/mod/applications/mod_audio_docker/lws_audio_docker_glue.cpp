@@ -43,8 +43,8 @@ namespace {
 
 void parse_wav_header(unsigned char *header) {
     if (strncmp((const char *)header, "RIFF", 4)) {
-      switch_log_printf(SWITCH_CHANNEL_LOG, SWITCH_LOG_DEBUG, "This is not a valid WAV file.\n");
-        return;
+      switch_log_printf(SWITCH_CHANNEL_LOG, SWITCH_LOG_DEBUG, "processIncomingMessage - This is not a valid WAV file.\n");
+      return;
     }
 
     // Assuming header is the first 44 bytes of the WAV file
@@ -62,40 +62,52 @@ void parse_wav_header(unsigned char *header) {
     // You can extract more information as needed
 }
 
-  void processIncomingMessage(private_t* tech_pvt, switch_core_session_t* session, const char* msg_type, const char* message, FILE* wav_file = NULL) {
+  void processIncomingMessage(private_t* tech_pvt, switch_core_session_t* session, const char* msg_type, const char* message) {
   std::string msg = message;
   std::string type  = msg_type;
 
-    switch_log_printf(SWITCH_CHANNEL_LOG, SWITCH_LOG_DEBUG, "(%u) processIncomingMessage - received msg_type:%s, message:%s \n", tech_pvt->id, msg_type, message);
+    switch_log_printf(SWITCH_CHANNEL_LOG, SWITCH_LOG_DEBUG, "(%u) processIncomingMessage - received msg_type:%s, message:%s \n", tech_pvt->id, type, msg);
     if (!session) {
-      lwsl_err("AudioPipe::lws_service_thread LWS_CALLBACK_CLIENT_RECEIVE unable to find session\n");
+      switch_log_printf(SWITCH_CHANNEL_LOG, SWITCH_LOG_DEBUG, "processIncomingMessage - unable to find session\n");
     } else {
-      if (msg_type == "AUDIO") {
+      if (type == "AUDIO") {
         // Let's try both options - stream audio to the session and and to a callig party as well as store it in a file and then send it to the session
-        if (playAudioMethod == "streamAudio") {
-
-        } else {
+        switch_log_printf(SWITCH_CHANNEL_LOG, SWITCH_LOG_DEBUG, "(%u) processIncomingMessage - AUDIO message-len:%s\n",msg.length());
           if (session && switch_channel_ready(switch_core_session_get_channel(session))) {
-            std::string filename = strcat( (char*)freeswitchHome, switch_core_session_get_uuid(session));
-            filename = filename + ".wav";
-              switch_status_t status = switch_ivr_play_file(session, NULL, filename.c_str(), NULL);
+///=================================
+              unsigned char header[44] = {0};
+              memcpy(header, message, 44);
+              parse_wav_header(header);
+
+              std::string filename = strcat((char*)sessionId,".wav");
+              std::string path =  strcat((char*)freeswitchHome, "/");
+              path = path + "/" + filename
+             
+              FILE* file = fopen(path.c_str(), "ab");
+              size_t len = sizeof(message);
+              size_t written = fwrite(message, sizeof(char), len, file);
+              fclose(file);
+              switch_log_printf(SWITCH_CHANNEL_LOG, SWITCH_LOG_DEBUG, "processIncomingMessage - store audio into file: %s message-len:%d\n",path, len);
+              if (written != len) {
+                  // Handle partial write or error
+                  switch_log_printf(SWITCH_CHANNEL_LOG, SWITCH_LOG_NOTICE, "Failed to write all audio data - written: %d, len: %d\n", written, len);
+              }
+              switch_status_t status = switch_ivr_play_file(session, NULL, path.c_str(), NULL);
               if (status != SWITCH_STATUS_SUCCESS) {
-                  switch_log_printf(SWITCH_CHANNEL_SESSION_LOG(session), SWITCH_LOG_WARNING, "Failed to play audio file: %s\n", wav_file);
+                  switch_log_printf(SWITCH_CHANNEL_LOG, SWITCH_LOG_DEBUG, "Failed to play audio file: %s\n", path);
               } else {
-                  switch_log_printf(SWITCH_CHANNEL_SESSION_LOG(session), SWITCH_LOG_DEBUG, "Playing audio file: %s\n", wav_file);
+                  switch_log_printf(SWITCH_CHANNEL_LOG, SWITCH_LOG_DEBUG, "Failed to play audio file: %s\n", path);
                   // Delete the file
-                  // if (remove(wav_file) == 0) {
-                  //     printf("The file %s was deleted successfully.\n", wav_file);
-                  // } else {
-                  //     perror("Error deleting the file");
-                  // }
-                  // tech_pvt->m_audio_TTS_file = NULL;
+                  if (remove(file) == 0) {
+                  switch_log_printf(SWITCH_CHANNEL_LOG, SWITCH_LOG_DEBUG, "The file %s was deleted successfully.\n", path);
+                  } else {
+                  switch_log_printf(SWITCH_CHANNEL_LOG, SWITCH_LOG_DEBUG,  "Error deleting the file");
+                  }
               }
 
           } else {
               switch_log_printf(SWITCH_CHANNEL_SESSION_LOG(session), SWITCH_LOG_WARNING, "Cannot play audio. The channel is not ready or session is invalid.\n");
           }
-        }
 
         // switch_frame_t  write_frame = { 0 };
         // switch_status_t status;
@@ -111,10 +123,10 @@ void parse_wav_header(unsigned char *header) {
         // else {
         //   lwsl_notice("AudioPipe::lws_service_thread LWS_CALLBACK_CLIENT_RECEIVE wrote frame to session: %d\n", strlen(msg.c_str()));
         // }
-      } else if (msg_type == "MESSAGE"){
-        lwsl_err("AudioPipe::lws_service_thread LWS_CALLBACK_CLIENT_RECEIVE message:%s\n", message);
+      } else if (type == "MESSAGE"){
+        lwsl_notice("processIncomingMessage - MESSAGE message:%s\n", message);
       } else {
-        lwsl_err("AudioPipe::lws_service_thread LWS_CALLBACK_CLIENT_RECEIVE unknown message type\n");
+        lwsl_err("processIncomingMessage - unknown message type\n");
       }
 
     }
@@ -280,51 +292,53 @@ void parse_wav_header(unsigned char *header) {
               processIncomingMessage(tech_pvt, session,"MESSAGE", message);
             break;
             case AudioPipe::AUDIO:
-              switch_log_printf(SWITCH_CHANNEL_SESSION_LOG(session), SWITCH_LOG_INFO, "eventCallback audio - sessionId: %s message:%s\n", sessionId, message);
-              //########################
-                       // Open file in append mode if not already opened
-              std::string filename = strcat((char*)sessionId,".wav");
-              std::string path =  strcat((char*)freeswitchHome, "/");
-              path =  strcat((char*)path.c_str(), filename.c_str());
+              switch_log_printf(SWITCH_CHANNEL_SESSION_LOG(session), SWITCH_LOG_INFO, "eventCallback AUDIO - sessionId: %s message:%s\n", sessionId, message);
+              // //########################
+              //          // Open file in append mode if not already opened
+              // std::string filename = strcat((char*)sessionId,".wav");
+              // std::string path =  strcat((char*)freeswitchHome, "/");
+              // path =  strcat((char*)path.c_str(), filename.c_str());
 
-              //  // Check if the file exists
-              // if (access(path, F_OK) == 0) {
-              //   switch_log_printf(SWITCH_CHANNEL_LOG, SWITCH_LOG_ERROR, "The file %s exists.\n", path.c_str());
-              // } else {
-              //     printf("The file %s does not exist.\n", filename);
-              AudioPipe *pAudioPipe = static_cast<AudioPipe *>(tech_pvt->pAudioPipe);
-              int len = sizeof(message);
-              size_t written = 0;
-              if (pAudioPipe->getAudioTTSFile() == NULL) {
-                FILE* file = fopen(path.c_str(), "ab");
-                if (!file) {
-                  // Handle error, could not open file
-                  switch_log_printf(SWITCH_CHANNEL_LOG, SWITCH_LOG_ERROR, "Failed to open file %s\n", path.c_str());
-                  return;
-                } else {
-                  pAudioPipe->setAudioTTSFile(file); 
-                }
-                switch_log_printf(SWITCH_CHANNEL_LOG, SWITCH_LOG_NOTICE, "Creating file %s\n", path.c_str());
-                unsigned char header[44] = {0};
-                memcpy(header, message, 44);
-                parse_wav_header(header);
-              }
-              written = fwrite(message, sizeof(char), len, pAudioPipe->getAudioTTSFile());
-              if (written != len) {
-                  // Handle partial write or error
-                  switch_log_printf(SWITCH_CHANNEL_LOG, SWITCH_LOG_NOTICE, "Failed to write all audio data - written: %d, len: %d\n", written, len);
-              }
+              // //  // Check if the file exists
+              // // if (access(path, F_OK) == 0) {
+              // //   switch_log_printf(SWITCH_CHANNEL_LOG, SWITCH_LOG_ERROR, "The file %s exists.\n", path.c_str());
+              // // } else {
+              // //     printf("The file %s does not exist.\n", filename);
+              // AudioPipe *pAudioPipe = static_cast<AudioPipe *>(tech_pvt->pAudioPipe);
+              // int len = sizeof(message);
+              // size_t written = 0;
+              // if (pAudioPipe->getAudioTTSFile() == NULL) {
+              //   FILE* file = fopen(path.c_str(), "ab");
+              //   if (!file) {
+              //     // Handle error, could not open file
+              //     switch_log_printf(SWITCH_CHANNEL_LOG, SWITCH_LOG_ERROR, "Failed to open file %s\n", path.c_str());
+              //     return;
+              //   } else {
+              //     pAudioPipe->setAudioTTSFile(file); 
+              //   }
+              //   switch_log_printf(SWITCH_CHANNEL_LOG, SWITCH_LOG_NOTICE, "Creating file %s\n", path.c_str());
+              //   unsigned char header[44] = {0};
+              //   memcpy(header, message, 44);
+              //   parse_wav_header(header);
+              // }
+              // written = fwrite(message, sizeof(char), len, pAudioPipe->getAudioTTSFile());
+              // if (written != len) {
+              //     // Handle partial write or error
+              //     switch_log_printf(SWITCH_CHANNEL_LOG, SWITCH_LOG_NOTICE, "Failed to write all audio data - written: %d, len: %d\n", written, len);
+              // }
 
-              if (pAudioPipe->getAudioTTSChunkSize() == 0) {
-                pAudioPipe->setAudioTTSChunkSize(len);
-              } else if (pAudioPipe->getAudioTTSChunkSize() > len){
-                fclose(pAudioPipe->getAudioTTSFile());
-                pAudioPipe->setAudioTTSChunkSize(0);
-                switch_log_printf(SWITCH_CHANNEL_LOG, SWITCH_LOG_NOTICE, "We have received audio(%d)   - play it now\n",len);
-                FILE *file = pAudioPipe->getAudioTTSFile();
-                processIncomingMessage(tech_pvt, session,"AUDIO", message, file);
-              }
-              //#########################
+              // if (pAudioPipe->getAudioTTSChunkSize() == 0) {
+              //   pAudioPipe->setAudioTTSChunkSize(len);
+              // } else if (pAudioPipe->getAudioTTSChunkSize() > len){
+              //   fclose(pAudioPipe->getAudioTTSFile());
+              //   pAudioPipe->setAudioTTSChunkSize(0);
+              //   switch_log_printf(SWITCH_CHANNEL_LOG, SWITCH_LOG_NOTICE, "We have received audio(%d)   - play it now\n",len);
+              //   FILE *file = pAudioPipe->getAudioTTSFile();
+              //   processIncomingMessage(tech_pvt, session,"AUDIO", message, file);
+              // }
+              // //#########################
+              processIncomingMessage(tech_pvt, session,"AUDIO", message);
+
             break;
           }
         }

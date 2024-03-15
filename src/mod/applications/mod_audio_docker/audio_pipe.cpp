@@ -143,102 +143,59 @@ int AudioPipe::lws_callback(struct lws *wsi,
           lwsl_err("AudioPipe::lws_callback LWS_CALLBACK_CLIENT_RECEIVE %s unable to find wsi %p..\n", ap->m_uuid.c_str(), wsi); 
           return 0;
         }
-		lwsl_notice("LWS_CALLBACK_CLIENT_RECEIVE: %4d (rpp %5d, first %d, last %d, bin %d)\n",
-			(int)len, (int)lws_remaining_packet_payload(wsi),
-			lws_is_first_fragment(wsi),
-			lws_is_final_fragment(wsi),
-			lws_frame_is_binary(wsi));
+		    lwsl_notice("LWS_CALLBACK_CLIENT_RECEIVE: %4d (rpp: %5d, first: %d, last: %d, bin: %d)\n",
+			  (int)len, (int)lws_remaining_packet_payload(wsi),
+		    lws_is_first_fragment(wsi),
+			  lws_is_final_fragment(wsi),
+			  lws_frame_is_binary(wsi));
 
-		// lwsl_hexdump_notice(in, len);
-
-        if (lws_frame_is_binary(wsi)) {
-          // // Handle incoming messages from the server.
-          // printf("Received data: %s\n", (const char *)in);
-           // Here, 'in' is your received audio data and 'len' is its length
-
-            // // You would process this data, likely pushing it into a buffer or directly to FreeSWITCH media handling
-            // lwsl_user("Received audio data\n");
-            // // process_audio_data(in, len); // Pseudo function to handle audio
-
-          lwsl_notice("AudioPipe::lws_service_thread LWS_CALLBACK_CLIENT_RECEIVE received binary frame - len: %d\n", (int)len);
-
-          ((char *)in)[len] = '\0';
-          // lwsl_hexdump_notice(in, len);
-          char audio[len] = {0};
-          memcpy(audio, in, len);
-          // if (app->m_audio_TTS_file == NULL)
-          // {
-          //     //########################
-          //              // Open file in append mode if not already opened
-          //     std::string filename = ap->m_uuid + ".wav";
-          //     std::string path = freeswitchHome + filename;
-
-          //     //  // Check if the file exists
-          //     // if (access(path, F_OK) == 0) {
-          //     //   switch_log_printf(SWITCH_CHANNEL_LOG, SWITCH_LOG_ERROR, "The file %s exists.\n", path.c_str());
-          //     // } else {
-          //     //     printf("The file %s does not exist.\n", filename);
-          //     if (tech_pvt->pAudioPipe->m_audio_TTS_file == NULL) {
-          //       tech_pvt->pAudioPipe->m_audio_TTS_file = fopen(path.c_str(), "ab"); 
-          //       if (!tech_pvt->pAudioPipe->m_audio_TTS_file) {
-          //           // Handle error, could not open file
-          //           switch_log_printf(SWITCH_CHANNEL_LOG, SWITCH_LOG_ERROR, "Failed to open file %s\n", path.c_str());
-          //           return;
-          //       }
-          //       unsigned char header[44] = {0};
-          //       memcpy(header, message, 44);
-          //       parse_wav_header(header);
-
-          //       // Append the received data to the wav file
-          //   size_t written = fwrite(, sizeof(char), len, wav_file);
-          //   if (written != len) {
-          //       // Handle partial write or error
-          //       switch_log_printf(SWITCH_CHANNEL_LOG, SWITCH_LOG_ERROR, "Failed to write data to received_audio.wav\n");
-          //   }
-
-          //     } else {
-          //       switch_log_printf(SWITCH_CHANNEL_LOG, SWITCH_LOG_ERROR, "The file %s exists.\n", path.c_str());
-          //       //write to file 
-          //     }
-          //     //#########################
-          // }
-          ap->m_callback(ap->m_uuid.c_str(), AudioPipe::AUDIO, (char *)audio);
-
-                      // switch_core_session_t* session = ap->m_uuid.c_str(); // User holds the FreeSWITCH session pointer
-                      // if (!session) {
-                      //   lwsl_err("AudioPipe::lws_service_thread LWS_CALLBACK_CLIENT_RECEIVE unable to find session\n");
-                      // } else {
-                      //   switch_frame_t *frame = { 0 };
-                      //   switch_frame_t *read_frame, write_frame = { 0 };
-                      //   switch_status_t status;
-                      //   // switch_channel_t *channel = switch_core_session_get_channel(session);
-                      //   write_frame.data = (void *)in;
-                      //   write_frame.datalen = len;
-                      //   write_frame.codec = switch_core_session_get_read_codec(session);
-
-                      //   status = switch_core_session_write_frame(session, &write_frame, SWITCH_IO_FLAG_NONE, 0);
-                      //   if (status != SWITCH_STATUS_SUCCESS) {
-                      //     lwsl_err("AudioPipe::lws_service_thread LWS_CALLBACK_CLIENT_RECEIVE failed to write frame to session - len: %d\n", len);
-                      //   }
-                      //   else {
-                      //     lwsl_notice("AudioPipe::lws_service_thread LWS_CALLBACK_CLIENT_RECEIVE wrote frame to session\n");
-                      //   }
-          // }
-          /// alternatively, call callback with the received data
-          // if (nullptr != ap->m_recv_buf) {
-          //     std::string msg((char *)ap->m_recv_buf, ap->m_recv_buf_ptr - ap->m_recv_buf);
-          //     lwsl_debug("AudioPipe::lws_callback LWS_CALLBACK_CLIENT_RECEIVE - MSG: %s\n", msg.c_str());
-          //     ap->m_callback(ap->m_uuid.c_str(), AudioPipe::MESSAGE, msg.c_str());
-          //     if (nullptr != ap->m_recv_buf) free(ap->m_recv_buf);
-          //   }
-          //   ap->m_recv_buf = ap->m_recv_buf_ptr = nullptr;
-          //   ap->m_recv_buf_len = 0;
-          // } 
-
-          return 0;
+        if (lws_is_first_fragment(wsi)) {
+          // allocate a buffer for the entire chunk of memory needed
+          assert(nullptr == ap->m_recv_buf);
+          ap->m_recv_buf_len = len + lws_remaining_packet_payload(wsi);
+          ap->m_recv_buf = (uint8_t*) malloc(ap->m_recv_buf_len);
+          ap->m_recv_buf_ptr = ap->m_recv_buf;
         }
-        ((char *)in)[len] = '\0';
-        lwsl_notice("AudioPipe::lws_service_thread LWS_CALLBACK_CLIENT_RECEIVE received text - len:%d, text: %s\n",len, (char *)in);
+
+        size_t write_offset = ap->m_recv_buf_ptr - ap->m_recv_buf;
+        size_t remaining_space = ap->m_recv_buf_len - write_offset;
+        if (remaining_space < len) {
+          lwsl_notice("AudioPipe::lws_service_thread LWS_CALLBACK_CLIENT_RECEIVE buffer realloc needed.\n");
+          size_t newlen = ap->m_recv_buf_len + RECV_BUF_REALLOC_SIZE;
+          if (newlen > MAX_RECV_BUF_SIZE) {
+            free(ap->m_recv_buf);
+            ap->m_recv_buf = ap->m_recv_buf_ptr = nullptr;
+            ap->m_recv_buf_len = 0;
+            lwsl_notice("AudioPipe::lws_service_thread LWS_CALLBACK_CLIENT_RECEIVE max buffer exceeded, truncating message.\n");
+          }
+          else {
+            ap->m_recv_buf = (uint8_t*) realloc(ap->m_recv_buf, newlen);
+            if (nullptr != ap->m_recv_buf) {
+              ap->m_recv_buf_len = newlen;
+              ap->m_recv_buf_ptr = ap->m_recv_buf + write_offset;
+            }
+          }
+        }
+
+        if (nullptr != ap->m_recv_buf) {
+          if (len > 0) {
+            memcpy(ap->m_recv_buf_ptr, in, len);
+            ap->m_recv_buf_ptr += len;
+          }
+          if (lws_is_final_fragment(wsi)) {
+            if (nullptr != ap->m_recv_buf) {
+              std::string msg((char *)ap->m_recv_buf, ap->m_recv_buf_ptr - ap->m_recv_buf);
+              if (lws_frame_is_binary(wsi)) {
+                ap->m_callback(ap->m_uuid.c_str(), AudioPipe::AUDIO, msg.c_str());
+              } else {
+                ap->m_callback(ap->m_uuid.c_str(), AudioPipe::MESSAGE, msg.c_str());
+              }
+              if (nullptr != ap->m_recv_buf) free(ap->m_recv_buf);
+            }
+            ap->m_recv_buf = ap->m_recv_buf_ptr = nullptr;
+            ap->m_recv_buf_len = 0;
+          }
+        }
       }
       break;
 
