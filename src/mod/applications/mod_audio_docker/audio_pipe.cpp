@@ -500,7 +500,7 @@ AudioPipe::AudioPipe(const char* uuid, const char* host, unsigned int port, cons
   m_audio_buffer = new uint8_t[m_audio_buffer_max_len];
   if (apiToken) {
     m_api_token.assign(apiToken);
-    lwsl_notice("AudioPipe:: init - apiToken:%s, tcp_keepalive:%d, max_buffer_len:%d\n", apiToken, nTcpKeepaliveSecs,m_audio_buffer_max_len);
+    lwsl_notice("AudioPipe:: init - apiToken:%s, tcp_keepalive:%d, max_buffer_len:%d, min_freespace:%d\n", apiToken, nTcpKeepaliveSecs,m_audio_buffer_max_len, m_audio_buffer_min_freespace);
   }
 }
 AudioPipe::~AudioPipe() {

@@ -69,7 +69,7 @@ public:
     m_audio_buffer_write_offset += len;
   }
  
-  void audioWritePtrResetToZero(void) {
+  void binaryWritePtrResetToZero(void) {
     m_audio_buffer_write_offset = 0;
   }
   void clearMetadata(void) {

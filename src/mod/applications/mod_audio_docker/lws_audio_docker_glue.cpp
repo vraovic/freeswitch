@@ -255,7 +255,7 @@ void parse_wav_header(unsigned char *header) {
               switch_core_media_bug_flush(bug);
               // AudioPipe *pAudioPipe = static_cast<AudioPipe *>(tech_pvt->pAudioPipe);
               // if(pAudioPipe) {
-              //   pAudioPipe->audioWritePtrResetToZero();
+              //   pAudioPipe->binaryWritePtrResetToZero();
               //   pAudioPipe->clearMetadata();
               // }
 
@@ -664,6 +664,7 @@ extern "C" {
     private_t* tech_pvt = (private_t*) switch_core_media_bug_get_user_data(bug);
     size_t inuse = 0;
     bool dirty = false;
+    char *p = (char *) "{\"msg\": \"buffer overrun\"}";
 
     if (!tech_pvt || tech_pvt->audio_paused || tech_pvt->graceful_shutdown) {
       if (skip_printing++ % 100 == 0) {
@@ -672,29 +673,24 @@ extern "C" {
       }
       return SWITCH_TRUE;
     }
+ 
     if (switch_mutex_trylock(tech_pvt->mutex) == SWITCH_STATUS_SUCCESS) {
       if (!tech_pvt->pAudioPipe) {
         switch_mutex_unlock(tech_pvt->mutex);
-        // switch_log_printf(SWITCH_CHANNEL_SESSION_LOG(session), SWITCH_LOG_NOTICE, "audio_docker_frame - return - no pAudioPipe\n");
         return SWITCH_TRUE;
       }
       AudioPipe *pAudioPipe = static_cast<AudioPipe *>(tech_pvt->pAudioPipe);
       if (pAudioPipe->getLwsState() != AudioPipe::LWS_CLIENT_CONNECTED) {
-        // switch_log_printf(SWITCH_CHANNEL_SESSION_LOG(session), SWITCH_LOG_NOTICE, "audio_docker_frame - return - pAudioPipe is not CONNECTED\n");
         switch_mutex_unlock(tech_pvt->mutex);
         return SWITCH_TRUE;
       }
 
       pAudioPipe->lockAudioBuffer();
       size_t available = pAudioPipe->binarySpaceAvailable();
-      switch_log_printf(SWITCH_CHANNEL_SESSION_LOG(session), SWITCH_LOG_NOTICE, "AUDIO-BUFFER available:%u\n",available );
-      size_t transcription_size = 0;
       if (NULL == tech_pvt->resampler) {
         switch_frame_t frame = { 0 };
         frame.data = pAudioPipe->binaryWritePtr();
         frame.buflen = available;
-        transcription_size = FRAME_SIZE_8000 * ::atoi(numberOfFramesForTranscription);
-
         while (true) {
 
           // check if buffer would be overwritten; dump packets if so
@@ -705,7 +701,7 @@ extern "C" {
             }
             switch_log_printf(SWITCH_CHANNEL_SESSION_LOG(session), SWITCH_LOG_ERROR, "(%u) dropping packets!\n", 
               tech_pvt->id);
-            pAudioPipe->audioWritePtrResetToZero();
+            pAudioPipe->binaryWritePtrResetToZero();
 
             frame.data = pAudioPipe->binaryWritePtr();
             frame.buflen = available = pAudioPipe->binarySpaceAvailable();
@@ -714,66 +710,19 @@ extern "C" {
           switch_status_t rv = switch_core_media_bug_read(bug, &frame, SWITCH_TRUE);
           if (rv != SWITCH_STATUS_SUCCESS) break;
           if (frame.datalen) {
-            switch_log_printf(SWITCH_CHANNEL_SESSION_LOG(session), SWITCH_LOG_NOTICE, "8000 samling rate - READING frame.datalen: %u\n",frame.datalen); 
             pAudioPipe->binaryWritePtrAdd(frame.datalen);
             frame.buflen = available = pAudioPipe->binarySpaceAvailable();
             frame.data = pAudioPipe->binaryWritePtr();
             dirty = true;
-            if (pAudioPipe->audioSpaceSize() >= transcription_size) {
-
-         			int16_t *fdata = (int16_t *) pAudioPipe->audioReadPtr();
-              uint32_t samples = transcription_size / sizeof(*fdata);
-              uint32_t score, count = 0, j = 0;
-              double energy = 0;
-
-
-              for (count = 0; count < samples ; count++) {
-                energy += abs(fdata[j++]);
-              }
-
-              score = (uint32_t) (energy / samples);
-
-              switch_log_printf(SWITCH_CHANNEL_SESSION_LOG(session), SWITCH_LOG_WARNING, "TRANSCRIPTION FRAME ENERGY:%d, samples:%d\n",score, samples);
-
-              if (score > 100) {
-                if (pAudioPipe->isAudioDetected() == false) {
-                  pAudioPipe->audioDetected(true);
-                  pAudioPipe->silenceDetected(false);
-                  switch_log_printf(SWITCH_CHANNEL_SESSION_LOG(session), SWITCH_LOG_WARNING, "AUDIO - START:%d, samples:%d\n",score, samples);
-                  //session - get channel and set variable - speaking_state = 1
-                  switch_channel_t *channel = switch_core_session_get_channel(session);
-                  switch_channel_set_variable(channel, "speaking_state", "1");
-                }
-              } else if (pAudioPipe->isAudioDetected() == true) {
-                pAudioPipe->audioDetected(false);
-                pAudioPipe->silenceDetected(true);
-                pAudioPipe->storeSilenceStartTime(switch_micro_time_now());
-                switch_log_printf(SWITCH_CHANNEL_SESSION_LOG(session), SWITCH_LOG_WARNING, "AUDIO - STOP:%d, samples:%d\n",score, samples);
-                //session - get channel and set variable - speaking_state = 0
-                switch_channel_t *channel = switch_core_session_get_channel(session);
-                switch_channel_set_variable(channel, "speaking_state", "0");
-              }
-              break; 
-            }
-            else {
-              switch_log_printf(SWITCH_CHANNEL_SESSION_LOG(session), SWITCH_LOG_DEBUG, "Not enough data to send - m_audio_buffer_write_offset: %u\n", pAudioPipe->audioSpaceSize());
-            }
-
           }
         }
       }
       else {
-        uint8_t data[FRAME_SIZE_8000];
-        // uint8_t data[AUDIO_DOCKER_FRAME_SIZE]; // 100 msec of audio
+        uint8_t data[SWITCH_RECOMMENDED_BUFFER_SIZE];
         switch_frame_t frame = { 0 };
         frame.data = data;
-        frame.buflen = FRAME_SIZE_8000;
-        // frame.buflen = AUDIO_DOCKER_FRAME_SIZE;
-
-        size_t transcription_size = FRAME_SIZE_8000 * ::atoi(numberOfFramesForTranscription) * 2;
-        // switch_log_printf(SWITCH_CHANNEL_SESSION_LOG(session), SWITCH_LOG_NOTICE, "audio_docker_frame - resampler != null");
-
-        while (switch_core_media_bug_read(bug, &frame, SWITCH_TRUE) == SWITCH_STATUS_SUCCESS ) {
+        frame.buflen = SWITCH_RECOMMENDED_BUFFER_SIZE;
+        while (switch_core_media_bug_read(bug, &frame, SWITCH_TRUE) == SWITCH_STATUS_SUCCESS) {
           if (frame.datalen) {
             spx_uint32_t out_len = available >> 1;  // space for samples which are 2 bytes
             spx_uint32_t in_len = frame.samples;
@@ -783,16 +732,13 @@ extern "C" {
               (spx_uint32_t *) &in_len, 
               (spx_int16_t *) ((char *) pAudioPipe->binaryWritePtr()),
               &out_len);
-            switch_log_printf(SWITCH_CHANNEL_SESSION_LOG(session), SWITCH_LOG_NOTICE, "audio_docker_frame - datalen:%u, in_len: %u, new value out_len:%u channels:%u\n",frame.datalen,in_len, out_len, tech_pvt->channels);
 
             if (out_len > 0) {
-              // bytes written = num channels * 2 * num channels
+              // bytes written = num samples * 2 * num channels
               size_t bytes_written = out_len << tech_pvt->channels;
               pAudioPipe->binaryWritePtrAdd(bytes_written);
               available = pAudioPipe->binarySpaceAvailable();
               dirty = true;
-              switch_log_printf(SWITCH_CHANNEL_SESSION_LOG(session), SWITCH_LOG_NOTICE, "audio_docker_frame - bytes_written:%u, available:%u, audioBufferSize: %u\n", bytes_written, available, pAudioPipe->audioSpaceSize());
-
             }
             if (available < pAudioPipe->binaryMinSpace()) {
               if (!tech_pvt->buffer_overrun_notified) {
@@ -807,14 +753,9 @@ extern "C" {
         }
       }
 
-    switch_log_printf(SWITCH_CHANNEL_SESSION_LOG(session), SWITCH_LOG_DEBUG, "unlockAudioBuffer audio_docker_frame \n");
-      if (pAudioPipe->audioSpaceSize() >= transcription_size) {
-        pAudioPipe->unlockAudioBuffer();
-      }
+      pAudioPipe->unlockAudioBuffer();
       switch_mutex_unlock(tech_pvt->mutex);
     }
-    switch_log_printf(SWITCH_CHANNEL_SESSION_LOG(session), SWITCH_LOG_DEBUG, "EXIT audio_docker_frame \n");
-
     return SWITCH_TRUE;
   }
 
