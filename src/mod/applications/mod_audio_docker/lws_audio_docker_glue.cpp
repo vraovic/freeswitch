@@ -687,12 +687,12 @@ extern "C" {
       pAudioPipe->lockAudioBuffer();
       size_t available = pAudioPipe->binarySpaceAvailable();
       switch_log_printf(SWITCH_CHANNEL_SESSION_LOG(session), SWITCH_LOG_NOTICE, "AUDIO-BUFFER available:%u\n",available );
-
+      size_t transcription_size = 0;
       if (NULL == tech_pvt->resampler) {
         switch_frame_t frame = { 0 };
         frame.data = pAudioPipe->binaryWritePtr();
         frame.buflen = available;
-        size_t transcription_size = FRAME_SIZE_8000 * ::atoi(numberOfFramesForTranscription);
+        transcription_size = FRAME_SIZE_8000 * ::atoi(numberOfFramesForTranscription);
 
         while (true) {
 
