@@ -49,12 +49,9 @@ public:
 
   LwsState_t getLwsState(void) { return m_state; }
   void connect(void);
-  void bufferForSending(const char* text, size_t len);
+  void bufferForSending(const char* text);
   size_t binarySpaceAvailable(void) {
     return m_audio_buffer_max_len - m_audio_buffer_write_offset;
-  }
-  size_t audioSpaceSize(void) {
-    return m_audio_buffer_write_offset;
   }
   size_t binaryMinSpace(void) {
     return m_audio_buffer_min_freespace;

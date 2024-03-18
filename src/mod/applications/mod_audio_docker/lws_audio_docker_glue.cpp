@@ -598,7 +598,7 @@ extern "C" {
       free(tmp);
     }
 
-    if (pAudioPipe && text) pAudioPipe->bufferForSending(text, strlen(text));
+    if (pAudioPipe && text) pAudioPipe->bufferForSending(text);
     if (pAudioPipe) pAudioPipe->close();
 
     destroy_tech_pvt(tech_pvt);
@@ -624,7 +624,7 @@ extern "C" {
     AudioPipe *pAudioPipe = static_cast<AudioPipe *>(tech_pvt->pAudioPipe);
     if (pAudioPipe && text) {
       switch_log_printf(SWITCH_CHANNEL_SESSION_LOG(session), SWITCH_LOG_ERROR, "audio_docker_session_send_text - len: %d\n",strlen(text));
-       pAudioPipe->bufferForSending(text, strlen(text));
+       pAudioPipe->bufferForSending(text);
     } else {
       switch_log_printf(SWITCH_CHANNEL_SESSION_LOG(session), SWITCH_LOG_ERROR, "audio_docker_session_send_text failed to get AudioPipe\n");
       return SWITCH_STATUS_FALSE;

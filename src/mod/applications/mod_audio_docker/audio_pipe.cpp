@@ -234,7 +234,7 @@ int AudioPipe::lws_callback(struct lws *wsi,
 
             // there may be audio data, but only one write per writeable event
             // get it next time
-            lws_callback_on_writable(wsi);
+            // lws_callback_on_writable(ap->m_wsi);
 
             return 0;
           }
@@ -537,7 +537,7 @@ bool AudioPipe::connect_client(struct lws_per_vhost_data *vhd) {
   return nullptr != m_wsi;
 }
 
-void AudioPipe::bufferForSending(const char* text, size_t len) {
+void AudioPipe::bufferForSending(const char* text) {
   if (m_state != LWS_CLIENT_CONNECTED) return;
   {
     std::lock_guard<std::mutex> lk(m_text_mutex);
