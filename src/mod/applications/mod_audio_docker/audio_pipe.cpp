@@ -497,10 +497,11 @@ AudioPipe::AudioPipe(const char* uuid, const char* host, unsigned int port, cons
   m_audio_TTS_file(nullptr),m_audio_TTS_chunk_size(0),
   m_state(LWS_CLIENT_IDLE), m_wsi(nullptr), m_vhd(nullptr), m_callback(callback) {
 
+  m_audio_buffer_max_len = m_audio_buffer_max_len + LWS_PRE
   m_audio_buffer = new uint8_t[m_audio_buffer_max_len];
   if (apiToken) {
     m_api_token.assign(apiToken);
-    lwsl_notice("AudioPipe:: init - apiToken:%s, tcp_keepalive:%d\n", apiToken, nTcpKeepaliveSecs);
+    lwsl_notice("AudioPipe:: init - apiToken:%s, tcp_keepalive:%d, max_buffer_len:%d\n", apiToken, nTcpKeepaliveSecs,m_audio_buffer_max_len);
   }
 }
 AudioPipe::~AudioPipe() {
