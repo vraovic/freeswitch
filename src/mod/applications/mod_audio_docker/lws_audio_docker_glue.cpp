@@ -613,6 +613,8 @@ extern "C" {
       switch_log_printf(SWITCH_CHANNEL_SESSION_LOG(session), SWITCH_LOG_ERROR, "audio_docker_session_send_text failed because no bug\n");
       return SWITCH_STATUS_FALSE;
     }
+    switch_log_printf(SWITCH_CHANNEL_SESSION_LOG(session), SWITCH_LOG_INFO, "audio_docker_session_send_text: %s\n", text);
+
     private_t* tech_pvt = (private_t*) switch_core_media_bug_get_user_data(bug);
   
     if (!tech_pvt) {
@@ -620,8 +622,14 @@ extern "C" {
       return SWITCH_STATUS_FALSE;
     }
     AudioPipe *pAudioPipe = static_cast<AudioPipe *>(tech_pvt->pAudioPipe);
-    if (pAudioPipe && text) pAudioPipe->bufferForSending(text, strlen(text));
+    if (pAudioPipe && text) {
+      switch_log_printf(SWITCH_CHANNEL_SESSION_LOG(session), SWITCH_LOG_ERROR, "audio_docker_session_send_text - len: %d\n",strlen(text));
+       pAudioPipe->bufferForSending(text, strlen(text));
+    } else {
+      switch_log_printf(SWITCH_CHANNEL_SESSION_LOG(session), SWITCH_LOG_ERROR, "audio_docker_session_send_text failed to get AudioPipe\n");
+      return SWITCH_STATUS_FALSE;
 
+    }
     return SWITCH_STATUS_SUCCESS;
   }
 
@@ -757,7 +765,7 @@ extern "C" {
         }
       }
 
-      pAudioPipe->unlockAudioBuffer();
+      pAudioPipe->unlockBinaryBuffer();
       switch_mutex_unlock(tech_pvt->mutex);
     }
     return SWITCH_TRUE;

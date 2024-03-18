@@ -165,16 +165,7 @@ static switch_status_t do_graceful_shutdown(switch_core_session_t *session)
 static switch_status_t send_text(switch_core_session_t *session, char* text) {
 	switch_status_t status = SWITCH_STATUS_FALSE;
 
-	switch_channel_t *channel = switch_core_session_get_channel(session);
-	switch_media_bug_t *bug = switch_channel_get_private(channel, MY_BUG_NAME);
-
-  if (bug) {
-		switch_log_printf(SWITCH_CHANNEL_SESSION_LOG(session), SWITCH_LOG_INFO, "mod_audio_docker: sending text: %s\n", text);
     status = audio_docker_session_send_text(session, text);
-  }
-  else {
-		switch_log_printf(SWITCH_CHANNEL_SESSION_LOG(session), SWITCH_LOG_ERROR, "mod_audio_docker: no bug, failed sending text: %s\n", text);
-  }
   return status;
 }
 
