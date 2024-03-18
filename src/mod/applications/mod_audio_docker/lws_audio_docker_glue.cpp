@@ -765,7 +765,7 @@ extern "C" {
         }
       }
 
-      pAudioPipe->unlockBinaryBuffer();
+      pAudioPipe->unlockAudioBuffer();
       switch_mutex_unlock(tech_pvt->mutex);
     }
     return SWITCH_TRUE;
