@@ -224,11 +224,7 @@ int AudioPipe::lws_callback(struct lws *wsi,
           if (ap->m_metadata.length() > 0) {
             uint8_t buf[ap->m_metadata.length() + LWS_PRE];
             memcpy(buf + LWS_PRE, ap->m_metadata.c_str(), ap->m_metadata.length());
-            // uint8_t buf[8553 + LWS_PRE];
-            // memcpy(buf + LWS_PRE, ap->m_metadata.c_str(), 8553);
             int n = ap->m_metadata.length();
-            // lwsl_notice("AudioPipe::lws_write - send audio to AAI: %ld\n",n); 
-            // lwsl_notice("AudioPipe::lws_write - send to AAI:%s\n",buf + LWS_PRE); 
             int m = lws_write(wsi, buf + LWS_PRE, n, LWS_WRITE_TEXT);
             ap->m_metadata.clear();
             if (m < n) {
@@ -238,7 +234,7 @@ int AudioPipe::lws_callback(struct lws *wsi,
 
             // there may be audio data, but only one write per writeable event
             // get it next time
-            // lws_callback_on_writable(ap->m_wsi);
+            lws_callback_on_writable(wsi);
 
             return 0;
           }
@@ -399,6 +395,7 @@ void AudioPipe::addPendingDisconnect(AudioPipe* ap) {
   lws_cancel_service(ap->m_vhd->context);
 }
 void AudioPipe::addPendingWrite(AudioPipe* ap) {
+    lwsl_notice("before - addPendingWrite\n"); 
   {
     std::lock_guard<std::mutex> guard(mutex_writes);
     pendingWrites.push_back(ap);
