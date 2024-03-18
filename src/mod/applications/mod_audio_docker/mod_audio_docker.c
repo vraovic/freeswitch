@@ -181,7 +181,7 @@ static switch_status_t send_text(switch_core_session_t *session, char* text) {
 #define AUDIO_DOCKER_API_SYNTAX "<uuid> [start | stop | send_text | pause | resume | graceful-shutdown ] [wss-url | path] [metadata]"
 SWITCH_STANDARD_API(audio_docker_function)
 {
-	char *mycmd = NULL, *argv[4] = { 0 };
+	char *mycmd = NULL, *argv[6] = { 0 };
 	int argc = 0;
 	switch_status_t status = SWITCH_STATUS_FALSE;
 	switch_core_session_t *lsession = NULL;
@@ -189,7 +189,7 @@ SWITCH_STANDARD_API(audio_docker_function)
 	if (!zstr(cmd) && (mycmd = strdup(cmd))) {
 		argc = switch_separate_string(mycmd, ' ', argv, (sizeof(argv) / sizeof(argv[0])));
 	}
-	assert(cmd);
+	// assert(cmd);
 	switch_log_printf(SWITCH_CHANNEL_LOG, SWITCH_LOG_NOTICE, "mod_audio_docker - cmd: %s, argc:%u\n", cmd, argc);
 
 	if ((lsession = switch_core_session_locate(argv[0]))) 

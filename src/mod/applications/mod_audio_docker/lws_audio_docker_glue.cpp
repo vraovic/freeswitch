@@ -367,7 +367,7 @@ void parse_wav_header(unsigned char *header) {
     tech_pvt->channels = channels;
     tech_pvt->id = ++idxCallCount;
     tech_pvt->buffer_overrun_notified = 0;
-    tech_pvt->audio_paused = 1; // pause audio until we get connected and get response from the far end
+    tech_pvt->audio_paused = 0; //1; // pause audio until we get connected and get response from the far end
     tech_pvt->graceful_shutdown = 0;
     
     size_t buflen = LWS_PRE + (FRAME_SIZE_8000 * desiredSampling / 8000 * channels * 1000 / RTP_PACKETIZATION_PERIOD * nAudioBufferSecs);
@@ -708,12 +708,16 @@ extern "C" {
           }
 
           switch_status_t rv = switch_core_media_bug_read(bug, &frame, SWITCH_TRUE);
-          if (rv != SWITCH_STATUS_SUCCESS) break;
+          if (rv != SWITCH_STATUS_SUCCESS)  {
+            switch_log_printf(SWITCH_CHANNEL_SESSION_LOG(session), SWITCH_LOG_NOTICE, "audio_docker_frame - exit while(true)\n");
+            break;
+          }
           if (frame.datalen) {
             pAudioPipe->binaryWritePtrAdd(frame.datalen);
             frame.buflen = available = pAudioPipe->binarySpaceAvailable();
             frame.data = pAudioPipe->binaryWritePtr();
             dirty = true;
+            switch_log_printf(SWITCH_CHANNEL_SESSION_LOG(session), SWITCH_LOG_NOTICE, "audio_docker_frame - write audio len:%d\n", frame.datalen);
           }
         }
       }
