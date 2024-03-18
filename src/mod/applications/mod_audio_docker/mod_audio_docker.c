@@ -178,7 +178,7 @@ static switch_status_t send_text(switch_core_session_t *session, char* text) {
   return status;
 }
 
-#define AUDIO_DOCKER_API_SYNTAX "<uuid> [start | stop | send_text | pause | resume | graceful-shutdown ] [wss-url | path] [mono | mixed | stereo] [8000 | 16000 | 24000 | 32000 | 64000] [metadata]"
+#define AUDIO_DOCKER_API_SYNTAX "<uuid> [start | stop | send_text | pause | resume | graceful-shutdown ] [wss-url | path] [metadata]"
 SWITCH_STANDARD_API(audio_docker_function)
 {
 	char *mycmd = NULL, *argv[4] = { 0 };
@@ -190,13 +190,13 @@ SWITCH_STANDARD_API(audio_docker_function)
 		argc = switch_separate_string(mycmd, ' ', argv, (sizeof(argv) / sizeof(argv[0])));
 	}
 	assert(cmd);
-	switch_log_printf(SWITCH_CHANNEL_LOG, SWITCH_LOG_NOTICE, "mod_audio_docker - cmd: %s, argv[0]:%s, argv[1]:%s,argc:%u\n", cmd,argv[0], argv[1], argc);
+	switch_log_printf(SWITCH_CHANNEL_LOG, SWITCH_LOG_NOTICE, "mod_audio_docker - cmd: %s, argc:%u\n", cmd, argc);
 
 	if ((lsession = switch_core_session_locate(argv[0]))) 
 	{
 		if (!strcasecmp(argv[1], "stop")) 
 		{
-			status = do_stop(lsession, argv[2]);
+			status = do_stop(lsession, argc > 2 ? argv[2] : NULL);
 		} 
 		else if (!strcasecmp(argv[1], "pause")) 
 		{
@@ -302,6 +302,8 @@ SWITCH_MODULE_LOAD_FUNCTION(mod_audio_docker_load)
 	switch_console_set_complete("add uuid_audio_docker start wss-url metadata");
 	switch_console_set_complete("add uuid_audio_docker start wss-url");
 	switch_console_set_complete("add uuid_audio_docker stop");
+	switch_console_set_complete("add uuid_audio_docker stop wss-url");
+	switch_console_set_complete("add uuid_audio_docker stop wss-url metadata");
 	switch_console_set_complete("add uuid_audio_docker send_text wss-url");
 	switch_console_set_complete("add uuid_audio_docker send_text wss-url metadata");
 
