@@ -252,7 +252,7 @@ int AudioPipe::lws_callback(struct lws *wsi,
         // check for audio packets
         {
           std::lock_guard<std::mutex> lk(ap->m_audio_mutex);
-          if (ap->m_audio_buffer_write_offset > LWS_PRE )) {
+          if (ap->m_audio_buffer_write_offset > LWS_PRE) {
             size_t datalen = ap->m_audio_buffer_write_offset - LWS_PRE;
             int sent = lws_write(wsi, (unsigned char *) ap->m_audio_buffer + LWS_PRE, datalen, LWS_WRITE_BINARY);
             if (sent < datalen) {
