@@ -114,7 +114,7 @@ static switch_status_t start_capture(switch_core_session_t *session,
 
 	switch_log_printf(SWITCH_CHANNEL_SESSION_LOG(session), SWITCH_LOG_DEBUG, "calling audio_docker_session_init.\n");
 	if (SWITCH_STATUS_FALSE == audio_docker_session_init(session, responseHandler, read_codec->implementation->actual_samples_per_second, 
-		host, port, path, sampling, sslFlags, channels, &pUserData)) {
+		host, port, path, sampling, sslFlags, channels, metadata, &pUserData)) {
 		switch_log_printf(SWITCH_CHANNEL_SESSION_LOG(session), SWITCH_LOG_ERROR, "Error initializing mod_audio_docker session.\n");
 		return SWITCH_STATUS_FALSE;
 	}
@@ -244,10 +244,10 @@ SWITCH_STANDARD_API(audio_docker_function)
 				sampling = atoi(next_token);
 					switch_log_printf(SWITCH_CHANNEL_LOG, SWITCH_LOG_NOTICE, "TOKEN:%s, NEXT_TOKEN:%s, token1: %s, sampling:%d\n",token, next_token,token1,sampling);
 					switch_log_printf(SWITCH_CHANNEL_LOG, SWITCH_LOG_NOTICE, "start_capture - host:%s,port:%d, path:%s, sampling:%d\n",host,port, path, sampling);
-				token2 = strtok(path1, "?")
-				srtcpy(path, token2);
+				token2 = strtok(path1, "?");
+				strcpy(path, token2);
 				switch_log_printf(SWITCH_CHANNEL_LOG, SWITCH_LOG_NOTICE, "start_capture - new path::%s\n",path);
-				status = start_capture(lsession, flags, host, port, path, sampling, sslFlags, "mod_audio_docker");
+				status = start_capture(lsession, flags, host, port, path, sampling, sslFlags, metadata, "mod_audio_docker");
 			}
 		}
 			else 
