@@ -84,6 +84,7 @@ static switch_status_t start_capture(switch_core_session_t *session,
         char* path,
         int sampling,
         int sslFlags,
+        char* metadata, 
         const char* base)
 {
 	switch_channel_t *channel = switch_core_session_get_channel(session);
@@ -218,6 +219,8 @@ SWITCH_STANDARD_API(audio_docker_function)
 			unsigned int port;
 			int sslFlags;
 			int sampling = 16000;
+         char *metadata = argc == 4 ? argv[3] : NULL ;
+
 				switch_media_bug_flag_t flags = SMBF_READ_STREAM ;
 			switch_log_printf(SWITCH_CHANNEL_LOG, SWITCH_LOG_NOTICE, "argv[2]: %s path-size:%lu\n", argv[2], sizeof(path));
 
@@ -231,6 +234,7 @@ SWITCH_STANDARD_API(audio_docker_function)
 				char *token =NULL;
 				char *next_token =NULL;
 				char *token1 = NULL;
+				char *token2 = NULL;
 				// char *next_token1 =NULL;
 				strcpy(path1, path);
 					switch_log_printf(SWITCH_CHANNEL_LOG, SWITCH_LOG_NOTICE, "Make TOKENS - copy to path1:%s\n",path1);
@@ -238,11 +242,12 @@ SWITCH_STANDARD_API(audio_docker_function)
 				token1 = strtok(token,"=");
 				next_token = strtok(NULL, "=");
 				sampling = atoi(next_token);
-
 					switch_log_printf(SWITCH_CHANNEL_LOG, SWITCH_LOG_NOTICE, "TOKEN:%s, NEXT_TOKEN:%s, token1: %s, sampling:%d\n",token, next_token,token1,sampling);
 					switch_log_printf(SWITCH_CHANNEL_LOG, SWITCH_LOG_NOTICE, "start_capture - host:%s,port:%d, path:%s, sampling:%d\n",host,port, path, sampling);
-
-					status = start_capture(lsession, flags, host, port, path, sampling, sslFlags, "mod_audio_docker");
+				token2 = strtok(path1, "?")
+				srtcpy(path, token2);
+				switch_log_printf(SWITCH_CHANNEL_LOG, SWITCH_LOG_NOTICE, "start_capture - new path::%s\n",path);
+				status = start_capture(lsession, flags, host, port, path, sampling, sslFlags, "mod_audio_docker");
 			}
 		}
 			else 

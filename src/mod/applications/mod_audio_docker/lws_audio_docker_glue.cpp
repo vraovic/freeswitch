@@ -253,18 +253,14 @@ void parse_wav_header(unsigned char *header) {
               
               //We are connected and ready for transcription; let's flush audio buffer
               switch_core_media_bug_flush(bug);
-              // AudioPipe *pAudioPipe = static_cast<AudioPipe *>(tech_pvt->pAudioPipe);
-              // if(pAudioPipe) {
-              //   pAudioPipe->binaryWritePtrResetToZero();
-              //   pAudioPipe->clearMetadata();
-              // }
 
-              // if (strlen(tech_pvt->initialMetadata) > 0) {
-              //   switch_log_printf(SWITCH_CHANNEL_SESSION_LOG(session), SWITCH_LOG_DEBUG, "sending initial metadata %s\n", tech_pvt->initialMetadata);
-              //   AudioPipe *pAudioPipe = static_cast<AudioPipe *>(tech_pvt->pAudioPipe);
-              //   pAudioPipe->bufferForSending(tech_pvt->initialMetadata);
-              // }
+              if (strlen(tech_pvt->initialMetadata) > 0) {
+                switch_log_printf(SWITCH_CHANNEL_SESSION_LOG(session), SWITCH_LOG_DEBUG, "sending initial metadata %s\n", tech_pvt->initialMetadata);
+                AudioPipe *pAudioPipe = static_cast<AudioPipe *>(tech_pvt->pAudioPipe);
+                pAudioPipe->bufferForSending(tech_pvt->initialMetadata);
+              }
             break;
+            
             case AudioPipe::CONNECT_FAIL:
             {
               // first thing: we can no longer access the AudioPipe
@@ -346,7 +342,7 @@ void parse_wav_header(unsigned char *header) {
     }
   }
   switch_status_t audio_docker_data_init(private_t *tech_pvt, switch_core_session_t *session, char * host, 
-    unsigned int port, char* path, int sslFlags, int sampling, int desiredSampling, int channels, responseHandler_t responseHandler) {
+    unsigned int port, char* path, int sslFlags, int sampling, int desiredSampling, int channels, char* metadata, responseHandler_t responseHandler) {
 
     const char* api_token = nullptr;
     int err;
@@ -369,6 +365,7 @@ void parse_wav_header(unsigned char *header) {
     tech_pvt->buffer_overrun_notified = 0;
     tech_pvt->audio_paused = 0; //1; // pause audio until we get connected and get response from the far end
     tech_pvt->graceful_shutdown = 0;
+    if (metadata) strncpy(tech_pvt->initialMetadata, metadata, MAX_METADATA_LEN);
     
     size_t buflen = LWS_PRE + (FRAME_SIZE_8000 * desiredSampling / 8000 * channels * 1000 / RTP_PACKETIZATION_PERIOD * nAudioBufferSecs);
 
@@ -535,6 +532,7 @@ extern "C" {
               int sampling,
               int sslFlags,
               int channels,
+              char* metadata,
               void **ppUserData)
   {    	
     int err;
@@ -546,9 +544,9 @@ extern "C" {
       return SWITCH_STATUS_FALSE;
     }
 
-    switch_log_printf(SWITCH_CHANNEL_SESSION_LOG(session), SWITCH_LOG_NOTICE, "audio_docker_session_init - samples_per_second:%u,sampling:%d,channels:%d \n", samples_per_second,sampling, channels);
+    switch_log_printf(SWITCH_CHANNEL_SESSION_LOG(session), SWITCH_LOG_NOTICE, "audio_docker_session_init - samples_per_second:%u,sampling:%d,channels:%d, metadata: %s \n", samples_per_second,sampling, channels, metadata);
 
-    if (SWITCH_STATUS_SUCCESS != audio_docker_data_init(tech_pvt, session, host, port, path, sslFlags, samples_per_second, sampling, channels, responseHandler)) {
+    if (SWITCH_STATUS_SUCCESS != audio_docker_data_init(tech_pvt, session, host, port, path, sslFlags, samples_per_second, sampling, channels, metadata, responseHandler)) {
       destroy_tech_pvt(tech_pvt);
       return SWITCH_STATUS_FALSE;
     }
