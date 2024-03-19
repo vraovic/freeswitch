@@ -228,18 +228,19 @@ int AudioPipe::lws_callback(struct lws *wsi,
             int m = lws_write(wsi, buf + LWS_PRE, n, LWS_WRITE_TEXT);
             ap->m_metadata.clear();
             if (m < n) {
-              lwsl_notice("AudioPipe::lws_write - CAN'T send all data\n"); 
+              lwsl_notice("AudioPipe::lws_write - CAN'T send all data m:%d < n:%d \n", m, n); 
               return -1;
             }
 
+            lwsl_notice("AudioPipe::lws_write - sent %d text\n", m); 
             // there may be audio data, but only one write per writeable event
             // get it next time
-            // lws_callback_on_writable(ap->m_wsi);
+            lws_callback_on_writable(wsi);
 
             return 0;
           }
           else {
-            lwsl_notice("AudioPipe::lws_write - NO DATA (m_metadata) to send\n"); 
+            lwsl_notice("AudioPipe::lws_write - NO DATA (text) to send\n"); 
           }
         }
 
@@ -251,17 +252,15 @@ int AudioPipe::lws_callback(struct lws *wsi,
         // check for audio packets
         {
           std::lock_guard<std::mutex> lk(ap->m_audio_mutex);
-          if (ap->m_audio_buffer_write_offset) {
-            size_t datalen = ap->m_audio_buffer_write_offset;
-            int sent = lws_write(wsi, (unsigned char *) ap->m_audio_buffer, datalen, LWS_WRITE_BINARY);
+          if (ap->m_audio_buffer_write_offset > LWS_PRE )) {
+            size_t datalen = ap->m_audio_buffer_write_offset - LWS_PRE;
+            int sent = lws_write(wsi, (unsigned char *) ap->m_audio_buffer + LWS_PRE, datalen, LWS_WRITE_BINARY);
             if (sent < datalen) {
               lwsl_err("AudioPipe::lws_service_thread LWS_CALLBACK_CLIENT_WRITEABLE %s attemped to send %lu only sent %d wsi %p..\n", 
                 ap->m_uuid.c_str(), datalen, sent, wsi); 
-            } else {
-            lwsl_notice("AudioPipe::lws_write -sent %d binary audio data\n", sent); 
             }
-
-            ap->m_audio_buffer_write_offset = 0;
+            lwsl_notice("AudioPipe::lws_write - sent %d audio(binary)\n", sent); 
+            ap->m_audio_buffer_write_offset = LWS_PRE;
           }
         }
 
