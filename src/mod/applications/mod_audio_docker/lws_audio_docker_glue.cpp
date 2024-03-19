@@ -40,6 +40,8 @@ namespace {
   static uint32_t base64AudioSize = norwood::b64_encoded_size(FRAME_SIZE_8000 * ::atoi(numberOfFramesForTranscription) * 2);
   // static char textToSend[(base64AudioSize  + 20) * 2];
   static uint32_t skip_printing = 0;
+  static size_t transcription_size = FRAME_SIZE_8000 * ::atoi(numberOfFramesForTranscription) * 2;
+
 
 void parse_wav_header(unsigned char *header) {
     if (strncmp((const char *)header, "RIFF", 4)) {
@@ -762,8 +764,10 @@ extern "C" {
           }
         }
       }
-
-      pAudioPipe->unlockAudioBuffer();
+      if (pAudioPipe->binarySpaceSize() > 1600) {
+            switch_log_printf(SWITCH_CHANNEL_SESSION_LOG(session), SWITCH_LOG_NOTICE, "audio_docker_frame - send now - transcription size:%d\n", transcription_size);
+          pAudioPipe->unlockAudioBuffer();
+      }
       switch_mutex_unlock(tech_pvt->mutex);
     }
     return SWITCH_TRUE;
