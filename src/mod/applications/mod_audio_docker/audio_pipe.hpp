@@ -67,7 +67,7 @@ public:
   }
  
   void binaryWritePtrResetToZero(void) {
-    m_audio_buffer_write_offset = 0;
+    m_audio_buffer_write_offset = LWS_PRE;
   }
   void clearMetadata(void) {
     m_metadata.clear();

@@ -489,7 +489,7 @@ AudioPipe::AudioPipe(const char* uuid, const char* host, unsigned int port, cons
   m_uuid(uuid), m_host(host), m_port(port), m_path(path), m_sslFlags(sslFlags),
   m_audio_buffer_min_freespace(minFreespace), m_audio_buffer_max_len(bufLen), m_gracefulShutdown(false),
   m_silence_detected(false), m_audio_detected(false),
-  m_audio_buffer_write_offset(0), m_recv_buf(nullptr), m_recv_buf_ptr(nullptr), 
+  m_audio_buffer_write_offset(LWS_PRE), m_recv_buf(nullptr), m_recv_buf_ptr(nullptr), 
   m_audio_TTS_file(nullptr),m_audio_TTS_chunk_size(0),
   m_state(LWS_CLIENT_IDLE), m_wsi(nullptr), m_vhd(nullptr), m_callback(callback) {
 
