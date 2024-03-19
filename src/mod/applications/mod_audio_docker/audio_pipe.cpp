@@ -548,7 +548,7 @@ void AudioPipe::bufferForSending(const char* text) {
 }
 
 void AudioPipe::unlockAudioBuffer() {
-  if (m_audio_buffer_write_offset > LWS_PRE) addPendingWrite(this);
+  if (m_audio_buffer_write_offset > (LWS_PRE + 5 * 320)) addPendingWrite(this);
   m_audio_mutex.unlock();
 }
 
