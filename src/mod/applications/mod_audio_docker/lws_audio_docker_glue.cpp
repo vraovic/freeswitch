@@ -715,7 +715,7 @@ extern "C" {
 
           switch_status_t rv = switch_core_media_bug_read(bug, &frame, SWITCH_TRUE);
           if (rv != SWITCH_STATUS_SUCCESS)  {
-            switch_log_printf(SWITCH_CHANNEL_SESSION_LOG(session), SWITCH_LOG_NOTICE, "audio_docker_frame - exit while(true) - transcription-size:%d\n", transcription_size);
+            switch_log_printf(SWITCH_CHANNEL_SESSION_LOG(session), SWITCH_LOG_NOTICE, "audio_docker_frame - exit while(true)\n");
             break;
           }
           if (frame.datalen) {
