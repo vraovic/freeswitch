@@ -99,7 +99,7 @@ void parse_wav_header(unsigned char *header) {
                   switch_log_printf(SWITCH_CHANNEL_LOG, SWITCH_LOG_DEBUG, "processIncomingMessage - Played audio file: %s\n", path.c_str());
                   // Delete the file
                   if (std::remove(path.c_str()) == 0) {
-                    free(path.c_str());
+                    // free(file);
                     switch_log_printf(SWITCH_CHANNEL_LOG, SWITCH_LOG_DEBUG, "processIncomingMessage - The file %s was deleted successfully.\n", path.c_str());
                   } else {
                     switch_log_printf(SWITCH_CHANNEL_LOG, SWITCH_LOG_DEBUG,  "processIncomingMessage - Error deleting the file");
