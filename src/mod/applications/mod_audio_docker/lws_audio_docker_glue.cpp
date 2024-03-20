@@ -37,10 +37,8 @@ namespace {
   static unsigned int nServiceThreads = std::max(1, std::min(requestedNumServiceThreads ? ::atoi(requestedNumServiceThreads) : 1, 5));
   static unsigned int idxCallCount = 0;
   static uint32_t playCount = 0;
-  static uint32_t base64AudioSize = norwood::b64_encoded_size(FRAME_SIZE_8000 * ::atoi(numberOfFramesForTranscription) * 2);
-  // static char textToSend[(base64AudioSize  + 20) * 2];
   static uint32_t skip_printing = 0;
-  static size_t transcription_size = FRAME_SIZE_8000 * ::atoi(numberOfFramesForTranscription) * 2;
+  static size_t streaming_size = FRAME_SIZE_8000 * ::atoi(numberOfFramesForTranscription);
 
 
 void parse_wav_header(unsigned char *header) {

@@ -17,6 +17,9 @@ namespace {
   static int nTcpKeepaliveSecs = requestedTcpKeepaliveSecs ? ::atoi(requestedTcpKeepaliveSecs) : 55;
 }
   static const char* apiToken = std::getenv("MOD_AUDIO_DOCKER_TOKEN");
+  static const char *numberOfFramesForTranscription = std::getenv("MOD_AUDIO_DOCKER_FRAME_SIZE");
+  size_t streaming_size = FRAME_SIZE_8000 * ::atoi(numberOfFramesForTranscription);
+
 
 
 // remove once we update to lws with this helper
@@ -548,7 +551,7 @@ void AudioPipe::bufferForSending(const char* text) {
 }
 
 void AudioPipe::unlockAudioBuffer() {
-  if (m_audio_buffer_write_offset > (LWS_PRE + 5 * 320)) addPendingWrite(this);
+  if (m_audio_buffer_write_offset > streaming_size) addPendingWrite(this);
   m_audio_mutex.unlock();
 }
 
