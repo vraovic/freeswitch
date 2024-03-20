@@ -82,8 +82,8 @@ void parse_wav_header(unsigned char *header) {
               // std::string filename = "";
               // filename = strcat((char*)sessionId,".wav");
               // std::string path =  strcat((char*)freeswitchHome, "/");
-              std::string filename = sessionId + ".wav";
-              std::string path =  freeswitchHome + "/" + filename;
+              std::string filename = std::string(sessionId) + ".wav";
+              std::string path =  std::string(freeswitchHome) + "/" + filename;
              
               FILE* file = fopen(path.c_str(), "wb");
               size_t written = fwrite(message, sizeof(char), length, file);
