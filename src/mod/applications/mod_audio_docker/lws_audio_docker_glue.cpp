@@ -72,35 +72,37 @@ void parse_wav_header(unsigned char *header) {
     } else {
       if (type == "AUDIO") {
         // Let's try both options - stream audio to the session and and to a callig party as well as store it in a file and then send it to the session
-          lwsl_notice("processIncomingMessage - AUDIO (len:%d) message:%s\n",length, msg);
+          const char* sessionId = switch_core_session_get_uuid(session);
+          lwsl_notice("processIncomingMessage - (%d) AUDIO (len:%d)\n",sessionId, length);
           if (session && switch_channel_ready(switch_core_session_get_channel(session))) {
 ///=================================
               unsigned char header[44] = {0};
               memcpy(header, message, 44);
               parse_wav_header(header);
-              const char* sessionId = switch_core_session_get_uuid(session);
-              std::string filename = strcat((char*)sessionId,".wav");
+              std::string filename = "";
+              filename = strcat((char*)sessionId,".wav");
               std::string path =  strcat((char*)freeswitchHome, "/");
               path = path + filename;
              
-              FILE* file = fopen(path.c_str(), "ab");
+              FILE* file = fopen(path.c_str(), "wb");
               size_t written = fwrite(message, sizeof(char), length, file);
               fclose(file);
-              switch_log_printf(SWITCH_CHANNEL_LOG, SWITCH_LOG_DEBUG, "processIncomingMessage - store audio into file: %s message-len:%d\n",path, length);
+              switch_log_printf(SWITCH_CHANNEL_LOG, SWITCH_LOG_DEBUG, "processIncomingMessage - store audio into file: %s message-len:%d\n",path.c_str(), length);
               if (written != length) {
                   // Handle partial write or error
-                  switch_log_printf(SWITCH_CHANNEL_LOG, SWITCH_LOG_NOTICE, "Failed to write all audio data - written: %d, len: %d\n", written, length);
+                  switch_log_printf(SWITCH_CHANNEL_LOG, SWITCH_LOG_NOTICE, "processIncomingMessage - Failed to write all audio data - written: %d, len: %d\n", written, length);
               }
               switch_status_t status = switch_ivr_play_file(session, NULL, path.c_str(), NULL);
               if (status != SWITCH_STATUS_SUCCESS) {
-                  switch_log_printf(SWITCH_CHANNEL_LOG, SWITCH_LOG_DEBUG, "Failed to play audio file: %s\n", path);
+                  switch_log_printf(SWITCH_CHANNEL_LOG, SWITCH_LOG_DEBUG, "processIncomingMessage - Failed to play audio file: %s\n", path.c_str());
               } else {
-                  switch_log_printf(SWITCH_CHANNEL_LOG, SWITCH_LOG_DEBUG, "Failed to play audio file: %s\n", path);
+                  switch_log_printf(SWITCH_CHANNEL_LOG, SWITCH_LOG_DEBUG, "processIncomingMessage - Played audio file: %s\n", path.c_str());
                   // Delete the file
-                  if (remove(path.c_str()) == 0) {
-                  switch_log_printf(SWITCH_CHANNEL_LOG, SWITCH_LOG_DEBUG, "The file %s was deleted successfully.\n", path);
+                  if (std::remove(path.c_str()) == 0) {
+                    free(path.c_str());
+                    switch_log_printf(SWITCH_CHANNEL_LOG, SWITCH_LOG_DEBUG, "processIncomingMessage - The file %s was deleted successfully.\n", path.c_str());
                   } else {
-                  switch_log_printf(SWITCH_CHANNEL_LOG, SWITCH_LOG_DEBUG,  "Error deleting the file");
+                    switch_log_printf(SWITCH_CHANNEL_LOG, SWITCH_LOG_DEBUG,  "processIncomingMessage - Error deleting the file");
                   }
               }
 
