@@ -32,6 +32,7 @@ namespace {
   static const char *requestedNumServiceThreads = std::getenv("MOD_AUDIO_DOCKER_THREADS");
   static const char *playAudioMethod = std::getenv("MOD_AUDIO_DOCKER_PLAY_AUDIO_METHOD") ? std::getenv("MOD_AUDIO_DOCKER_PLAY_AUDIO_METHOD") : "storeAudio"; // storeAudio or streamAudio
   static const char *freeswitchHome = std::getenv("HOME") ? std::getenv("HOME") : "/usr/local/freswitch"; 
+  static const char *audioDockerServer = std::getenv("MOD_AUDIO_DOCKER_SERVER") ? std::getenv("MOD_AUDIO_DOCKER_SERVER") : "localhost:8080"; 
   static const char* mySubProtocolName = std::getenv("MOD_AUDIO_DOCKER_SUBPROTOCOL_NAME") ?
     std::getenv("MOD_AUDIO_DOCKER_SUBPROTOCOL_NAME") : "streaming";
   static unsigned int nServiceThreads = std::max(1, std::min(requestedNumServiceThreads ? ::atoi(requestedNumServiceThreads) : 1, 5));
@@ -393,19 +394,6 @@ extern "C" {
     char *saveptr;
     int flags = LCCSCF_USE_SSL;
     
-    if (switch_true(switch_channel_get_variable(channel, "MOD_AUDIO_FORK_ALLOW_SELFSIGNED"))) {
-      switch_log_printf(SWITCH_CHANNEL_LOG, SWITCH_LOG_DEBUG, "parse_ws_uri - allowing self-signed certs\n");
-      flags |= LCCSCF_ALLOW_SELFSIGNED;
-    }
-    if (switch_true(switch_channel_get_variable(channel, "MOD_AUDIO_FORK_SKIP_SERVER_CERT_HOSTNAME_CHECK"))) {
-      switch_log_printf(SWITCH_CHANNEL_LOG, SWITCH_LOG_DEBUG, "parse_ws_uri - skipping hostname check\n");
-      flags |= LCCSCF_SKIP_SERVER_CERT_HOSTNAME_CHECK;
-    }
-    if (switch_true(switch_channel_get_variable(channel, "MOD_AUDIO_FORK_ALLOW_EXPIRED"))) {
-      switch_log_printf(SWITCH_CHANNEL_LOG, SWITCH_LOG_DEBUG, "parse_ws_uri - allowing expired certs\n");
-      flags |= LCCSCF_ALLOW_EXPIRED;
-    }
-
     // get the scheme
     strncpy(server, szServerUri, MAX_WS_URL_LEN + MAX_PATH_LEN);
     if (0 == strncmp(server, "https://", 8) || 0 == strncmp(server, "HTTPS://", 8)) {

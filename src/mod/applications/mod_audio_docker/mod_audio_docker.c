@@ -284,7 +284,8 @@ SWITCH_MODULE_LOAD_FUNCTION(mod_audio_docker_load)
 	*module_interface = switch_loadable_module_create_module_interface(pool, modname);
 
 	/* create/register custom event message types */
-	if (switch_event_reserve_subclass(EVENT_TRANSCRIPTION) != SWITCH_STATUS_SUCCESS ||
+	if (switch_event_reserve_subclass(EVENT_CONNECT_SUCCESS) != SWITCH_STATUS_SUCCESS ||
+    switch_event_reserve_subclass(EVENT_CONNECT_FAIL) != SWITCH_STATUS_SUCCESS ||
     switch_event_reserve_subclass(EVENT_PLAY_AUDIO) != SWITCH_STATUS_SUCCESS ||
     switch_event_reserve_subclass(EVENT_KILL_AUDIO) != SWITCH_STATUS_SUCCESS ||
     switch_event_reserve_subclass(EVENT_ERROR) != SWITCH_STATUS_SUCCESS ||
@@ -319,7 +320,8 @@ SWITCH_MODULE_SHUTDOWN_FUNCTION(mod_audio_docker_shutdown)
 {
 	audio_docker_cleanup();
   //mod_running = 0;
-	switch_event_free_subclass(EVENT_TRANSCRIPTION);
+	switch_event_free_subclass(EVENT_CONNECT_SUCCESS);
+	switch_event_free_subclass(EVENT_CONNECT_FAIL);
 	switch_event_free_subclass(EVENT_PLAY_AUDIO);
 	switch_event_free_subclass(EVENT_KILL_AUDIO);
 	switch_event_free_subclass(EVENT_ERROR);

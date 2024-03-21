@@ -12,7 +12,6 @@
 #define MAX_WS_URL_LEN (512)
 #define MAX_PATH_LEN (4096)
 
-#define EVENT_TRANSCRIPTION   "mod_audio_docker::transcription"
 #define EVENT_DISCONNECT      "mod_audio_docker::disconnect"
 #define EVENT_ERROR           "mod_audio_docker::error"
 #define EVENT_CONNECT_SUCCESS "mod_audio_docker::connect"
