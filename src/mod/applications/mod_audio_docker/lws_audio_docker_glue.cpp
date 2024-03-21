@@ -27,7 +27,7 @@
 
 namespace {
   static const char *requestedBufferSecs = std::getenv("MOD_AUDIO_DOCKER_BUFFER_SECS");
-  static const char *numberOfFramesForTranscription = std::getenv("MOD_AUDIO_DOCKER_FRAME_SIZE");
+  static const char *numberOfFramesForStreaming = std::getenv("MOD_AUDIO_DOCKER_FRAME_SIZE");
   static int nAudioBufferSecs = std::max(1, std::min(requestedBufferSecs ? ::atoi(requestedBufferSecs) : 2, 5));
   static const char *requestedNumServiceThreads = std::getenv("MOD_AUDIO_DOCKER_THREADS");
   static const char *playAudioMethod = std::getenv("MOD_AUDIO_DOCKER_PLAY_AUDIO_METHOD") ? std::getenv("MOD_AUDIO_DOCKER_PLAY_AUDIO_METHOD") : "storeAudio"; // storeAudio or streamAudio
@@ -39,7 +39,7 @@ namespace {
   static unsigned int idxCallCount = 0;
   static uint32_t playCount = 0;
   static uint32_t skip_printing = 0;
-  static size_t streaming_size = FRAME_SIZE_8000 * ::atoi(numberOfFramesForTranscription);
+  static size_t streaming_size = FRAME_SIZE_8000 * ::atoi(numberOfFramesForStreaming);
 
 
 void parse_wav_header(unsigned char *header) {
@@ -327,7 +327,7 @@ void parse_wav_header(unsigned char *header) {
     tech_pvt->graceful_shutdown = 0;
     if (metadata) strncpy(tech_pvt->initialMetadata, metadata, MAX_METADATA_LEN);
     
-    size_t buflen = LWS_PRE + (FRAME_SIZE_8000 * desiredSampling / 8000 * channels * 1000 / RTP_PACKETIZATION_PERIOD * nAudioBufferSecs);
+    size_t buflen = LWS_PRE + (streaming_size * 2 );
 
 
     switch_log_printf(SWITCH_CHANNEL_SESSION_LOG(session), SWITCH_LOG_NOTICE, "audio_docker_data_init - desiredSampling:%d,nAudioBufferSecs:%u decoded_bytes_per_packet:%u, buflen: %u \n",desiredSampling,nAudioBufferSecs,read_impl.decoded_bytes_per_packet, buflen);
@@ -670,7 +670,7 @@ extern "C" {
             frame.buflen = available = pAudioPipe->binarySpaceAvailable();
             frame.data = pAudioPipe->binaryWritePtr();
             dirty = true;
-            switch_log_printf(SWITCH_CHANNEL_SESSION_LOG(session), SWITCH_LOG_NOTICE, "audio_docker_frame - write audio len:%d\n", frame.datalen);
+            switch_log_printf(SWITCH_CHANNEL_SESSION_LOG(session), SWITCH_LOG_NOTICE, "audio_docker_frame - write audio len:%d, audio_buffer_size:%d\n", frame.datalen, pAudioPipe->binarySpaceSize());
           }
         }
       }
