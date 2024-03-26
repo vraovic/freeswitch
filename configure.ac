@@ -2082,6 +2082,7 @@ AC_CONFIG_FILES([Makefile
 		src/mod/Makefile
     src/mod/applications/mod_audio_fork/Makefile
     src/mod/applications/mod_aai_transcription/Makefile
+    src/mod/applications/mod_audio_docker/Makefile
     src/mod/applications/mod_google_tts/Makefile
     src/mod/applications/mod_google_transcribe/Makefile
     src/mod/applications/mod_azure_tts/Makefile
@@ -2149,7 +2150,6 @@ AC_CONFIG_FILES([Makefile
 		src/mod/asr_tts/mod_flite/Makefile
 		src/mod/asr_tts/mod_pocketsphinx/Makefile
 		src/mod/asr_tts/mod_tts_commandline/Makefile
-		src/mod/asr_tts/mod_unimrcp/Makefile
 		src/mod/codecs/mod_amr/Makefile
 		src/mod/codecs/mod_amrwb/Makefile
 		src/mod/codecs/mod_b64/Makefile
