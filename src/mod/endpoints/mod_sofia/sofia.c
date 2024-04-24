@@ -10433,6 +10433,7 @@ void sofia_handle_sip_i_invite(switch_core_session_t *session, nua_t *nua, sofia
 	}
 
 	if (!session || (sess_count >= sess_max || !sofia_test_pflag(profile, PFLAG_RUNNING))) {
+		switch_log_printf(SWITCH_CHANNEL_LOG, SWITCH_LOG_ERROR, "Maximum Calls In Progress - sess_count:%d, sess_max:%d, PFLAG_RUNNING:%s\n",sess_count, sess_max,sofia_test_pflag(profile, PFLAG_RUNNING) ? "RUNNING" : "DOWN");
 		nua_respond(nh, 503, "Maximum Calls In Progress", SIPTAG_RETRY_AFTER_STR("300"),
 					TAG_IF(!zstr(session_id_header), SIPTAG_HEADER_STR(session_id_header)), TAG_END());
 		goto fail;
