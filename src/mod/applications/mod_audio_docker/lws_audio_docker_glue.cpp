@@ -109,7 +109,7 @@ void parse_wav_header(unsigned char *header) {
               }
             } else {
               switch_log_printf(SWITCH_CHANNEL_LOG, SWITCH_LOG_NOTICE, "processIncomingMessage - EVENT_PLAY_AUDIO - path: %s\n",path.c_str());
-              tech_pvt->responseHandler(session, EVENT_PLAY_AUDIO, path);
+              tech_pvt->responseHandler(session, EVENT_PLAY_AUDIO, path.c_str());
             }
           } else {
               switch_log_printf(SWITCH_CHANNEL_SESSION_LOG(session), SWITCH_LOG_WARNING, "Cannot play audio. The channel is not ready or session is invalid.\n");
@@ -131,7 +131,7 @@ void parse_wav_header(unsigned char *header) {
         // }
       } else if (type == "MESSAGE"){
         lwsl_notice("processIncomingMessage - MESSAGE (len:%d) message:%s\n",strlen(msg.c_str()), msg);
-        tech_pvt->responseHandler(session, EVENT_TEXT_MESSAGE, msg);
+        tech_pvt->responseHandler(session, EVENT_TEXT_MESSAGE, msg.c_str());
       } else {
         lwsl_err("processIncomingMessage - unknown message type\n");
       }
