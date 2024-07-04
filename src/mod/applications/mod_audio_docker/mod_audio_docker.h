@@ -20,6 +20,7 @@
 #define EVENT_PLAY_AUDIO      "mod_audio_docker::play_audio"
 #define EVENT_KILL_AUDIO      "mod_audio_docker::kill_audio"
 #define EVENT_JSON            "mod_audio_docker::json"
+#define EVENT_TEXT_MESSAGE    "mod_audio_docker::text_message"
 
 #define MAX_METADATA_LEN (8192)
 
