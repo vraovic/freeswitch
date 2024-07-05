@@ -327,6 +327,7 @@ SWITCH_MODULE_SHUTDOWN_FUNCTION(mod_audio_docker_shutdown)
 	switch_event_free_subclass(EVENT_KILL_AUDIO);
 	switch_event_free_subclass(EVENT_ERROR);
 	switch_event_free_subclass(EVENT_DISCONNECT);
+	switch_event_free_subclass(EVENT_TEXT_MESSAGE);
 
 	return SWITCH_STATUS_SUCCESS;
 }
