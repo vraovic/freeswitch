@@ -93,7 +93,7 @@ void parse_wav_header(unsigned char *header) {
                 // Handle partial write or error
                 switch_log_printf(SWITCH_CHANNEL_LOG, SWITCH_LOG_NOTICE, "processIncomingMessage - Failed to write all audio data - written: %d, len: %d\n", written, length);
             }
-            if (playAudioMethod == "storeAudio") {
+            if (strcmp(playAudioMethod, "storeAudio") == 0) {
               switch_status_t status = switch_ivr_play_file(session, NULL, path.c_str(), NULL);
               if (status != SWITCH_STATUS_SUCCESS) {
                   switch_log_printf(SWITCH_CHANNEL_LOG, SWITCH_LOG_DEBUG, "processIncomingMessage - Failed to play audio file: %s\n", path.c_str());
