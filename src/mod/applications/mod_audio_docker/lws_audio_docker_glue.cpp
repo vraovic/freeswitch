@@ -108,9 +108,19 @@ void parse_wav_header(unsigned char *header) {
                   }
               }
             } else if (strcmp(playAudioMethod, PLAY_AUDIO_TO_B_LEG) == 0) {
+              switch_core_session_t *other_session = NULL;
               switch_channel_t *channel = switch_core_session_get_channel(session);
-              const char *other_uuid = switch_channel_get_variable(channel, SWITCH_UUID_BRIDGE);
-              switch_core_session_t *other_session = switch_core_session_locate(other_uuid);
+              const char *other_uuid_1 = switch_channel_get_variable(channel, SWITCH_UUID_BRIDGE);
+              switch_log_printf(SWITCH_CHANNEL_LOG, SWITCH_LOG_DEBUG, "processIncomingMessage (bridged_session) - other_uuid_1: %s\n", other_uuid_1);
+              switch_core_session_t *other_session_1 = switch_core_session_locate(other_uuid_1);
+              const char *other_uuid_2 = switch_channel_get_variable(channel, SWITCH_BRIDGE_UUID_VARIABLE);
+              switch_log_printf(SWITCH_CHANNEL_LOG, SWITCH_LOG_DEBUG, "processIncomingMessage (bridged_session) - other_uuid_2: %s\n", other_uuid_2);
+              switch_core_session_t *other_session_2 = switch_core_session_locate(other_uuid_2);
+              if (other_session_1) {
+                other_session = other_session_1;
+              } else if (other_session_2) {
+                other_session = other_session_2;
+              }
               if (other_session) {
                 switch_status_t status = switch_ivr_play_file(other_session, NULL, path.c_str(), NULL);
                 if (status != SWITCH_STATUS_SUCCESS) {
