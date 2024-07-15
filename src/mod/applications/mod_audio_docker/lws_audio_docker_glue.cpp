@@ -31,6 +31,7 @@ namespace {
   static int nAudioBufferSecs = std::max(1, std::min(requestedBufferSecs ? ::atoi(requestedBufferSecs) : 2, 5));
   static const char *requestedNumServiceThreads = std::getenv("MOD_AUDIO_DOCKER_THREADS");
   static const char *playAudioMethod = std::getenv("MOD_AUDIO_DOCKER_PLAY_AUDIO_METHOD") ? std::getenv("MOD_AUDIO_DOCKER_PLAY_AUDIO_METHOD") : PLAY_AUDIO_TO_A_LEG; // PLAY_AUDIO_TO_B_LEG or PLAY_AUDIO_BROADCAST
+  static const char *displaceAudio = std::getenv("MOD_AUDIO_DOCKER_DISPLACE_AUDIO") ? std::getenv("MOD_AUDIO_DOCKER_DISPLACE_AUDIO") : DISPLACE_AUDIO; // YES or NO
   static const char *freeswitchHome = std::getenv("HOME") ? std::getenv("HOME") : "/usr/local/freswitch"; 
   static const char *audioDockerServer = std::getenv("MOD_AUDIO_DOCKER_SERVER") ? std::getenv("MOD_AUDIO_DOCKER_SERVER") : "localhost:8080"; 
   static const char* mySubProtocolName = std::getenv("MOD_AUDIO_DOCKER_SUBPROTOCOL_NAME") ?
@@ -93,8 +94,20 @@ void parse_wav_header(unsigned char *header) {
                 // Handle partial write or error
                 switch_log_printf(SWITCH_CHANNEL_LOG, SWITCH_LOG_NOTICE, "processIncomingMessage - Failed to write all audio data - written: %d, len: %d\n", written, length);
             }
+            int displace = 0;
+            if (strcmp(displaceAudio, DISPLACE_AUDIO) == 0) {
+              displace = 1;
+            }
+
             if (strcmp(playAudioMethod, PLAY_AUDIO_TO_A_LEG) == 0) {
-              switch_status_t status = switch_ivr_play_file(session, NULL, path.c_str(), NULL);
+              switch_status_t status = SWITCH_STATUS_NOT_INITALIZED;
+              if (displace == 1) {
+                switch_log_printf(SWITCH_CHANNEL_LOG, SWITCH_LOG_DEBUG, "processIncomingMessage - switch_ivr_displace_session\n");
+                status = switch_ivr_displace_session(session, path.c_str(), 0, NULL);
+              } else {
+                  switch_log_printf(SWITCH_CHANNEL_LOG, SWITCH_LOG_DEBUG, "processIncomingMessage - switch_ivr_play_file\n");
+                status = switch_ivr_play_file(session, NULL, path.c_str(), NULL);
+              }
               if (status != SWITCH_STATUS_SUCCESS) {
                   switch_log_printf(SWITCH_CHANNEL_LOG, SWITCH_LOG_DEBUG, "processIncomingMessage - Failed to play audio file: %s\n", path.c_str());
               } else {
@@ -108,21 +121,19 @@ void parse_wav_header(unsigned char *header) {
                   }
               }
             } else if (strcmp(playAudioMethod, PLAY_AUDIO_TO_B_LEG) == 0) {
-              switch_core_session_t *other_session = NULL;
               switch_channel_t *channel = switch_core_session_get_channel(session);
-              const char *other_uuid_1 = switch_channel_get_variable(channel, SWITCH_UUID_BRIDGE);
-              switch_log_printf(SWITCH_CHANNEL_LOG, SWITCH_LOG_DEBUG, "processIncomingMessage (bridged_session) - other_uuid_1: %s\n", other_uuid_1);
-              switch_core_session_t *other_session_1 = switch_core_session_locate(other_uuid_1);
-              const char *other_uuid_2 = switch_channel_get_variable(channel, SWITCH_BRIDGE_UUID_VARIABLE);
-              switch_log_printf(SWITCH_CHANNEL_LOG, SWITCH_LOG_DEBUG, "processIncomingMessage (bridged_session) - other_uuid_2: %s\n", other_uuid_2);
-              switch_core_session_t *other_session_2 = switch_core_session_locate(other_uuid_2);
-              if (other_session_1) {
-                other_session = other_session_1;
-              } else if (other_session_2) {
-                other_session = other_session_2;
-              }
+              const char *other_uuid = switch_channel_get_variable(channel, SWITCH_BRIDGE_UUID_VARIABLE);
+              switch_log_printf(SWITCH_CHANNEL_LOG, SWITCH_LOG_DEBUG, "processIncomingMessage (bridged_session) - other_uuid: %s\n", other_uuid);
+              switch_core_session_t *other_session = switch_core_session_locate(other_uuid);
               if (other_session) {
-                switch_status_t status = switch_ivr_play_file(other_session, NULL, path.c_str(), NULL);
+                switch_status_t status = SWITCH_STATUS_NOT_INITALIZED;
+                if (displace == 1) {
+                  switch_log_printf(SWITCH_CHANNEL_LOG, SWITCH_LOG_DEBUG, "processIncomingMessage - switch_ivr_displace_session");
+                  status = switch_ivr_displace_session(other_session, path.c_str(), 0, NULL);
+                } else {
+                  switch_log_printf(SWITCH_CHANNEL_LOG, SWITCH_LOG_DEBUG, "processIncomingMessage - switch_ivr_play_file");
+                  status = switch_ivr_play_file(other_session, NULL, path.c_str(), NULL);
+                }
                 if (status != SWITCH_STATUS_SUCCESS) {
                     switch_log_printf(SWITCH_CHANNEL_LOG, SWITCH_LOG_DEBUG, "processIncomingMessage (bridged_session) - Failed to play audio file: %s\n", path.c_str());
                 } else {
