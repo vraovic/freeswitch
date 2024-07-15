@@ -30,7 +30,7 @@ namespace {
   static const char *numberOfFramesForStreaming = std::getenv("MOD_AUDIO_DOCKER_FRAME_SIZE");
   static int nAudioBufferSecs = std::max(1, std::min(requestedBufferSecs ? ::atoi(requestedBufferSecs) : 2, 5));
   static const char *requestedNumServiceThreads = std::getenv("MOD_AUDIO_DOCKER_THREADS");
-  static const char *playAudioMethod = std::getenv("MOD_AUDIO_DOCKER_PLAY_AUDIO_METHOD") ? std::getenv("MOD_AUDIO_DOCKER_PLAY_AUDIO_METHOD") : "storeAudio"; // storeAudio or streamAudio
+  static const char *playAudioMethod = std::getenv("MOD_AUDIO_DOCKER_PLAY_AUDIO_METHOD") ? std::getenv("MOD_AUDIO_DOCKER_PLAY_AUDIO_METHOD") : "ivrPlay"; // ivrPlay or handleDirection
   static const char *freeswitchHome = std::getenv("HOME") ? std::getenv("HOME") : "/usr/local/freswitch"; 
   static const char *audioDockerServer = std::getenv("MOD_AUDIO_DOCKER_SERVER") ? std::getenv("MOD_AUDIO_DOCKER_SERVER") : "localhost:8080"; 
   static const char* mySubProtocolName = std::getenv("MOD_AUDIO_DOCKER_SUBPROTOCOL_NAME") ?
@@ -93,7 +93,7 @@ void parse_wav_header(unsigned char *header) {
                 // Handle partial write or error
                 switch_log_printf(SWITCH_CHANNEL_LOG, SWITCH_LOG_NOTICE, "processIncomingMessage - Failed to write all audio data - written: %d, len: %d\n", written, length);
             }
-            if (strcmp(playAudioMethod, "storeAudio") == 0) {
+            if (strcmp(playAudioMethod, "ivrPlay") == 0) {
               switch_status_t status = switch_ivr_play_file(session, NULL, path.c_str(), NULL);
               if (status != SWITCH_STATUS_SUCCESS) {
                   switch_log_printf(SWITCH_CHANNEL_LOG, SWITCH_LOG_DEBUG, "processIncomingMessage - Failed to play audio file: %s\n", path.c_str());
