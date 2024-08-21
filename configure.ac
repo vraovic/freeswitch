@@ -2083,8 +2083,6 @@ AC_CONFIG_FILES([Makefile
     src/mod/applications/mod_audio_fork/Makefile
     src/mod/applications/mod_aai_transcription/Makefile
     src/mod/applications/mod_audio_docker/Makefile
-    src/mod/applications/mod_google_tts/Makefile
-    src/mod/applications/mod_google_transcribe/Makefile
     src/mod/applications/mod_azure_tts/Makefile
     src/mod/applications/mod_dialogflow/Makefile
 		src/mod/applications/mod_abstraction/Makefile
@@ -2160,12 +2158,10 @@ AC_CONFIG_FILES([Makefile
 		src/mod/codecs/mod_dahdi_codec/Makefile
 		src/mod/codecs/mod_g723_1/Makefile
 		src/mod/codecs/mod_g729/Makefile
-		src/mod/codecs/mod_h26x/Makefile
 		src/mod/codecs/mod_ilbc/Makefile
 		src/mod/codecs/mod_isac/Makefile
 		src/mod/codecs/mod_mp4v/Makefile
 		src/mod/codecs/mod_opus/Makefile
-		src/mod/codecs/mod_openh264/Makefile
 		src/mod/codecs/mod_sangoma_codec/Makefile
 		src/mod/codecs/mod_silk/Makefile
 		src/mod/codecs/mod_siren/Makefile
@@ -2217,7 +2213,6 @@ AC_CONFIG_FILES([Makefile
 		src/mod/formats/mod_opusfile/Makefile
 		src/mod/formats/mod_png/Makefile
 		src/mod/formats/mod_shell_stream/Makefile
-		src/mod/formats/mod_shout/Makefile
 		src/mod/formats/mod_sndfile/Makefile
 		src/mod/formats/mod_ssml/Makefile
 		src/mod/formats/mod_tone_stream/Makefile
