@@ -708,7 +708,7 @@ extern "C" {
 
           switch_status_t rv = switch_core_media_bug_read(bug, &frame, SWITCH_TRUE);
           if (rv != SWITCH_STATUS_SUCCESS)  {
-            switch_log_printf(SWITCH_CHANNEL_SESSION_LOG(session), SWITCH_LOG_NOTICE, "audio_docker_frame - exit while(true)\n");
+            switch_log_printf(SWITCH_CHANNEL_SESSION_LOG(session), SWITCH_LOG_DEBUG, "audio_docker_frame - exit while(true)\n");
             break;
           }
           if (frame.datalen) {
@@ -716,7 +716,7 @@ extern "C" {
             frame.buflen = available = pAudioPipe->binarySpaceAvailable();
             frame.data = pAudioPipe->binaryWritePtr();
             dirty = true;
-            switch_log_printf(SWITCH_CHANNEL_SESSION_LOG(session), SWITCH_LOG_NOTICE, "audio_docker_frame - write audio len:%d, audio_buffer_size:%d\n", frame.datalen, (pAudioPipe->binarySpaceSize() - LWS_PRE));
+            switch_log_printf(SWITCH_CHANNEL_SESSION_LOG(session), SWITCH_LOG_DEBUG, "audio_docker_frame - write audio len:%d, audio_buffer_size:%d\n", frame.datalen, (pAudioPipe->binarySpaceSize() - LWS_PRE));
           }
         }
       }
