@@ -22,9 +22,9 @@
 #define EVENT_JSON            "mod_audio_docker::json"
 #define EVENT_TEXT_MESSAGE    "mod_audio_docker::text_message"
 
-#define PLAY_AUDIO_TO_A_LEG    "ivr-A"
-#define PLAY_AUDIO_TO_B_LEG    "ivr-B"
-#define PLAY_AUDIO_BROADCAST   "broadcast"
+#define PLAY_AUDIO_TO_A_LEG    "A"
+#define PLAY_AUDIO_TO_B_LEG    "B"
+#define PLAY_AUDIO_TO_BOTH     "AB"
 #define DISPLACE_AUDIO         "YES"
 
 #define MAX_METADATA_LEN (8192)

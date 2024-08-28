@@ -202,7 +202,7 @@ SWITCH_STANDARD_API(audio_docker_function)
 		{
 			status = do_graceful_shutdown(lsession);
 		}
-			else if (!strcasecmp(argv[1], "send_text")) 
+		else if (!strcasecmp(argv[1], "send_text")) 
 		{
 			if (argc < 3) 
 			{
@@ -250,7 +250,7 @@ SWITCH_STANDARD_API(audio_docker_function)
 				status = start_capture(lsession, flags, host, port, path, sampling, sslFlags, metadata, "mod_audio_docker");
 			}
 		}
-			else 
+		else 
 		{
 			switch_log_printf(SWITCH_CHANNEL_LOG, SWITCH_LOG_ERROR, "unsupported mod_audio_docker cmd: %s\n", argv[1]);
 		}
