@@ -105,7 +105,7 @@ void parse_wav_header(unsigned char *header) {
                 switch_log_printf(SWITCH_CHANNEL_LOG, SWITCH_LOG_DEBUG, "processIncomingMessage - switch_ivr_displace_session\n");
                 status = switch_ivr_displace_session(session, path.c_str(), 0, NULL);
               } else {
-                  switch_log_printf(SWITCH_CHANNEL_LOG, SWITCH_LOG_DEBUG, "processIncomingMessage - switch_ivr_play_file\n");
+                  switch_log_printf(SWITCH_CHANNEL_LOG, SWITCH_LOG_DEBUG, "processIncomingMessage - play the announcement on A leg of the call.");
                 status = switch_ivr_play_file(session, NULL, path.c_str(), NULL);
               }
               if (status != SWITCH_STATUS_SUCCESS) {
@@ -128,7 +128,7 @@ void parse_wav_header(unsigned char *header) {
               if (other_session) {
                 switch_status_t status = SWITCH_STATUS_NOT_INITALIZED;
                 if (displace == 1) {
-                  switch_log_printf(SWITCH_CHANNEL_LOG, SWITCH_LOG_DEBUG, "processIncomingMessage - switch_ivr_displace_session");
+                  switch_log_printf(SWITCH_CHANNEL_LOG, SWITCH_LOG_DEBUG, "processIncomingMessage - play the announcement on B leg of the call.");
                   status = switch_ivr_displace_session(other_session, path.c_str(), 0, NULL);
                 } else {
                   switch_log_printf(SWITCH_CHANNEL_LOG, SWITCH_LOG_DEBUG, "processIncomingMessage - switch_ivr_play_file");
@@ -158,7 +158,7 @@ void parse_wav_header(unsigned char *header) {
                 switch_status_t status = SWITCH_STATUS_NOT_INITALIZED;
                 switch_status_t status1 = SWITCH_STATUS_NOT_INITALIZED;
                 if (displace == 1) {
-                  switch_log_printf(SWITCH_CHANNEL_LOG, SWITCH_LOG_DEBUG, "processIncomingMessage - switch_ivr_displace_session");
+                  switch_log_printf(SWITCH_CHANNEL_LOG, SWITCH_LOG_DEBUG, "processIncomingMessage - play the announcement on both legs of the call.");
                   status = switch_ivr_displace_session(session, path.c_str(), 0, NULL);
                   status1 = switch_ivr_displace_session(other_session, path.c_str(), 0, NULL);
                 } else {
