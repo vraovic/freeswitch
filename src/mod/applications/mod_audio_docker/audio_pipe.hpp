@@ -75,6 +75,9 @@ public:
   void clearMetadata(void) {
     m_metadata.clear();
   }
+  char * getMetadata() {
+    return (char *) m_metadata;
+  }
 
   void lockAudioBuffer(void) {
     m_audio_mutex.lock();

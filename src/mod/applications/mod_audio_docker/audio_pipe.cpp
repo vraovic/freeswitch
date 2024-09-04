@@ -71,7 +71,7 @@ int AudioPipe::lws_callback(struct lws *wsi,
           memcpy(b, apiToken,strlen(apiToken));
           b[strlen(apiToken)] = '\0';
           lwsl_notice("AudioPipe::lws_callback  HANDSHAKE_HEADER Authorization: %s\n",b);
-          lwsl_notice("AudioPipe::lws_callback  HANDSHAKE_HEADER Authorization - token: %s\n",apiToken);
+          lwsl_notice("AudioPipe::lws_callback  HANDSHAKE_HEADER Authorization - token: %s, metadata:%s\n",apiToken, ap->getMetadata());
           if (lws_add_http_header_by_token(wsi, WSI_TOKEN_HTTP_AUTHORIZATION, (unsigned char *)b, strlen(b), p, end)) return -1;
       }
       break;
