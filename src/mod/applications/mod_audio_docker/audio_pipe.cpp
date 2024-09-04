@@ -78,7 +78,7 @@ int AudioPipe::lws_callback(struct lws *wsi,
           // Add header by name
           std:stringstream ss(ap->getMetadata());
 		      std::string item;
-          char delim = '/'
+          char delim = '/';
           char header_name[128];
           char header_value[128];
 		      while (std::getline(ss, item, delim)) {
