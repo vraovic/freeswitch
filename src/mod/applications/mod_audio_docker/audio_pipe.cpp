@@ -71,17 +71,25 @@ int AudioPipe::lws_callback(struct lws *wsi,
           memcpy(b, apiToken,strlen(apiToken));
           b[strlen(apiToken)] = '\0';
           lwsl_notice("AudioPipe::lws_callback  HANDSHAKE_HEADER Authorization: %s\n",b);
-          lwsl_notice("AudioPipe::lws_callback  HANDSHAKE_HEADER Authorization - token: %s, metadata:%s\n",apiToken, ap->getMetadata());
+          lwsl_notice("AudioPipe::lws_callback  HANDSHAKE_HEADER Authorization - token: %s, metadata:%s\n",apiToken, ap->getMetadata().c_str());
           if (lws_add_http_header_by_token(wsi, WSI_TOKEN_HTTP_AUTHORIZATION, (unsigned char *)b, strlen(b), p, end)) return -1;
           // Add header by name
-          std::string header_name = "call-id";
-          std::string header_value = "12345-6789-00";
-          if (lws_add_http_header_by_name(wsi, (unsigned char *)header_name.c_str(), 
-                                            (unsigned char *)header_value.c_str(), strlen(header_value.c_str()), 
-                                            p, end)) {
+          std:stringstream ss(ap->getMetadata());
+    		  std::stringstream ss(s);
+		      std::string item;
+          char delim = '/'
+          char header_name[128];
+          char header_value[128];
+		      while (std::getline(ss, item, delim)) {
+            header_name = strtok(item.c_str(),"=");
+				    header_value = strtok(NULL, "=");
+            lwsl_notice("AudioPipe::lws_callback  HANDSHAKE_HEADER header: %s[len:%d], value:%s[len:%d]\n",header_name,strlen(header_name), header_value),strlen(header_value));
+            if (lws_add_http_header_by_name(wsi, (unsigned char *)header_name, 
+                                            (unsigned char *)header_value, strlen(header_value), p, end)) {
                 lwsl_err("Failed to add HTTP header by name - call-id\n");
                 return 1; // Error occurred
             }
+		      }
       }
       break;
 
@@ -507,10 +515,10 @@ AudioPipe::AudioPipe(const char* uuid, const char* host, unsigned int port, cons
   m_state(LWS_CLIENT_IDLE), m_wsi(nullptr), m_vhd(nullptr), m_callback(callback) {
 
   m_audio_buffer = new uint8_t[m_audio_buffer_max_len];
-  m_metadata.assign(metadata, 8192);
+  m_metadata.append(metadata);
   if (apiToken) {
     m_api_token.assign(apiToken);
-    lwsl_notice("AudioPipe:: init - apiToken:%s, tcp_keepalive:%d, max_buffer_len:%d, min_freespace:%d\n", apiToken, nTcpKeepaliveSecs,m_audio_buffer_max_len, m_audio_buffer_min_freespace);
+    lwsl_notice("AudioPipe:: init - apiToken:%s,metadata:%s, tcp_keepalive:%d, max_buffer_len:%d, min_freespace:%d\n", apiToken,m_metadata.c_str(), nTcpKeepaliveSecs,m_audio_buffer_max_len, m_audio_buffer_min_freespace);
   }
 }
 AudioPipe::~AudioPipe() {
