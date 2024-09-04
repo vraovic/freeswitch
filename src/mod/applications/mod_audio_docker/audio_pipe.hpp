@@ -44,7 +44,7 @@ public:
 
   // constructor
   AudioPipe(const char* uuid, const char* host, unsigned int port, const char* path, int sslFlags, 
-    size_t bufLen, size_t minFreespace, notifyHandler_t callback);
+    size_t bufLen, size_t minFreespace, const char* metadata, notifyHandler_t callback);
   ~AudioPipe();  
 
   LwsState_t getLwsState(void) { return m_state; }
@@ -75,8 +75,8 @@ public:
   void clearMetadata(void) {
     m_metadata.clear();
   }
-  char * getMetadata() {
-    return (char *) m_metadata;
+  std::string getMetadata() {
+    return m_metadata;
   }
 
   void lockAudioBuffer(void) {

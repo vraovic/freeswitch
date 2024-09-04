@@ -413,7 +413,7 @@ void parse_wav_header(unsigned char *header) {
     switch_log_printf(SWITCH_CHANNEL_SESSION_LOG(session), SWITCH_LOG_NOTICE, "audio_docker_data_init - ech_pvt->sampling:%d,tech_pvt->path: %s\n",tech_pvt->sampling,tech_pvt->path);
 
     AudioPipe* ap = new AudioPipe(tech_pvt->sessionId, host, port, path, sslFlags, 
-      buflen, read_impl.decoded_bytes_per_packet, eventCallback);
+      buflen, read_impl.decoded_bytes_per_packet,metadata, eventCallback);
     if (!ap) {
       switch_log_printf(SWITCH_CHANNEL_SESSION_LOG(session), SWITCH_LOG_ERROR, "Error allocating AudioPipe\n");
       return SWITCH_STATUS_FALSE;
