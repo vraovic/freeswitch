@@ -237,7 +237,7 @@ SWITCH_STANDARD_API(audio_docker_function)
 				char *token2 = NULL;
 				// char *next_token1 =NULL;
 				strcpy(path1, path);
-					switch_log_printf(SWITCH_CHANNEL_LOG, SWITCH_LOG_NOTICE, "Make TOKENS - copy to path1:%s\n",path1);
+				switch_log_printf(SWITCH_CHANNEL_LOG, SWITCH_LOG_NOTICE, "Make TOKENS - copy to path1:%s\n",path1);
 				token = strtok(path1, "&");
 				token1 = strtok(token,"=");
 				next_token = strtok(NULL, "=");

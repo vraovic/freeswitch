@@ -5,6 +5,8 @@
 #include <thread>
 #include <cassert>
 #include <iostream>
+#include <sstream>
+#include <vector>
 
 /* discard incoming text messages over the socket that are longer than this */
 #define MAX_RECV_BUF_SIZE (65 * 1024 * 10)
