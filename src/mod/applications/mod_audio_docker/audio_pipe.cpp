@@ -77,7 +77,6 @@ int AudioPipe::lws_callback(struct lws *wsi,
           if (lws_add_http_header_by_token(wsi, WSI_TOKEN_HTTP_AUTHORIZATION, (unsigned char *)b, strlen(b), p, end)) return -1;
           // Add header by name
           std:stringstream ss(ap->getMetadata());
-    		  std::stringstream ss(s);
 		      std::string item;
           char delim = '/'
           char header_name[128];
