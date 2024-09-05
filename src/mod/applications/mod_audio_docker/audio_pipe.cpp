@@ -58,9 +58,13 @@ int AudioPipe::lws_callback(struct lws *wsi,
     case LWS_CALLBACK_PROTOCOL_INIT:
       lwsl_notice("AudioPipe::lws_callback - LWS_CALLBACK_PROTOCOL_INIT\n");
       vhd = (struct AudioPipe::lws_per_vhost_data *) lws_protocol_vh_priv_zalloc(lws_get_vhost(wsi), lws_get_protocol(wsi), sizeof(struct AudioPipe::lws_per_vhost_data));
+      lwsl_notice("AudioPipe::lws_callback - LWS_CALLBACK_PROTOCOL_INIT-1\n");
       vhd->context = lws_get_context(wsi);
+      lwsl_notice("AudioPipe::lws_callback - LWS_CALLBACK_PROTOCOL_INI-2\n");
       vhd->protocol = lws_get_protocol(wsi);
+      lwsl_notice("AudioPipe::lws_callback - LWS_CALLBACK_PROTOCOL_INIT-3\n");
       vhd->vhost = lws_get_vhost(wsi);
+      lwsl_notice("AudioPipe::lws_callback - LWS_CALLBACK_PROTOCOL_INIT-4\n");
       break;
 
     case LWS_CALLBACK_CLIENT_APPEND_HANDSHAKE_HEADER:
