@@ -404,13 +404,17 @@ void parse_wav_header(unsigned char *header) {
     tech_pvt->buffer_overrun_notified = 0;
     tech_pvt->audio_paused = 0; //1; // pause audio until we get connected and get response from the far end
     tech_pvt->graceful_shutdown = 0;
-    if (metadata) strncpy(tech_pvt->initialMetadata, metadata, MAX_METADATA_LEN);
     
+    if (metadata) {
+      switch_log_printf(SWITCH_CHANNEL_SESSION_LOG(session), SWITCH_LOG_NOTICE, "audio_docker_data_init - coping metadata\n");
+      strncpy(tech_pvt->initialMetadata, metadata, MAX_METADATA_LEN);
+    } else {
+      switch_log_printf(SWITCH_CHANNEL_SESSION_LOG(session), SWITCH_LOG_NOTICE, "audio_docker_data_init - NO metadata\n");
+    }
     size_t buflen = LWS_PRE + (streaming_size * 2 );
 
-
     switch_log_printf(SWITCH_CHANNEL_SESSION_LOG(session), SWITCH_LOG_NOTICE, "audio_docker_data_init - desiredSampling:%d,nAudioBufferSecs:%u decoded_bytes_per_packet:%u, buflen: %u \n",desiredSampling,nAudioBufferSecs,read_impl.decoded_bytes_per_packet, buflen);
-    switch_log_printf(SWITCH_CHANNEL_SESSION_LOG(session), SWITCH_LOG_NOTICE, "audio_docker_data_init - ech_pvt->sampling:%d,tech_pvt->path: %s\n",tech_pvt->sampling,tech_pvt->path);
+    switch_log_printf(SWITCH_CHANNEL_SESSION_LOG(session), SWITCH_LOG_NOTICE, "ech_pvt->sampling:%d,tech_pvt->path: %s, host:%s, port:%d,tech_pvt->sessionId:%s, bufferlen:%d\n",tech_pvt->sampling, path, host,port,tech_pvt->sessionId, buflen);
 
     AudioPipe* ap = new AudioPipe(tech_pvt->sessionId, host, port, path, sslFlags, 
       buflen, read_impl.decoded_bytes_per_packet,metadata, eventCallback);
@@ -419,6 +423,7 @@ void parse_wav_header(unsigned char *header) {
       return SWITCH_STATUS_FALSE;
     }
 
+    switch_log_printf(SWITCH_CHANNEL_SESSION_LOG(session), SWITCH_LOG_DEBUG, "AudioPipe is created.\n");
     tech_pvt->pAudioPipe = static_cast<void *>(ap);
 
     switch_mutex_init(&tech_pvt->mutex, SWITCH_MUTEX_NESTED, switch_core_session_get_pool(session));
