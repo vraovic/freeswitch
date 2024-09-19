@@ -792,7 +792,7 @@ SWITCH_DECLARE(switch_status_t) switch_ivr_record_file_event(switch_core_session
 		}
 
 		if (args) {
-		switch_log_printf(SWITCH_CHANNEL_SESSION_LOG(session), SWITCH_LOG_DEBUG, "switch_ivr_record_file_event - args\n");
+		// switch_log_printf(SWITCH_CHANNEL_SESSION_LOG(session), SWITCH_LOG_DEBUG, "switch_ivr_record_file_event - args\n");
 			/*
 			   dtmf handler function you can hook up to be executed when a digit is dialed during playback
 			   if you return anything but SWITCH_STATUS_SUCCESS the playback will stop.
