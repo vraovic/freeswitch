@@ -80,7 +80,7 @@ int AudioPipe::lws_callback(struct lws *wsi,
           lwsl_notice("AudioPipe::lws_callback  HANDSHAKE_HEADER Authorization - token: %s, metadata:%s\n",apiToken, ap->getMetadata().c_str());
           if (lws_add_http_header_by_token(wsi, WSI_TOKEN_HTTP_AUTHORIZATION, (unsigned char *)b, strlen(b), p, end)) return -1;
           
-          if (strstr(ap->getMetadata().c_str(),"call-id") {
+          if (strstr(ap->getMetadata().c_str(),"call-id")) {
             // Add header by name
             std::stringstream ss(ap->getMetadata());
             std::string item;
