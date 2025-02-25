@@ -79,27 +79,30 @@ int AudioPipe::lws_callback(struct lws *wsi,
           lwsl_notice("AudioPipe::lws_callback  HANDSHAKE_HEADER Authorization: %s\n",b);
           lwsl_notice("AudioPipe::lws_callback  HANDSHAKE_HEADER Authorization - token: %s, metadata:%s\n",apiToken, ap->getMetadata().c_str());
           if (lws_add_http_header_by_token(wsi, WSI_TOKEN_HTTP_AUTHORIZATION, (unsigned char *)b, strlen(b), p, end)) return -1;
-          // Add header by name
-          std::stringstream ss(ap->getMetadata());
-		      std::string item;
-          char delim = '/';
-          char header_name[128];
-          char header_value[128];
-          char * token = NULL;
-          char * next_token = NULL;
+          
+          if (strstr(ap->getMetadata().c_str(),"call-id") {
+            // Add header by name
+            std::stringstream ss(ap->getMetadata());
+            std::string item;
+            char delim = '/';
+            char header_name[128];
+            char header_value[128];
+            char * token = NULL;
+            char * next_token = NULL;
 
-		      while (std::getline(ss, item, delim)) {
-            token = strtok((char *)item.c_str(),"=");
-				    next_token = strtok(NULL, "=");
-            strcpy(header_name, token);
-            strcpy(header_value, next_token);
-            lwsl_notice("AudioPipe::lws_callback  HANDSHAKE_HEADER header: %s[len:%d], value:%s[len:%d]\n",header_name,strlen(header_name), header_value,strlen(header_value));
-            if (lws_add_http_header_by_name(wsi, (unsigned char *)header_name, 
-                                            (unsigned char *)header_value, strlen(header_value), p, end)) {
-                lwsl_err("Failed to add HTTP header by name - call-id\n");
-                return 1; // Error occurred
-            }
-		      }
+            while (std::getline(ss, item, delim)) {
+              token = strtok((char *)item.c_str(),"=");
+              next_token = strtok(NULL, "=");
+              strcpy(header_name, token);
+              strcpy(header_value, next_token);
+              lwsl_notice("AudioPipe::lws_callback  HANDSHAKE_HEADER header: %s[len:%d], value:%s[len:%d]\n",header_name,strlen(header_name), header_value,strlen(header_value));
+              if (lws_add_http_header_by_name(wsi, (unsigned char *)header_name, 
+                                              (unsigned char *)header_value, strlen(header_value), p, end)) {
+                  lwsl_err("Failed to add HTTP header by name - call-id\n");
+                  return 1; // Error occurred
+              }
+		        }
+          }
       }
       break;
 
